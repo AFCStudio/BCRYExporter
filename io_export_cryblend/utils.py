@@ -827,6 +827,53 @@ def set_keyframe(armature, frame, location_list, rotation_list):
         fakeBone.keyframe_insert(data_path="location")
         fakeBone.keyframe_insert(data_path="rotation_euler")
 
+def bake_inverse_kinematics(armature, skeleton):
+    '''Bake Inverse Kinematics to Skeleton'''
+
+    deselect_all()
+
+    bpy.context.scene.objects.active = armature
+    armature.select = True
+
+    bpy.ops.object.mode_set(mode='POSE')
+
+    for i in range(0, 32):
+        skeleton.layers[i] = True
+
+    for pose_bone in armature.pose.bones:
+        pose_bone.bone.select = True
+
+    scene = bpy.context.scene
+    bpy.ops.nla.bake(frame_start=scene.frame_start, frame_end=scene.frame_end,
+        step=1, only_selected=True, visual_keying=True, clear_constraints=True,
+        clear_parents=False, bake_types={'POSE'})
+
+    cbPrint("Animation was baked to skeleton.")
+
+    remove_ik_bones(armature)
+
+    bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.object.location_clear();
+    bpy.ops.object.rotation_clear();
+    bpy.ops.object.scale_clear();
+
+def remove_ik_bones(armature):
+    '''Remove IK Bones from Skeleton'''
+
+    for pose_bone in armature.pose.bones:
+        index = pose_bone.name.find('IK')
+        if index != -1:
+            cbPrint(pose_bone.name)
+            pose_bone.bone.select = True
+        else:
+            pose_bone.bone.select = False
+
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.armature.delete()
+    bpy.ops.object.mode_set(mode='POSE')
+
+    cbPrint("IK bones were removed from skeleton.")
+
 def apply_animation_scale():
     '''Apply Animation Scale.'''
     scene = bpy.context.scene

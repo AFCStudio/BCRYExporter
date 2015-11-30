@@ -1447,6 +1447,26 @@ class RenamePhysBones(bpy.types.Operator):
 
         return {'FINISHED'}
 
+class BakeInverseKinematics(bpy.types.Operator):
+    '''Bake inverse kinematics transformations to skeleton'''
+    bl_label = "Bake Inverse Kinematics"
+    bl_idname = "ops.bake_inverse_kinematics"
+
+    def execute(self, context):
+        scene = bpy.context.scene
+        armature = utils.get_armature()
+        if armature is None:
+            return
+
+        try:
+            skeleton = bpy.data.armatures[armature.name]
+        except:
+            raise TypeError("Armature object name and object data name must "
+                + "be same! You may set it in properties or outliner editor.")
+
+        utils.bake_inverse_kinematics(armature, skeleton)
+        return {'FINISHED'}
+
 class ApplyAnimationScale(bpy.types.Operator):
     '''Select to apply animation skeleton scaling and rotation'''
     bl_label = "Apply Animation Scaling"
@@ -1884,6 +1904,7 @@ class BoneUtilitiesPanel(View3DPanel, Panel):
         col.label("Skeleton", icon="BONE_DATA")
         col.separator()
         col.operator("armature.add_root_bone", text="Add Root Bone")
+        col.operator("ops.bake_inverse_kinematics", text="Bake Inverse Kinematics")
         col.operator("ops.apply_animation_scaling", text="Apply Animation Scaling")
         col.operator("scene.remove_fake_bones", text="Remove Old Fakebones")
 
@@ -2020,6 +2041,7 @@ class BoneUtilitiesMenu(bpy.types.Menu):
 
         layout.label(text="Skeleton")
         layout.operator("armature.add_root_bone", text="Add Root Bone", icon="BONE_DATA")
+        layout.operator("ops.bake_inverse_kinematics", text="Bake Inverse Kinematics", icon='BONE_DATA')
         layout.operator("ops.apply_animation_scaling", text="Apply Animation Scaling", icon='BONE_DATA')
         layout.operator("scene.remove_fake_bones", text="Remove Old Fakebones", icon='BONE_DATA')
         layout.separator()
@@ -2215,6 +2237,7 @@ def get_classes_to_register():
         RemoveBoneGeometry,
         RemoveFakeBones,
 
+        BakeInverseKinematics,
         ApplyAnimationScale,
 
         Export,
