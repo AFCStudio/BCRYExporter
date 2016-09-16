@@ -414,13 +414,18 @@ class ApplyTransforms(bpy.types.Operator):
     '''Click to apply transforms on selected objects.'''
     bl_label = "Apply Transforms"
     bl_idname = "object.apply_transforms"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    loc = BoolProperty(name="Location", default=False)
+    rot = BoolProperty(name="Rotation", default=True)
+    scale = BoolProperty(name="Scale", default=True)
 
     def execute(self, context):
         selected = bpy.context.selected_objects
         if selected:
             message = "Applying object transforms."
             bpy.ops.object.transform_apply(
-                location=True, rotation=True, scale=True)
+                location=self.loc, rotation=self.rot, scale=self.scale)
         else:
             message = "No Object Selected."
         self.report({'INFO'}, message)
