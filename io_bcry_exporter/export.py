@@ -512,7 +512,12 @@ class CrytekDaeExporter:
                     use_edge_sharp = modifier.use_edge_sharp
                     split_angle = modifier.split_angle
 
-        float_normals = utils.get_normal_array(bmesh_, use_edge_angle,
+        float_normals = None
+        if self._config.custom_normals:
+            float_normals = utils.get_custom_normals(bmesh_, use_edge_angle,
+                                               split_angle)
+        else:
+            float_normals = utils.get_normal_array(bmesh_, use_edge_angle,
                                                use_edge_sharp, split_angle)
 
         id_ = "{!s}-normal".format(geometry_name)
