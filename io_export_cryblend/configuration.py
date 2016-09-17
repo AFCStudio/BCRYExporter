@@ -3,8 +3,8 @@
 # Purpose:     Stores CryBlend configuration settings
 #
 # Author:      Mikołaj Milej,
-#              Angelo J. Miner, Daniel White, David Marcelis, Duo Oratar,
-#              Oscar Martin Garcia, Özkan Afacan
+#              Angelo J. Miner, Daniel White, Özkan Afacan,
+#              Oscar Martin Garcia, Duo Oratar, David Marcelis
 #
 # Created:     02/10/2013
 # Copyright:   (c) Mikołaj Milej 2013

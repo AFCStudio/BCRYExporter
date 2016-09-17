@@ -3,8 +3,8 @@
 # Purpose:     Animation exporter to CryEngine
 #
 # Author:      Özkan Afacan,
-#              Angelo J. Miner, Daniel White, David Marcelis, Duo Oratar,
-#              Mikołaj Milej, Oscar Martin Garcia
+#              Angelo J. Miner, Mikołaj Milej, Daniel White,
+#              Oscar Martin Garcia, Duo Oratar, David Marcelis 
 #
 # Created:     13/06/2016
 # Copyright:   (c) Özkan Afacan 2016

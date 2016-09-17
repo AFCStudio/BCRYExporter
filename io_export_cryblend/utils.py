@@ -3,8 +3,8 @@
 # Purpose:     Utility functions for use throughout the add-on
 #
 # Author:      Angelo J. Miner,
-#              Daniel White, David Marcelis, Duo Oratar, Mikołaj Milej,
-#              Oscar Martin Garcia, Özkan Afacan
+#              Mikołaj Milej, Daniel White, Özkan Afacan,
+#              Oscar Martin Garcia, Duo Oratar, David Marcelis 
 #
 # Created:     23/02/2012
 # Copyright:   (c) Angelo J. Miner 2012

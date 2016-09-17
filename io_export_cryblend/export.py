@@ -3,8 +3,8 @@
 # Purpose:     Main exporter to CryEngine
 #
 # Author:      Angelo J. Miner,
-#              Daniel White, David Marcelis, Duo Oratar, Mikołaj Milej,
-#              Oscar Martin Garcia, Özkan Afacan,
+#              Mikołaj Milej, Özkan Afacan, Daniel White,
+#              Oscar Martin Garcia, Duo Oratar, David Marcelis
 #              Some code borrowed from fbx exporter Campbell Barton
 #
 # Created:     23/01/2012

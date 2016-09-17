@@ -3,8 +3,8 @@
 # Purpose:     Pipeline for console output
 #
 # Author:      Angelo J. Miner,
-#              Daniel White, David Marcelis, Duo Oratar, Mikołaj Milej,
-#              Oscar Martin Garcia, Özkan Afacan
+#              Mikołaj Milej, Özkan Afacan, Daniel White,
+#              Oscar Martin Garcia, Duo Oratar, David Marcelis
 #
 # Created:     N/A
 # Copyright:   (c) N/A

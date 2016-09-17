@@ -3,8 +3,8 @@
 # Purpose:     Resource compiler transactions
 #
 # Author:      Daniel White,
-#              Angelo J. Miner, David Marcelis, Duo Oratar, Mikołaj Milej,
-#              Oscar Martin Garcia, Özkan Afacan
+#              Angelo J. Miner, Mikołaj Milej, Özkan Afacan,
+#              Oscar Martin Garcia, Duo Oratar, David Marcelis
 #
 # Created:     2/12/2016
 # Copyright:   (c) Daniel White 2016

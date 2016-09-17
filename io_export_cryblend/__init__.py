@@ -21,8 +21,8 @@
 # Purpose:     Primary python file for CryBlend add-on
 #
 # Author:      Angelo J. Miner,
-#              Daniel White, David Marcelis, Duo Oratar, Mikołaj Milej,
-#              Oscar Martin Garcia, Özkan Afacan
+#              Mikołaj Milej, Daniel White, Özkan Afacan,
+#              Oscar Martin Garcia, David Marcelis, Duo Oratar
 #
 # Created:     23/02/2012
 # Copyright:   (c) Angelo J. Miner 2012

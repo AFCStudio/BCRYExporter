@@ -3,8 +3,7 @@
 # Purpose:     Holds custom exception classes
 #
 # Author:      Mikołaj Milej,
-#              Angelo J. Miner, Daniel White, David Marcelis, Duo Oratar,
-#              Oscar Martin Garcia, Özkan Afacan
+#              Özkan Afacan, Daniel White
 #
 # Created:     23/06/2013
 # Copyright:   (c) Mikołaj Milej 2013
