@@ -653,17 +653,20 @@ class CrytekDaeExporter:
     def _export_library_controllers(self, parent_element):
         library_node = self._doc.createElement("library_controllers")
 
-        for object_ in utils.get_type("geometry"):
-            if not utils.is_bone_geometry(object_):
-                armature = utils.get_armature_for_object(object_)
-                if armature is not None:
-                    self._process_bones(library_node,
-                                        object_,
-                                        armature)
+        for group in utils.get_mesh_export_nodes(
+                    self._config.export_selected_nodes):
+            for object_ in group.objects:
+                if not utils.is_bone_geometry(object_):
+                    armature = utils.get_armature_for_object(object_)
+                    if armature is not None:
+                        self._process_bones(library_node,
+                                            group,
+                                            object_,
+                                            armature)
 
         parent_element.appendChild(library_node)
 
-    def _process_bones(self, parent_node, object_, armature):
+    def _process_bones(self, parent_node, group, object_, armature):
         id_ = "{!s}_{!s}".format(armature.name, object_.name)
 
         controller_node = self._doc.createElement("controller")
@@ -671,7 +674,7 @@ class CrytekDaeExporter:
         controller_node.setAttribute("id", id_)
 
         skin_node = self._doc.createElement("skin")
-        skin_node.setAttribute("source", "#{}".format(object_.name))
+        skin_node.setAttribute("source", "#{!s}".format(utils.get_geometry_name(group, object_)))
         controller_node.appendChild(skin_node)
 
         bind_shape_matrix = self._doc.createElement("bind_shape_matrix")
