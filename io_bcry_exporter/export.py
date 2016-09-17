@@ -435,7 +435,7 @@ class CrytekDaeExporter:
         parent_element.appendChild(libgeo)
         for group in utils.get_mesh_export_nodes(self._config.export_selected_nodes):
             for object_ in group.objects:
-                bmesh_, layer_state = utils.get_bmesh(object_)
+                bmesh_, layer_state, scene_layer = utils.get_bmesh(object_)
                 geometry_node = self._doc.createElement("geometry")
                 geometry_name = utils.get_geometry_name(group, object_)
                 geometry_node.setAttribute("id", geometry_name)
@@ -478,7 +478,7 @@ class CrytekDaeExporter:
                 geometry_node.appendChild(mesh_node)
                 libgeo.appendChild(geometry_node)
 
-                utils.clear_bmesh(object_, layer_state)
+                utils.clear_bmesh(object_, layer_state, scene_layer)
                 cbPrint(
                     '"{}" object has been processed for "{}" node.'.format(
                         object_.name, group.name))
