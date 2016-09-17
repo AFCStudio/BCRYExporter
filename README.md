@@ -1,16 +1,14 @@
-# CryBlend
+# BCry Exporter
 
-CryEngine3 Utilities and Exporter for Blender
+CryEngine Utilities and Exporter for Blender
 
 
-Original source: http://www.cryengine.com/community/viewtopic.php?f=315&t=103136
+Official documentation: https://github.com/AFCStudio/BCryExporter/wiki
 
-Official documentation: https://github.com/travnick/CryBlend/wiki
-
-Feedback place: https://github.com/travnick/CryBlend
+Feedback place: https://github.com/AFCStudio/BCryExporter
 
 ## Installation
 
-Place the io_export_cryblend folder into:
+Place the io_export_bcry folder into:
 
 Your_Blender_path\scripts\addons\
