@@ -39,8 +39,8 @@ bl_info = {
     "location": "BCry Exporter Menu",
     "description": "Export assets from Blender to CryEngine 3",
     "warning": "",
-    "wiki_url": "https://github.com/travnick/CryBlend/wiki",
-    "tracker_url": "https://github.com/travnick/CryBlend/issues?state=open",
+    "wiki_url": "https://github.com/AFCStudio/BCryExporter/wiki",
+    "tracker_url": "https://github.com/AFCStudio/BCryExporter/issues",
     "support": 'OFFICIAL',
     "category": "Import-Export"}
 
