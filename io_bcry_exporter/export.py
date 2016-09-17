@@ -483,16 +483,16 @@ class CrytekDaeExporter:
                     '"{}" object has been processed for "{}" node.'.format(
                         object_.name, group.name))
 
-    def _write_positions(self, object_, bmesh_, root, geometry_name):
+    def _write_positions(self, object_, bmesh_, mesh_node, geometry_name):
         float_positions = []
         for vertex in bmesh_.verts:
             float_positions.extend(vertex.co)
 
         id_ = "{!s}-pos".format(geometry_name)
         source = utils.write_source(id_, "float", float_positions, "XYZ")
-        root.appendChild(source)
+        mesh_node.appendChild(source)
 
-    def _write_normals(self, object_, bmesh_, root, geometry_name):
+    def _write_normals(self, object_, bmesh_, mesh_node, geometry_name):
         split_angle = 0
         use_edge_angle = False
         use_edge_sharp = False
@@ -513,9 +513,9 @@ class CrytekDaeExporter:
 
         id_ = "{!s}-normal".format(geometry_name)
         source = utils.write_source(id_, "float", float_normals, "XYZ")
-        root.appendChild(source)
+        mesh_node.appendChild(source)
 
-    def _write_uvs(self, object_, root, geometry_name):
+    def _write_uvs(self, object_, mesh_node, geometry_name):
         uvdata = object_.data.uv_layers
         if uvdata is None:
             cbPrint("Your UV map is missing, adding...")
@@ -529,9 +529,9 @@ class CrytekDaeExporter:
 
         id_ = "{!s}-uvs".format(geometry_name)
         source = utils.write_source(id_, "float", float_uvs, "ST")
-        root.appendChild(source)
+        mesh_node.appendChild(source)
 
-    def _write_vertex_colors(self, object_, bmesh_, root, geometry_name):
+    def _write_vertex_colors(self, object_, bmesh_, mesh_node, geometry_name):
         float_colors = []
         alpha_found = False
 
@@ -555,14 +555,14 @@ class CrytekDaeExporter:
             id_ = "{!s}-colors".format(geometry_name)
             params = ("RGBA" if alpha_found else "RGB")
             source = utils.write_source(id_, "float", float_colors, params)
-            root.appendChild(source)
+            mesh_node.appendChild(source)
 
-    def _write_vertices(self, root, geometry_name):
+    def _write_vertices(self, mesh_node, geometry_name):
         vertices = self._doc.createElement("vertices")
         vertices.setAttribute("id", "{}-vtx".format(geometry_name))
         input = utils.write_input(geometry_name, None, "pos", "POSITION")
         vertices.appendChild(input)
-        root.appendChild(vertices)
+        mesh_node.appendChild(vertices)
 
     def _write_polylist(self, object_, bmesh_, root, geometry_name):
         current_material_index = -1
