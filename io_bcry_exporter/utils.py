@@ -139,9 +139,12 @@ def get_bmesh(object_):
     # Unfortunately Blender goes in edit mode just objects
     # in which first layer with bpy.ops.object.mode_set(mode='EDIT')
     # So we must temporarily activate first layer for objects which it is not 
-    # already in first layer.
+    # already in first layer. Also scene first layer must be active.
     # That lacking related with Blender, if it will fix in future that 
     # code will be clean.
+
+    scene_first_layer = bpy.context.scene.layers[0]
+    bpy.context.scene.layers[0] = True
 
     layer_state = not object_.layers[0]
     if layer_state:
@@ -149,11 +152,13 @@ def get_bmesh(object_):
 
     bpy.ops.object.mode_set(mode='EDIT')
 
-    return bmesh.from_edit_mesh(object_.data), layer_state
+    return bmesh.from_edit_mesh(object_.data), layer_state, scene_first_layer
 
 
-def clear_bmesh(object_, layer_state):
+def clear_bmesh(object_, layer_state, scene_first_layer):
     bpy.ops.object.mode_set(mode='OBJECT')
+
+    bpy.context.scene.layers[0] = scene_first_layer
 
     if layer_state:
         object_.layers[0] = False
