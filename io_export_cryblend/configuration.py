@@ -15,8 +15,8 @@
 
 
 import bpy
-from io_export_cryblend.outpipe import cbPrint
-from io_export_cryblend.utils import get_filename
+from io_bcry_exporter.outpipe import cbPrint
+from io_bcry_exporter.utils import get_filename
 import os
 import pickle
 
@@ -25,7 +25,7 @@ class __Configuration:
     __CONFIG_PATH = bpy.utils.user_resource('CONFIG',
                                             path='scripts',
                                             create=True)
-    __CONFIG_FILENAME = 'cryblend.cfg'
+    __CONFIG_FILENAME = 'bcry.cfg'
     __CONFIG_FILEPATH = os.path.join(__CONFIG_PATH, __CONFIG_FILENAME)
     __DEFAULT_CONFIGURATION = {'RC_PATH': r'',
                                'TEXTURE_RC_PATH': r'',

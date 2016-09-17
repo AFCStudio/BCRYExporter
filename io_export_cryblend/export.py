@@ -19,11 +19,11 @@ if "bpy" in locals():
     imp.reload(exceptions)
 else:
     import bpy
-    from io_export_cryblend import utils, add, exceptions
+    from io_bcry_exporter import utils, add, exceptions, bcrymesh
 
-from io_export_cryblend.rc import RCInstance
-from io_export_cryblend.outpipe import cbPrint
-from io_export_cryblend.utils import join
+from io_bcry_exporter.rc import RCInstance
+from io_bcry_exporter.outpipe import cbPrint
+from io_bcry_exporter.utils import join
 
 from bpy_extras.io_utils import ExportHelper
 from collections import OrderedDict
@@ -141,7 +141,7 @@ class CrytekDaeExporter:
         author.appendChild(author_name)
         author_tool = self._doc.createElement('authoring_tool')
         author_name_text = self._doc.createTextNode(
-            'CryBlend v{}'.format(self._config.cryblend_version))
+            'BCry v{}'.format(self._config.bcry_version))
         author_tool.appendChild(author_name_text)
         contributor.appendChild(author_tool)
         created = self._doc.createElement('created')
@@ -288,7 +288,7 @@ class CrytekDaeExporter:
         for cycles_node in cycles_nodes:
             image = cycles_node.image
             if not image:
-                raise exceptions.CryBlendException(
+                raise exceptions.BCryException(
                     "One of texture slots has no image assigned.")
 
             surface, sampler = self._create_surface_and_sampler(image.name)
@@ -304,7 +304,7 @@ class CrytekDaeExporter:
         for texture_slot in texture_slots:
             image = texture_slot.texture.image
             if not image:
-                raise exceptions.CryBlendException(
+                raise exceptions.BCryException(
                     "One of texture slots has no image assigned.")
 
             surface, sampler = self._create_surface_and_sampler(image.name)

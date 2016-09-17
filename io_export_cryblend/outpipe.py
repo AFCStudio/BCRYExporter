@@ -14,7 +14,7 @@
 # <pep8-80 compliant>
 
 
-from io_export_cryblend import exceptions
+from io_bcry_exporter import exceptions
 from logging import basicConfig, info, debug, warning, DEBUG
 
 

@@ -19,9 +19,9 @@ if "bpy" in locals():
     imp.reload(utils)
 else:
     import bpy
-    from io_export_cryblend import utils
+    from io_bcry_exporter import utils
 
-from io_export_cryblend.outpipe import cbPrint
+from io_bcry_exporter.outpipe import cbPrint
 import fnmatch
 import os
 import shutil

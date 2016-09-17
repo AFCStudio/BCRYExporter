@@ -19,10 +19,10 @@ if "bpy" in locals():
     imp.reload(exceptions)
 else:
     import bpy
-    from io_export_cryblend import exceptions
+    from io_bcry_exporter import exceptions
 
 
-from io_export_cryblend.outpipe import cbPrint
+from io_bcry_exporter.outpipe import cbPrint
 from mathutils import Matrix, Vector
 from xml.dom.minidom import Document, parseString
 import bpy
@@ -409,7 +409,7 @@ def fix_weights():
             bpy.ops.object.vertex_group_normalize_all(
                 override, lock_active=False)
         except:
-            raise exceptions.CryBlendException(
+            raise exceptions.BCryException(
                 "Please fix weightless vertices first.")
     cbPrint("Weights Corrected.")
 
@@ -665,7 +665,7 @@ def raise_exception_if_textures_have_same_type(texture_types):
             error_messages.append(ERROR_TEMPLATE.format(type_name.lower()))
 
     if error_messages:
-        raise exceptions.CryBlendException(
+        raise exceptions.BCryException(
             "\n".join(error_messages) +
             "\n" +
             "Please correct that and try again.")
@@ -770,11 +770,11 @@ def get_material_parts(node, material):
     return group, index, name, physics
 
 
-def extract_cryblend_properties(materialname):
-    """Returns the CryBlend properties of a materialname as dict or
+def extract_bcry_properties(materialname):
+    """Returns the BCry properties of a materialname as dict or
     None if name is invalid.
     """
-    if is_cryblend_material(materialname):
+    if is_bcry_material(materialname):
         groups = re.findall(
             "(.+)__([0-9]+)__(.*)__(phys[A-Za-z0-9]+)",
             materialname)
@@ -787,7 +787,7 @@ def extract_cryblend_properties(materialname):
     return None
 
 
-def is_cryblend_material(materialname):
+def is_bcry_material(materialname):
     if re.search(".+__[0-9]+__.*__phys[A-Za-z0-9]+", materialname):
         return True
     else:
@@ -1231,10 +1231,10 @@ def get_armature_from_node(group):
 
     error_message = None
     if armature_count == 0:
-        raise exceptions.CryBlendException("i_caf node has no armature!")
+        raise exceptions.BCryException("i_caf node has no armature!")
         error_message = "i_caf node has no armature!"
     elif armature_count > 1:
-        raise exceptions.CryBlendException(
+        raise exceptions.BCryException(
             "{} i_caf node have more than one armature!".format(node_name))
 
     return None

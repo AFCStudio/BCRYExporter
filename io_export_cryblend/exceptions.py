@@ -13,7 +13,7 @@
 # <pep8-80 compliant>
 
 
-class CryBlendException(RuntimeError):
+class BCryException(RuntimeError):
 
     def __init__(self, message):
         self._message = message
@@ -25,15 +25,15 @@ class CryBlendException(RuntimeError):
         return self._message
 
 
-class BlendNotSavedException(CryBlendException):
+class BlendNotSavedException(BCryException):
 
     def __init__(self):
         message = "Blend file has to be saved before exporting."
 
-        CryBlendException.__init__(self, message)
+        BCryException.__init__(self, message)
 
 
-class TextureAndBlendDiskMismatchException(CryBlendException):
+class TextureAndBlendDiskMismatchException(BCryException):
 
     def __init__(self, blend_path, texture_path):
         message = """
@@ -42,10 +42,10 @@ It's impossible to create relative paths if they are not.
 Blend file: {!r}
 Texture file: {!r}""".format(blend_path, texture_path)
 
-        CryBlendException.__init__(self, message)
+        BCryException.__init__(self, message)
 
 
-class NoRcSelectedException(CryBlendException):
+class NoRcSelectedException(BCryException):
 
     def __init__(self):
         message = """
@@ -53,20 +53,20 @@ Please find Resource Compiler first.
 Usually located in 'CryEngine\\Bin32\\rc\\rc.exe'
 """
 
-        CryBlendException.__init__(self, message)
+        BCryException.__init__(self, message)
 
 
-class NoGameDirectorySelected(CryBlendException):
+class NoGameDirectorySelected(BCryException):
 
     def __init__(self):
         message = "Please select a Game Directory!"
 
-        CryBlendException.__init__(self, message)
+        BCryException.__init__(self, message)
 
 
-class MarkersNotFound(CryBlendException):
+class MarkersNotFound(BCryException):
 
     def __init__(self):
         message = "Start or end marker is less!"
 
-        CryBlendException.__init__(self, message)
+        BCryException.__init__(self, message)

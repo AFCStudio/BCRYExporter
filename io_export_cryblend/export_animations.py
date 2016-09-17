@@ -18,10 +18,10 @@ if "bpy" in locals():
     imp.reload(exceptions)
 else:
     import bpy
-    from io_export_cryblend import export, utils, add, exceptions
+    from io_bcry_exporter import export, utils, add, exceptions
 
-from io_export_cryblend.rc import RCInstance
-from io_export_cryblend.outpipe import cbPrint
+from io_bcry_exporter.rc import RCInstance
+from io_bcry_exporter.outpipe import cbPrint
 
 from xml.dom.minidom import Document, Element, parse, parseString
 import xml.dom.minidom
