@@ -18,11 +18,11 @@
 #
 #------------------------------------------------------------------------------
 # Name:        __init__.py
-# Purpose:     Primary python file for CryBlend add-on
+# Purpose:     Primary python file for BCry Exporter add-on
 #
 # Author:      Angelo J. Miner,
-#              Daniel White, David Marcelis, Duo Oratar, Mikołaj Milej,
-#              Oscar Martin Garcia, Özkan Afacan
+#              Mikołaj Milej, Daniel White, Özkan Afacan,
+#              Oscar Martin Garcia, David Marcelis, Duo Oratar
 #
 # Created:     23/02/2012
 # Copyright:   (c) Angelo J. Miner 2012
@@ -31,16 +31,16 @@
 
 
 bl_info = {
-    "name": "CryBlend",
-    "author": "Angelo J. Miner, Duo Oratar, Mikołaj Milej, Daniel White, "
-              "David Marcelis, Özkan Afacan, Oscar Martin Garcia",
+    "name": "BCry Exporter",
+    "author": "Özkan Afacan, Angelo J. Miner, Mikołaj Milej, Daniel White, "
+              "Oscar Martin Garcia, Duo Oratar, David Marcelis",
     "blender": (2, 70, 0),
-    "version": (5, 2, 0),
-    "location": "CryBlend Menu",
+    "version": (1, 0, 0),
+    "location": "BCry Exporter Menu",
     "description": "Export assets from Blender to CryEngine 3",
     "warning": "",
-    "wiki_url": "https://github.com/travnick/CryBlend/wiki",
-    "tracker_url": "https://github.com/travnick/CryBlend/issues?state=open",
+    "wiki_url": "https://github.com/AFCStudio/BCryExporter/wiki",
+    "tracker_url": "https://github.com/AFCStudio/BCryExporter/issues",
     "support": 'OFFICIAL',
     "category": "Import-Export"}
 
@@ -59,15 +59,15 @@ if "bpy" in locals():
     imp.reload(desc)
 else:
     import bpy
-    from io_export_cryblend import add, export, export_animations, exceptions, utils, desc
+    from io_bcry_exporter import add, export, export_animations, exceptions, utils, desc
 
 from bpy.props import BoolProperty, EnumProperty, FloatVectorProperty, \
     FloatProperty, IntProperty, StringProperty, BoolVectorProperty
 from bpy.types import Menu, Panel
 from bpy_extras.io_utils import ExportHelper
-from io_export_cryblend.configuration import Configuration
-from io_export_cryblend.outpipe import cbPrint
-from io_export_cryblend.desc import list
+from io_bcry_exporter.configuration import Configuration
+from io_bcry_exporter.outpipe import cbPrint
+from io_bcry_exporter.desc import list
 from xml.dom.minidom import Document, Element, parse, parseString
 import bmesh
 import bpy.ops
@@ -162,8 +162,8 @@ for textures in .mtl file.'''
         return ExportHelper.invoke(self, context, event)
 
 
-class SaveCryBlendConfiguration(bpy.types.Operator):
-    '''operator: Saves current CryBlend configuration.'''
+class SaveBCryConfiguration(bpy.types.Operator):
+    '''operator: Saves current BCry Exporter configuration.'''
     bl_label = "Save Config File"
     bl_idname = "config.save"
     bl_options = {'REGISTER'}
@@ -711,7 +711,7 @@ class SetMaterialNames(bpy.types.Operator):
                     for slot in object.material_slots:
 
                         # Skip materials that have been renamed already.
-                        if not utils.is_cryblend_material(slot.material.name):
+                        if not utils.is_bcry_material(slot.material.name):
                             materialCounter[group.name] += 1
                             materialOldName = slot.material.name
 
@@ -743,14 +743,14 @@ class SetMaterialNames(bpy.types.Operator):
 
 
 class RemoveMaterialNames(bpy.types.Operator):
-    '''Removes all CryBlend properties from material names. This includes \
+    '''Removes all BCry Exporter properties from material names. This includes \
 physics, so they get lost.'''
-    bl_label = "Remove CryBlend properties from material names"
+    bl_label = "Remove BCry Exporter properties from material names"
     bl_idname = "material.remove_material_names"
 
     def execute(self, context):
-        removeCryBlendProperties()
-        message = "Removed CryBlend properties from material names"
+        removeBCryProperties()
+        message = "Removed BCry Exporter properties from material names"
         self.report({'INFO'}, message)
         cbPrint(message)
         return {'FINISHED'}
@@ -765,10 +765,10 @@ def getMaterialCounter():
     return materialCounter
 
 
-def removeCryBlendProperties():
-    """Removes CryBlend properties from all material names."""
+def removeBCryProperties():
+    """Removes BCry Exporter properties from all material names."""
     for material in bpy.data.materials:
-        properties = utils.extract_cryblend_properties(material.name)
+        properties = utils.extract_bcry_properties(material.name)
         if properties:
             material.name = properties["Name"]
 
@@ -777,7 +777,7 @@ def getMaterialPhysics():
     """Returns a dictionary with the physics of all material names."""
     physicsProperties = {}
     for material in bpy.data.materials:
-        properties = utils.extract_cryblend_properties(material.name)
+        properties = utils.extract_bcry_properties(material.name)
         if properties:
             physicsProperties[properties["Name"]] = properties["Physics"]
     return physicsProperties
@@ -2175,8 +2175,8 @@ class Export(bpy.types.Operator, ExportHelper):
         default=False,
     )
     run_in_profiler = BoolProperty(
-        name="Profile CryBlend",
-        description="Select only if you want to profile CryBlend.",
+        name="Profile BCry Exporter",
+        description="Select only if you want to profile BCry Exporter.",
         default=False,
     )
 
@@ -2204,7 +2204,7 @@ class Export(bpy.types.Operator, ExportHelper):
             for attribute in attributes:
                 setattr(self, attribute, getattr(config, attribute))
 
-            setattr(self, 'cryblend_version', VERSION)
+            setattr(self, 'bcry_version', VERSION)
             setattr(self, 'rc_path', Configuration.rc_path)
             setattr(self, 'texture_rc_path', Configuration.texture_rc_path)
             setattr(self, 'game_dir', Configuration.game_dir)
@@ -2223,7 +2223,7 @@ class Export(bpy.types.Operator, ExportHelper):
 
             self.filepath = '//'
 
-        except exceptions.CryBlendException as exception:
+        except exceptions.BCryException as exception:
             cbPrint(exception.what(), 'error')
             bpy.ops.screen.display_error(
                 'INVOKE_DEFAULT', message=exception.what())
@@ -2304,8 +2304,8 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
         default=False,
     )
     run_in_profiler = BoolProperty(
-        name="Profile CryBlend",
-        description="Select only if you want to profile CryBlend.",
+        name="Profile BCry Exporter",
+        description="Select only if you want to profile BCry Exporter.",
         default=False,
     )
     merge_all_nodes = True
@@ -2329,7 +2329,7 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
             for attribute in attributes:
                 setattr(self, attribute, getattr(config, attribute))
 
-            setattr(self, 'cryblend_version', VERSION)
+            setattr(self, 'bcry_version', VERSION)
             setattr(self, 'rc_path', Configuration.rc_path)
             setattr(self, 'texture_rc_path', Configuration.texture_rc_path)
             setattr(self, 'game_dir', Configuration.game_dir)
@@ -2349,7 +2349,7 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
 
             self.filepath = '//'
 
-        except exceptions.CryBlendException as exception:
+        except exceptions.BCryException as exception:
             cbPrint(exception.what(), 'error')
             bpy.ops.screen.display_error(
                 'INVOKE_DEFAULT', message=exception.what())
@@ -2411,7 +2411,7 @@ def multiline_label(col, text):
 
 
 #------------------------------------------------------------------------------
-# CryBlend Tab:
+# BCry Exporter Tab:
 #------------------------------------------------------------------------------
 
 class PropPanel():
@@ -2429,7 +2429,7 @@ class PropPanel():
 class View3DPanel():
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_category = "CryBlend"
+    bl_category = "BCry Exporter"
 
 
 class ExportUtilitiesPanel(View3DPanel, Panel):
@@ -2606,13 +2606,13 @@ class ExportPanel(View3DPanel, Panel):
         col.operator("scene.export_animations", text="Export Animations")
 
 #------------------------------------------------------------------------------
-# CryBlend Menu:
+# BCry Exporter Menu:
 #------------------------------------------------------------------------------
 
 
-class CryBlendMainMenu(bpy.types.Menu):
-    bl_label = 'CryBlend'
-    bl_idname = 'view3d.cryblend_main_menu'
+class BCryMainMenu(bpy.types.Menu):
+    bl_label = 'BCry Exporter'
+    bl_idname = 'view3d.BCry_main_menu'
 
     def draw(self, context):
         layout = self.layout
@@ -2930,9 +2930,9 @@ class RemoveUnusedVertexGroups(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class CryBlendReducedMenu(bpy.types.Menu):
-    bl_label = 'CryBlend'
-    bl_idname = 'view3d.cryblend_reduced_menu'
+class BCryReducedMenu(bpy.types.Menu):
+    bl_label = 'BCry Exporter'
+    bl_idname = 'view3d.BCry_reduced_menu'
 
     def draw(self, context):
         layout = self.layout
@@ -2964,7 +2964,7 @@ def get_classes_to_register():
         FindRC,
         FindRCForTextureConversion,
         SelectGameDirectory,
-        SaveCryBlendConfiguration,
+        SaveBCryConfiguration,
 
         AddCryExportNode,
         AddCryAnimationNode,
@@ -3021,7 +3021,7 @@ def get_classes_to_register():
         ConfigurationsPanel,
         ExportPanel,
 
-        CryBlendMainMenu,
+        BCryMainMenu,
         AddPhysicsProxyMenu,
         BoneUtilitiesMenu,
         CryUtilitiesMenu,
@@ -3032,7 +3032,7 @@ def get_classes_to_register():
 
         AddMaterialPhysicsMenu,
         RemoveUnusedVertexGroups,
-        CryBlendReducedMenu,
+        BCryReducedMenu,
     )
 
     return classes
@@ -3040,13 +3040,13 @@ def get_classes_to_register():
 
 def draw_item(self, context):
     layout = self.layout
-    layout.menu(CryBlendMainMenu.bl_idname)
+    layout.menu(BCryMainMenu.bl_idname)
 
 
 def physics_menu(self, context):
     layout = self.layout
     layout.separator()
-    layout.label("CryBlend")
+    layout.label("BCry Exporter")
     layout.menu("menu.add_material_physics", icon="PHYSICS")
     layout.separator()
 
@@ -3054,7 +3054,7 @@ def physics_menu(self, context):
 def remove_unused_vertex_groups(self, context):
     layout = self.layout
     layout.separator()
-    layout.label("CryBlend")
+    layout.label("BCry Exporter")
     layout.operator("ops.remove_unused_vertex_groups", icon="X")
 
 
@@ -3088,7 +3088,7 @@ def unregister():
         km = kc.keymaps['3D View']
         for kmi in km.keymap_items:
             if kmi.idname == 'wm.call_menu':
-                if kmi.properties.name == "view3d.cryblend_reduced_menu":
+                if kmi.properties.name == "view3d.BCry_reduced_menu":
                     km.keymap_items.remove(kmi)
                     break
 

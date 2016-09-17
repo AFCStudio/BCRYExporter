@@ -3,8 +3,8 @@
 # Purpose:     Resource compiler transactions
 #
 # Author:      Daniel White,
-#              Angelo J. Miner, David Marcelis, Duo Oratar, Mikołaj Milej,
-#              Oscar Martin Garcia, Özkan Afacan
+#              Angelo J. Miner, Mikołaj Milej, Özkan Afacan,
+#              Oscar Martin Garcia, Duo Oratar, David Marcelis
 #
 # Created:     2/12/2016
 # Copyright:   (c) Daniel White 2016
@@ -19,9 +19,9 @@ if "bpy" in locals():
     imp.reload(utils)
 else:
     import bpy
-    from io_export_cryblend import utils
+    from io_bcry_exporter import utils
 
-from io_export_cryblend.outpipe import cbPrint
+from io_bcry_exporter.outpipe import cbPrint
 import fnmatch
 import os
 import shutil

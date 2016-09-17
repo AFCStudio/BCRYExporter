@@ -3,8 +3,8 @@
 # Purpose:     Animation exporter to CryEngine
 #
 # Author:      Özkan Afacan,
-#              Angelo J. Miner, Daniel White, David Marcelis, Duo Oratar,
-#              Mikołaj Milej, Oscar Martin Garcia
+#              Angelo J. Miner, Mikołaj Milej, Daniel White,
+#              Oscar Martin Garcia, Duo Oratar, David Marcelis 
 #
 # Created:     13/06/2016
 # Copyright:   (c) Özkan Afacan 2016
@@ -18,10 +18,10 @@ if "bpy" in locals():
     imp.reload(exceptions)
 else:
     import bpy
-    from io_export_cryblend import export, utils, add, exceptions
+    from io_bcry_exporter import export, utils, add, exceptions
 
-from io_export_cryblend.rc import RCInstance
-from io_export_cryblend.outpipe import cbPrint
+from io_bcry_exporter.rc import RCInstance
+from io_bcry_exporter.outpipe import cbPrint
 
 from xml.dom.minidom import Document, Element, parse, parseString
 import xml.dom.minidom

@@ -2,9 +2,7 @@
 # Name:        desc.py
 # Purpose:     Holds descriptions of UDP and IK properties.
 #
-# Author:      Özkan Afacan,
-#              Angelo J. Miner, Daniel White, David Marcelis, Duo Oratar,
-#              Mikołaj Milej, Oscar Martin Garcia
+# Author:      Özkan Afacan
 #
 # Created:     07/02/2015
 # Copyright:   (c) Özkan Afacan 2015
