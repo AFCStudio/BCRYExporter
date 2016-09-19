@@ -52,14 +52,14 @@ VERSION = '.'.join(str(n) for n in bl_info["version"])
 
 if "bpy" in locals():
     import imp
-    imp.reload(add)
     imp.reload(export)
     imp.reload(exceptions)
+    imp.reload(udp)
     imp.reload(utils)
     imp.reload(desc)
 else:
     import bpy
-    from io_bcry_exporter import add, export, export_animations, exceptions, utils, desc
+    from io_bcry_exporter import export, export_animations, exceptions, udp, utils, desc
 
 from bpy.props import BoolProperty, EnumProperty, FloatVectorProperty, \
     FloatProperty, IntProperty, StringProperty, BoolVectorProperty
@@ -513,7 +513,8 @@ class AddBreakableJoint(bpy.types.Operator):
     bl_idname = "object.add_joint"
 
     def execute(self, context):
-        return add.add_joint(self, context)
+        # Reviewed in the future.
+        #return add.add_joint(self, context)
 
     def invoke(self, context, event):
         if context.object is None or context.object.type != "MESH" or context.object.mode != "OBJECT":
@@ -695,7 +696,7 @@ class SetMaterialNames(bpy.types.Operator):
             return {'FINISHED'}
 
         if self.just_rephysic:
-            return add.add_phys_material(self, context, self.material_phys)
+            return utils.add_phys_material(self, context, self.material_phys)
 
         # Revert all materials to fetch also those that are no longer in a group
         # and store their possible physics properties in a dictionary.
@@ -1038,15 +1039,15 @@ class EditPhysicProxy(bpy.types.Operator):
         if self.object_ is None:
             return None
 
-        self.proxy_type, self.is_proxy = add.get_udp(
+        self.proxy_type, self.is_proxy = udp.get_udp(
             self.object_, "phys_proxy", self.proxy_type, self.is_proxy)
-        self.no_exp_occlusion = add.get_udp(
+        self.no_exp_occlusion = udp.get_udp(
             self.object_,
             "no_explosion_occlusion",
             self.no_exp_occlusion)
-        self.colltype_player = add.get_udp(
+        self.colltype_player = udp.get_udp(
             self.object_, "colltype_player", self.colltype_player)
-        self.wheel = add.get_udp(self.object_, "wheel", self.wheel)
+        self.wheel = udp.get_udp(self.object_, "wheel", self.wheel)
 
         return None
 
@@ -1055,22 +1056,22 @@ class EditPhysicProxy(bpy.types.Operator):
             cbPrint("Please select a object.")
             return {'FINISHED'}
 
-        add.edit_udp(
+        udp.edit_udp(
             self.object_,
             "phys_proxy",
             self.proxy_type,
             self.is_proxy)
-        add.edit_udp(
+        udp.edit_udp(
             self.object_,
             "no_explosion_occlusion",
             "no_explosion_occlusion",
             self.no_exp_occlusion)
-        add.edit_udp(
+        udp.edit_udp(
             self.object_,
             "colltype_player",
             "colltype_player",
             self.colltype_player)
-        add.edit_udp(self.object_, "wheel", "wheel", self.wheel)
+        udp.edit_udp(self.object_, "wheel", "wheel", self.wheel)
 
         return {'FINISHED'}
 
@@ -1129,19 +1130,19 @@ class EditRenderMesh(bpy.types.Operator):
         if self.object_ is None:
             return None
 
-        self.mass, self.is_mass = add.get_udp(self.object_,
+        self.mass, self.is_mass = udp.get_udp(self.object_,
                                               "mass", self.mass, self.is_mass)
-        self.density, self.is_density = add.get_udp(
+        self.density, self.is_density = udp.get_udp(
             self.object_, "density", self.density, self.is_density)
-        self.pieces, self.is_pieces = add.get_udp(
+        self.pieces, self.is_pieces = udp.get_udp(
             self.object_, "pieces", self.pieces, self.is_pieces)
-        self.no_hit_refinement = add.get_udp(
+        self.no_hit_refinement = udp.get_udp(
             self.object_, "no_hit_refinement", self.no_hit_refinement)
-        self.other_rendermesh = add.get_udp(
+        self.other_rendermesh = udp.get_udp(
             self.object_, "other_rendermesh", self.other_rendermesh)
 
-        self.is_entity = add.get_udp(self.object_, "entity", self.is_entity)
-        self.is_dynamic = add.get_udp(self.object_, "dynamic", self.is_dynamic)
+        self.is_entity = udp.get_udp(self.object_, "entity", self.is_entity)
+        self.is_dynamic = udp.get_udp(self.object_, "dynamic", self.is_dynamic)
 
         return None
 
@@ -1150,17 +1151,17 @@ class EditRenderMesh(bpy.types.Operator):
             cbPrint("Please select a object.")
             return {'FINISHED'}
 
-        add.edit_udp(self.object_, "entity", "entity", self.is_entity)
-        add.edit_udp(self.object_, "mass", self.mass, self.is_mass)
-        add.edit_udp(self.object_, "density", self.density, self.is_density)
-        add.edit_udp(self.object_, "pieces", self.pieces, self.is_pieces)
-        add.edit_udp(self.object_, "dynamic", "dynamic", self.is_dynamic)
-        add.edit_udp(
+        udp.edit_udp(self.object_, "entity", "entity", self.is_entity)
+        udp.edit_udp(self.object_, "mass", self.mass, self.is_mass)
+        udp.edit_udp(self.object_, "density", self.density, self.is_density)
+        udp.edit_udp(self.object_, "pieces", self.pieces, self.is_pieces)
+        udp.edit_udp(self.object_, "dynamic", "dynamic", self.is_dynamic)
+        udp.edit_udp(
             self.object_,
             "no_hit_refinement",
             "no_hit_refinement",
             self.no_hit_refinement)
-        add.edit_udp(
+        udp.edit_udp(
             self.object_,
             "other_rendermesh",
             "other_rendermesh",
@@ -1229,21 +1230,21 @@ class EditJointNode(bpy.types.Operator):
         if self.object_ is None:
             return None
 
-        self.limit, self.is_limit = add.get_udp(
+        self.limit, self.is_limit = udp.get_udp(
             self.object_, "limit", self.limit, self.is_limit)
-        self.bend, self.is_bend = add.get_udp(
+        self.bend, self.is_bend = udp.get_udp(
             self.object_, "bend", self.bend, self.is_bend)
-        self.twist, self.is_twist = add.get_udp(
+        self.twist, self.is_twist = udp.get_udp(
             self.object_, "twist", self.twist, self.is_twist)
-        self.pull, self.is_pull = add.get_udp(
+        self.pull, self.is_pull = udp.get_udp(
             self.object_, "pull", self.pull, self.is_pull)
-        self.push, self.is_push = add.get_udp(
+        self.push, self.is_push = udp.get_udp(
             self.object_, "push", self.push, self.is_push)
-        self.shift, self.is_shift = add.get_udp(
+        self.shift, self.is_shift = udp.get_udp(
             self.object_, "shift", self.shift, self.is_shift)
-        self.player_can_break = add.get_udp(
+        self.player_can_break = udp.get_udp(
             self.object_, "player_can_break", self.player_can_break)
-        self.gameplay_critical = add.get_udp(
+        self.gameplay_critical = udp.get_udp(
             self.object_, "gameplay_critical", self.gameplay_critical)
 
         return None
@@ -1253,18 +1254,18 @@ class EditJointNode(bpy.types.Operator):
             cbPrint("Please select a object.")
             return {'FINISHED'}
 
-        add.edit_udp(self.object_, "limit", self.limit, self.is_limit)
-        add.edit_udp(self.object_, "bend", self.bend, self.is_bend)
-        add.edit_udp(self.object_, "twist", self.twist, self.is_twist)
-        add.edit_udp(self.object_, "pull", self.pull, self.is_pull)
-        add.edit_udp(self.object_, "push", self.push, self.is_push)
-        add.edit_udp(self.object_, "shift", self.shift, self.is_shift)
-        add.edit_udp(
+        udp.edit_udp(self.object_, "limit", self.limit, self.is_limit)
+        udp.edit_udp(self.object_, "bend", self.bend, self.is_bend)
+        udp.edit_udp(self.object_, "twist", self.twist, self.is_twist)
+        udp.edit_udp(self.object_, "pull", self.pull, self.is_pull)
+        udp.edit_udp(self.object_, "push", self.push, self.is_push)
+        udp.edit_udp(self.object_, "shift", self.shift, self.is_shift)
+        udp.edit_udp(
             self.object_,
             "player_can_break",
             "player_can_break",
             self.player_can_break)
-        add.edit_udp(
+        udp.edit_udp(
             self.object_,
             "gameplay_critical",
             "gameplay_critical",
@@ -1343,22 +1344,22 @@ class EditDeformable(bpy.types.Operator):
         if self.object_ is None:
             return None
 
-        self.stiffness, self.is_stiffness = add.get_udp(
+        self.stiffness, self.is_stiffness = udp.get_udp(
             self.object_, "stiffness", self.stiffness, self.is_stiffness)
-        self.hardness, self.is_hardness = add.get_udp(
+        self.hardness, self.is_hardness = udp.get_udp(
             self.object_, "hardness", self.hardness, self.is_hardness)
-        self.max_stretch, self.is_max_stretch = add.get_udp(
+        self.max_stretch, self.is_max_stretch = udp.get_udp(
             self.object_, "max_stretch", self.max_stretch, self.is_max_stretch)
-        self.max_impulse, self.is_max_impulse = add.get_udp(
+        self.max_impulse, self.is_max_impulse = udp.get_udp(
             self.object_, "max_impulse", self.max_impulse, self.is_max_impulse)
-        self.skin_dist, self.is_skin_dist = add.get_udp(
+        self.skin_dist, self.is_skin_dist = udp.get_udp(
             self.object_, "skin_dist", self.skin_dist, self.is_skin_dist)
-        self.thickness, self.is_thickness = add.get_udp(
+        self.thickness, self.is_thickness = udp.get_udp(
             self.object_, "thickness", self.thickness, self.is_thickness)
-        self.explosion_scale, self.is_explosion_scale = add.get_udp(
+        self.explosion_scale, self.is_explosion_scale = udp.get_udp(
             self.object_, "explosion_scale", self.explosion_scale, self.is_explosion_scale)
 
-        self.notaprim = add.get_udp(self.object_, "notaprim", self.notaprim)
+        self.notaprim = udp.get_udp(self.object_, "notaprim", self.notaprim)
 
         return None
 
@@ -1367,38 +1368,38 @@ class EditDeformable(bpy.types.Operator):
             cbPrint("Please select a object.")
             return {'FINISHED'}
 
-        add.edit_udp(
+        udp.edit_udp(
             self.object_,
             "stiffness",
             self.stiffness,
             self.is_stiffness)
-        add.edit_udp(self.object_, "hardness", self.hardness, self.is_hardness)
-        add.edit_udp(
+        udp.edit_udp(self.object_, "hardness", self.hardness, self.is_hardness)
+        udp.edit_udp(
             self.object_,
             "max_stretch",
             self.max_stretch,
             self.is_max_stretch)
-        add.edit_udp(
+        udp.edit_udp(
             self.object_,
             "max_impulse",
             self.max_impulse,
             self.is_max_impulse)
-        add.edit_udp(
+        udp.edit_udp(
             self.object_,
             "skin_dist",
             self.skin_dist,
             self.is_skin_dist)
-        add.edit_udp(
+        udp.edit_udp(
             self.object_,
             "thickness",
             self.thickness,
             self.is_thickness)
-        add.edit_udp(
+        udp.edit_udp(
             self.object_,
             "explosion_scale",
             self.explosion_scale,
             self.is_explosion_scale)
-        add.edit_udp(self.object_, "notaprim", "notaprim", self.notaprim)
+        udp.edit_udp(self.object_, "notaprim", "notaprim", self.notaprim)
 
         return {'FINISHED'}
 
@@ -1440,7 +1441,7 @@ class AddMaterialPhysDefault(bpy.types.Operator):
         message = "Adding __physDefault"
         self.report({'INFO'}, message)
         cbPrint(message)
-        return add.add_phys_material(self, context, self.bl_label)
+        return utils.add_phys_material(self, context, self.bl_label)
 
 
 class AddMaterialPhysProxyNoDraw(bpy.types.Operator):
@@ -1452,7 +1453,7 @@ class AddMaterialPhysProxyNoDraw(bpy.types.Operator):
         message = "Adding __physProxyNoDraw"
         self.report({'INFO'}, message)
         cbPrint(message)
-        return add.add_phys_material(self, context, self.bl_label)
+        return utils.add_phys_material(self, context, self.bl_label)
 
 
 class AddMaterialPhysNone(bpy.types.Operator):
@@ -1464,7 +1465,7 @@ class AddMaterialPhysNone(bpy.types.Operator):
         message = "Adding __physNone"
         self.report({'INFO'}, message)
         cbPrint(message)
-        return add.add_phys_material(self, context, self.bl_label)
+        return utils.add_phys_material(self, context, self.bl_label)
 
 
 class AddMaterialPhysObstruct(bpy.types.Operator):
@@ -1473,7 +1474,7 @@ class AddMaterialPhysObstruct(bpy.types.Operator):
     bl_idname = "material.add_phys_obstruct"
 
     def execute(self, context):
-        return add.add_phys_material(self, context, self.bl_label)
+        return utils.add_phys_material(self, context, self.bl_label)
 
 
 class AddMaterialPhysNoCollide(bpy.types.Operator):
@@ -1485,7 +1486,7 @@ class AddMaterialPhysNoCollide(bpy.types.Operator):
         message = "Adding __physNoCollide"
         self.report({'INFO'}, message)
         cbPrint(message)
-        return add.add_phys_material(self, context, self.bl_label)
+        return utils.add_phys_material(self, context, self.bl_label)
 
 
 #------------------------------------------------------------------------------

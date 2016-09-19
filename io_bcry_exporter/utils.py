@@ -810,14 +810,14 @@ def get_material_parts(node, material):
     return group, index, name, physics
 
 
-def extract_bcry_properties(materialname):
-    """Returns the BCry properties of a materialname as dict or
+def extract_bcry_properties(material_name):
+    """Returns the BCry properties of a material_name as dict or
     None if name is invalid.
     """
-    if is_bcry_material(materialname):
+    if is_bcry_material(material_name):
         groups = re.findall(
             "(.+)__([0-9]+)__(.*)__(phys[A-Za-z0-9]+)",
-            materialname)
+            material_name)
         properties = {}
         properties["ExportNode"] = groups[0][0]
         properties["Number"] = int(groups[0][1])
@@ -827,11 +827,29 @@ def extract_bcry_properties(materialname):
     return None
 
 
-def is_bcry_material(materialname):
-    if re.search(".+__[0-9]+__.*__phys[A-Za-z0-9]+", materialname):
+def is_bcry_material(material_name):
+    if re.search(".+__[0-9]+__.*__phys[A-Za-z0-9]+", material_name):
         return True
     else:
         return False
+
+def add_phys_material(self, context, physName):
+    if not physName.startswith("__"):
+        physName = "__" + physName
+
+    me = bpy.context.active_object
+    if me.active_material:
+        me.active_material.name = replace_phys_material(
+            me.active_material.name, physName)
+
+    return {'FINISHED'}
+
+
+def replace_phys_material(material_name, phys):
+    if "__phys" in material_name:
+        return re.sub(r"__phys.*", phys, material_name)
+    else:
+        return "{}{}".format(material_name, phys)
 
 
 #------------------------------------------------------------------------------
