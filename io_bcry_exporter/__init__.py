@@ -515,6 +515,7 @@ class AddBreakableJoint(bpy.types.Operator):
     def execute(self, context):
         # Reviewed in the future.
         #return add.add_joint(self, context)
+        return None
 
     def invoke(self, context, event):
         if context.object is None or context.object.type != "MESH" or context.object.mode != "OBJECT":
@@ -1791,13 +1792,6 @@ class AddRootBone(bpy.types.Operator):
 
         return {'FINISHED'}
 
-    def invoke(self, context, event):
-        if context.object is None or context.object.type != "ARMATURE":
-            self.report({'ERROR'}, "Select one or more vertices in EDIT mode.")
-            return {'FINISHED'}
-
-        return self.execute(context)
-
 
 class AddLocatorLocomotion(bpy.types.Operator):
     '''Add locator locomotion bone for movement in CryEngine.'''
@@ -3072,7 +3066,7 @@ def register():
             'PRESS',
             ctrl=False,
             shift=True)
-        kmi.properties.name = "view3d.cryblend_reduced_menu"
+        kmi.properties.name = "view3d.BCry_reduced_menu"
 
     bpy.types.INFO_HT_header.append(draw_item)
     bpy.types.MATERIAL_MT_specials.append(physics_menu)
