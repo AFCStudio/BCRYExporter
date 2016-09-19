@@ -435,7 +435,8 @@ class CrytekDaeExporter:
         parent_element.appendChild(libgeo)
         for group in utils.get_mesh_export_nodes(self._config.export_selected_nodes):
             for object_ in group.objects:
-                bmesh_, layer_state, scene_layer = utils.get_bmesh(object_)
+                object_tris = utils.duplicate_object(object_)
+                bmesh_, layer_state, scene_layer = utils.get_triangulated_bmesh(object_tris)
                 geometry_node = self._doc.createElement("geometry")
                 geometry_name = utils.get_geometry_name(group, object_)
                 geometry_node.setAttribute("id", geometry_name)
@@ -445,22 +446,22 @@ class CrytekDaeExporter:
                 cbPrint('"{}" object is being processed...'.format(object_.name))
 
                 start_time = clock()
-                self._write_positions(object_, bmesh_, mesh_node, geometry_name)
+                self._write_positions(object_tris, bmesh_, mesh_node, geometry_name)
                 cbPrint('Positions have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 start_time = clock()
-                self._write_normals(object_, bmesh_, mesh_node, geometry_name)
+                self._write_normals(object_tris, bmesh_, mesh_node, geometry_name)
                 cbPrint('Normals have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 bpy.ops.object.mode_set(mode='OBJECT')
                 start_time = clock()
-                self._write_uvs(object_, mesh_node, geometry_name)
+                self._write_uvs(object_tris, mesh_node, geometry_name)
                 cbPrint('UVs have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 bpy.ops.object.mode_set(mode='EDIT')
-                bmesh_ = bmesh.from_edit_mesh(object_.data)
+                bmesh_ = bmesh.from_edit_mesh(object_tris.data)
                 start_time = clock()
-                self._write_vertex_colors(object_, bmesh_, mesh_node, geometry_name)
+                self._write_vertex_colors(object_tris, bmesh_, mesh_node, geometry_name)
                 cbPrint(
                     'Vertex colors have been writed {:.4f} seconds.'.format(
                         clock() - start_time))
@@ -470,15 +471,16 @@ class CrytekDaeExporter:
                 cbPrint('Vertices have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 start_time = clock()
-                self._write_polylist(object_, bmesh_, mesh_node, geometry_name)
-                cbPrint('Polylist have been writed {:.4f} seconds.'.format(clock() - start_time))
+                self._write_triangle_list(object_tris, bmesh_, mesh_node, geometry_name)
+                cbPrint('Triangle list have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 extra = self._create_double_sided_extra("MAYA")
                 mesh_node.appendChild(extra)
                 geometry_node.appendChild(mesh_node)
                 libgeo.appendChild(geometry_node)
 
-                utils.clear_bmesh(object_, layer_state, scene_layer)
+                utils.clear_bmesh(object_tris, layer_state, scene_layer)
+                bpy.ops.object.delete()
                 cbPrint(
                     '"{}" object has been processed for "{}" node.'.format(
                         object_.name, group.name))
@@ -564,37 +566,34 @@ class CrytekDaeExporter:
         vertices.appendChild(input)
         mesh_node.appendChild(vertices)
 
-    def _write_polylist(self, object_, bmesh_, root, geometry_name):
-        current_material_index = -1
+    def _write_triangle_list(self, object_, bmesh_, mesh_node, geometry_name):
+        #bcmesh = bcrymesh.BCryMesh(object_, bmesh_)
+
+        current_material_index = 0
         for material, materialname in self._get_materials_for_object(
                 object_).items():
-            vert_data = ''
-            verts_per_poly = ''
-            poly_count = normal = texcoord = 0
-            current_material_index += 1
-
+            triangles = ''
+            triangle_count = 0
+            normal_uv_index = 0
             for face in bmesh_.faces:
                 if face.material_index == current_material_index:
-                    verts_per_poly = join(
-                        verts_per_poly, len(
-                            face.verts), ' ')
-                    poly_count += 1
+                    triangle_count += 1
                     for vert in face.verts:
-                        data = self._write_vertex_data(
-                            vert.index, normal, texcoord, object_.data.vertex_colors)
-                        vert_data = join(vert_data, data)
-                        normal += 1
-                        texcoord += 1
+                        dae_vertex = self._write_vertex_data(
+                            vert.index, normal_uv_index, normal_uv_index, object_.data.vertex_colors)
+                        triangles = join(triangles, dae_vertex)
+                        normal_uv_index += 1
                 else:
-                    normal += len(face.verts)
-                    texcoord += len(face.verts)
+                    normal_uv_index += len(face.verts)
 
-            if poly_count == 0:
+            current_material_index += 1
+
+            if triangle_count == 0:
                 continue
 
-            polylist = self._doc.createElement('polylist')
-            polylist.setAttribute('material', materialname)
-            polylist.setAttribute('count', str(poly_count))
+            triangle_list = self._doc.createElement('triangles')
+            triangle_list.setAttribute('material', materialname)
+            triangle_list.setAttribute('count', str(triangle_count))
 
             inputs = []
             inputs.append(
@@ -624,19 +623,14 @@ class CrytekDaeExporter:
                         'COLOR'))
 
             for input in inputs:
-                polylist.appendChild(input)
-
-            vcount = self._doc.createElement('vcount')
-            vcount_text = self._doc.createTextNode(verts_per_poly)
-            vcount.appendChild(vcount_text)
+                triangle_list.appendChild(input)
 
             p = self._doc.createElement('p')
-            p_text = self._doc.createTextNode(vert_data)
+            p_text = self._doc.createTextNode(triangles)
             p.appendChild(p_text)
 
-            polylist.appendChild(vcount)
-            polylist.appendChild(p)
-            root.appendChild(polylist)
+            triangle_list.appendChild(p)
+            mesh_node.appendChild(triangle_list)
 
     def _write_vertex_data(self, vert, normal, texcoord, vertex_colors):
         if vertex_colors:
