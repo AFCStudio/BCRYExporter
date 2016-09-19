@@ -69,6 +69,7 @@ from io_bcry_exporter.configuration import Configuration
 from io_bcry_exporter.outpipe import cbPrint
 from io_bcry_exporter.desc import list
 from xml.dom.minidom import Document, Element, parse, parseString
+import bpy.utils.previews
 import bmesh
 import bpy.ops
 import bpy_extras
@@ -2099,7 +2100,7 @@ class RemoveFakebones(bpy.types.Operator):
 
 class Export(bpy.types.Operator, ExportHelper):
     '''Select to export to game.'''
-    bl_label = "Export to Game"
+    bl_label = "Export to CryEngine"
     bl_idname = "scene.export_to_game"
     filename_ext = ".dae"
     filter_glob = StringProperty(default="*.dae", options={'HIDDEN'})
@@ -2592,13 +2593,13 @@ class ExportPanel(View3DPanel, Panel):
         layout = self.layout
         col = layout.column(align=True)
 
-        col.label("Export", icon="GAME")
-        col.separator()
-        col.operator("scene.export_to_game", text="Export to Game")
-        col.separator()
-        col.label("Export Animations", icon="GAME")
+        col.label("Export Animations", icon="RENDER_ANIMATION")
         col.separator()
         col.operator("scene.export_animations", text="Export Animations")
+        col.label("Export to CryEngine", icon_value=bcry_icons["crye"].icon_id)
+        col.separator()
+        col.operator("scene.export_to_game", text="Export to CryEngine")
+        col.separator()
 
 #------------------------------------------------------------------------------
 # BCry Exporter Menu:
@@ -2654,7 +2655,7 @@ class BCryMainMenu(bpy.types.Menu):
 
         layout.separator()
         layout.separator()
-        layout.operator("scene.export_to_game", icon="GAME")
+        layout.operator("scene.export_to_game", icon_value=bcry_icons["crye"].icon_id)
         layout.separator()
         layout.operator("scene.export_animations", icon="RENDER_ANIMATION")
 
@@ -3053,7 +3054,21 @@ def remove_unused_vertex_groups(self, context):
     layout.operator("ops.remove_unused_vertex_groups", icon="X")
 
 
+def register_bcry_icons():
+    global bcry_icons
+    bcry_icons = bpy.utils.previews.new()
+    icons_dir = os.path.join(os.path.dirname(__file__), "icons")
+    bcry_icons.load("crye", os.path.join(icons_dir, "CryEngine.png"), 'IMAGE')
+
+
+def unregister_bcry_icons():
+    global bcry_icons
+    bpy.utils.previews.remove(bcry_icons)
+
+
 def register():
+    register_bcry_icons()
+
     for classToRegister in get_classes_to_register():
         bpy.utils.register_class(classToRegister)
     wm = bpy.context.window_manager
@@ -3074,6 +3089,8 @@ def register():
 
 
 def unregister():
+    unregister_bcry_icons()
+
     # Be sure to unregister operators.
     for classToRegister in get_classes_to_register():
         bpy.utils.unregister_class(classToRegister)
