@@ -18,7 +18,7 @@ if "bpy" in locals():
     imp.reload(exceptions)
 else:
     import bpy
-    from io_bcry_exporter import export, utils, add, exceptions
+    from io_bcry_exporter import export, utils, exceptions
 
 from io_bcry_exporter.rc import RCInstance
 from io_bcry_exporter.outpipe import cbPrint
