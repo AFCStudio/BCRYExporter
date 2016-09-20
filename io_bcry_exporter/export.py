@@ -16,10 +16,11 @@
 if "bpy" in locals():
     import imp
     imp.reload(utils)
+    imp.reload(udp)
     imp.reload(exceptions)
 else:
     import bpy
-    from io_bcry_exporter import utils, add, exceptions, bcrymesh
+    from io_bcry_exporter import utils, udp, exceptions
 
 from io_bcry_exporter.rc import RCInstance
 from io_bcry_exporter.outpipe import cbPrint
@@ -1121,7 +1122,7 @@ class CrytekDaeExporter:
         for prop in object_.rna_type.id_data.items():
             if prop:
                 prop_name = prop[0]
-                if add.is_user_defined_property(prop_name):
+                if udp.is_user_defined_property(prop_name):
                     udp = "\n"
 
                     if isinstance(prop[1], str):
@@ -1176,9 +1177,9 @@ class CrytekDaeExporter:
             armature_object = bpy.data.objects[object_.name[:-5]]
             pose_bone = armature_object.pose.bones[bone.name[:-5]]
 
-            xIK, yIK, zIK = add.get_bone_ik_max_min(pose_bone)
+            xIK, yIK, zIK = udp.get_bone_ik_max_min(pose_bone)
 
-            damping, spring, spring_tension = add.get_bone_ik_properties(
+            damping, spring, spring_tension = udp.get_bone_ik_properties(
                 pose_bone)
 
             props = join(
