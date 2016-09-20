@@ -56,10 +56,11 @@ if "bpy" in locals():
     imp.reload(exceptions)
     imp.reload(udp)
     imp.reload(utils)
+    imp.reload(material_utils)
     imp.reload(desc)
 else:
     import bpy
-    from io_bcry_exporter import export, export_animations, exceptions, udp, utils, desc
+    from io_bcry_exporter import export, export_animations, exceptions, udp, utils, material_utils, desc
 
 from bpy.props import BoolProperty, EnumProperty, FloatVectorProperty, \
     FloatProperty, IntProperty, StringProperty, BoolVectorProperty
@@ -698,15 +699,15 @@ class SetMaterialNames(bpy.types.Operator):
             return {'FINISHED'}
 
         if self.just_rephysic:
-            return utils.add_phys_material(self, context, self.material_phys)
+            return material_utils.add_phys_material(self, context, self.material_phys)
 
         # Revert all materials to fetch also those that are no longer in a group
         # and store their possible physics properties in a dictionary.
-        physicsProperties = getMaterialPhysics()
+        physicsProperties = material_utils.get_material_physics()
 
         # Create a dictionary with all CryExportNodes to store the current number
         # of materials in it.
-        materialCounter = getMaterialCounter()
+        materialCounter = material_utils.get_material_counter()
 
         for group in self.object_.users_group:
             if utils.is_export_node(group):
@@ -714,7 +715,7 @@ class SetMaterialNames(bpy.types.Operator):
                     for slot in object.material_slots:
 
                         # Skip materials that have been renamed already.
-                        if not utils.is_bcry_material(slot.material.name):
+                        if not material_utils.is_bcry_material(slot.material.name):
                             materialCounter[group.name] += 1
                             materialOldName = slot.material.name
 
@@ -752,48 +753,11 @@ physics, so they get lost.'''
     bl_idname = "material.remove_material_names"
 
     def execute(self, context):
-        removeBCryProperties()
+        material_utils.remove_bcry_properties()
         message = "Removed BCry Exporter properties from material names"
         self.report({'INFO'}, message)
         cbPrint(message)
         return {'FINISHED'}
-
-
-def getMaterialCounter():
-    """Returns a dictionary with all CryExportNodes."""
-    materialCounter = {}
-    for group in bpy.data.groups:
-        if utils.is_export_node(group):
-            materialCounter[group.name] = 0
-    return materialCounter
-
-
-def removeBCryProperties():
-    """Removes BCry Exporter properties from all material names."""
-    for material in bpy.data.materials:
-        properties = utils.extract_bcry_properties(material.name)
-        if properties:
-            material.name = properties["Name"]
-
-
-def getMaterialPhysics():
-    """Returns a dictionary with the physics of all material names."""
-    physicsProperties = {}
-    for material in bpy.data.materials:
-        properties = utils.extract_bcry_properties(material.name)
-        if properties:
-            physicsProperties[properties["Name"]] = properties["Physics"]
-    return physicsProperties
-
-
-def get_materials_per_group(group):
-    materials = []
-    for _objtmp in bpy.data.groups[group].objects:
-        for material in _objtmp.data.materials:
-            if material is not None:
-                if material.name not in materials:
-                    materials.append(material.name)
-    return materials
 
 
 class AddMaterial(bpy.types.Operator):
@@ -825,7 +789,7 @@ class AddMaterial(bpy.types.Operator):
                     node_name = _object.users_group[0].name
                     # get material for this group
                     if node_name not in materials:
-                        index = len(get_materials_per_group(node_name)) + 1
+                        index = len(material_utils.get_materials_per_group(node_name)) + 1
                         # generate new material
                         material = bpy.data.materials.new(
                             "{}__{:03d}__{}__{}".format(
@@ -1443,7 +1407,7 @@ class AddMaterialPhysDefault(bpy.types.Operator):
         message = "Adding __physDefault"
         self.report({'INFO'}, message)
         cbPrint(message)
-        return utils.add_phys_material(self, context, self.bl_label)
+        return material_utils.add_phys_material(self, context, self.bl_label)
 
 
 class AddMaterialPhysProxyNoDraw(bpy.types.Operator):
@@ -1455,7 +1419,7 @@ class AddMaterialPhysProxyNoDraw(bpy.types.Operator):
         message = "Adding __physProxyNoDraw"
         self.report({'INFO'}, message)
         cbPrint(message)
-        return utils.add_phys_material(self, context, self.bl_label)
+        return material_utils.add_phys_material(self, context, self.bl_label)
 
 
 class AddMaterialPhysNone(bpy.types.Operator):
@@ -1467,7 +1431,7 @@ class AddMaterialPhysNone(bpy.types.Operator):
         message = "Adding __physNone"
         self.report({'INFO'}, message)
         cbPrint(message)
-        return utils.add_phys_material(self, context, self.bl_label)
+        return material_utils.add_phys_material(self, context, self.bl_label)
 
 
 class AddMaterialPhysObstruct(bpy.types.Operator):
@@ -1476,7 +1440,7 @@ class AddMaterialPhysObstruct(bpy.types.Operator):
     bl_idname = "material.add_phys_obstruct"
 
     def execute(self, context):
-        return utils.add_phys_material(self, context, self.bl_label)
+        return material_utils.add_phys_material(self, context, self.bl_label)
 
 
 class AddMaterialPhysNoCollide(bpy.types.Operator):
@@ -1488,7 +1452,7 @@ class AddMaterialPhysNoCollide(bpy.types.Operator):
         message = "Adding __physNoCollide"
         self.report({'INFO'}, message)
         cbPrint(message)
-        return utils.add_phys_material(self, context, self.bl_label)
+        return material_utils.add_phys_material(self, context, self.bl_label)
 
 
 #------------------------------------------------------------------------------
