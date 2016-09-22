@@ -16,11 +16,12 @@
 if "bpy" in locals():
     import imp
     imp.reload(utils)
+    imp.reload(material_utils)
     imp.reload(udp)
     imp.reload(exceptions)
 else:
     import bpy
-    from io_bcry_exporter import utils, udp, exceptions
+    from io_bcry_exporter import utils, material_utils, udp, exceptions
 
 from io_bcry_exporter.rc import RCInstance
 from io_bcry_exporter.outpipe import cbPrint
@@ -100,7 +101,7 @@ class CrytekDaeExporter:
                     if slot.material not in materials:
                         node_name = utils.get_node_name(group)
 
-                        node, index, name, physics = utils.get_material_parts(
+                        node, index, name, physics = material_utils.get_material_parts(
                             node_name, slot.material.name)
 
                         # check if material has no position defined
@@ -190,7 +191,7 @@ class CrytekDaeExporter:
             self._convert_images_to_dds(images)
 
     def _export_library_image(self, image):
-        image_path = utils.get_image_path_for_game(image,
+        image_path = material_utils.get_image_path_for_game(image,
                                                    self._config.game_dir)
 
         image_element = self._doc.createElement('image')
@@ -206,11 +207,11 @@ class CrytekDaeExporter:
     def _get_nodes_images_in_export_nodes(self):
         images = []
 
-        nodes = utils.get_type("texture_nodes")
+        nodes = material_utils.get_texture_nodes_for_cycles()
 
         for node in nodes:
             try:
-                if utils.is_valid_image(node.image):
+                if material_utils.is_valid_image(node.image):
                     images.append(node.image)
 
             except AttributeError:
@@ -222,11 +223,11 @@ class CrytekDaeExporter:
 
     def _get_image_textures_in_export_nodes(self):
         images = []
-        textures = utils.get_type('textures')
+        textures = material_utils.get_textures()
 
         for texture in textures:
             try:
-                if utils.is_valid_image(texture.image):
+                if material_utils.is_valid_image(texture.image):
                     images.append(texture.image)
 
             except AttributeError:
@@ -285,7 +286,7 @@ class CrytekDaeExporter:
         current_element.appendChild(effect_node)
 
     def _get_cycles_render_images(self, material, images):
-        cycles_nodes = utils.get_texture_nodes_for_material(material)
+        cycles_nodes = material_utils.get_texture_nodes_for_material(material)
         for cycles_node in cycles_nodes:
             image = cycles_node.image
             if not image:
@@ -301,7 +302,7 @@ class CrytekDaeExporter:
                 images[2] = [image.name, surface, sampler]
 
     def _get_blender_render_images(self, material, images):
-        texture_slots = utils.get_texture_slots_for_material(material)
+        texture_slots = material_utils.get_texture_slots_for_material(material)
         for texture_slot in texture_slots:
             image = texture_slot.texture.image
             if not image:
@@ -372,7 +373,7 @@ class CrytekDaeExporter:
         node = self._doc.createElement(type_)
         color = self._doc.createElement("color")
         color.setAttribute("sid", type_)
-        col = utils.get_material_color(material, type_)
+        col = material_utils.get_material_color(material, type_)
         color_text = self._doc.createTextNode(col)
         color.appendChild(color_text)
         node.appendChild(color)
@@ -391,7 +392,7 @@ class CrytekDaeExporter:
         node = self._doc.createElement(type_)
         float = self._doc.createElement("float")
         float.setAttribute("sid", type_)
-        val = utils.get_material_attribute(material, type_)
+        val = material_utils.get_material_attribute(material, type_)
         value = self._doc.createTextNode(val)
         float.appendChild(value)
         node.appendChild(float)
