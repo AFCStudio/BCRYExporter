@@ -2084,6 +2084,11 @@ class Export(bpy.types.Operator, ExportHelper):
         description="Apply all modifiers for objects before exporting.",
         default=False,
     )
+    custom_normals = BoolProperty(
+        name="Use Custom Normals",
+        description="Use custom normals.",
+        default=False,
+    )
     do_materials = BoolProperty(
         name="Do Materials",
         description="Create MTL files for materials.",
@@ -2148,6 +2153,7 @@ class Export(bpy.types.Operator, ExportHelper):
                 'merge_all_nodes',
                 'export_selected_nodes',
                 'apply_modifiers',
+                'custom_normals',
                 'do_materials',
                 'do_textures',
                 'make_chrparams',
@@ -2210,6 +2216,7 @@ class Export(bpy.types.Operator, ExportHelper):
         box.prop(self, "merge_all_nodes")
         box.prop(self, "export_selected_nodes")
         box.prop(self, "apply_modifiers")
+        box.prop(self, "custom_normals")
 
         box = col.box()
         box.label("Material & Texture", icon="TEXTURE")

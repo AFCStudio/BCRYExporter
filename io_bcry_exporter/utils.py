@@ -200,6 +200,36 @@ def clear_bmesh(object_, layer_state, scene_first_layer):
         object_.layers[0] = False
 
 
+def get_custom_normals(bmesh_, use_edge_angle, split_angle):
+    split_angle = math.degrees(split_angle)
+    float_normals = []
+    
+    for face in bmesh_.faces:
+        if not face.smooth:
+            for vertex in face.verts:
+                float_normals.extend(face.normal.normalized())
+        else:
+            for vertex in face.verts:
+                smooth_normal = face.normal.normalized()
+                for link_face in vertex.link_faces:
+                    if face.index is link_face.index:
+                        continue
+                    if link_face.smooth:
+                        if not use_edge_angle:
+                            smooth_normal += link_face.normal.normalized()
+
+                        elif use_edge_angle:
+                            face_angle = face.normal.normalized().dot(link_face.normal.normalized())
+                            face_angle = min(1.0, max(face_angle, -1.0))
+                            face_angle = math.degrees(math.acos(face_angle))
+                            if face_angle < split_angle:
+                                smooth_normal += link_face.normal.normalized()
+
+                float_normals.extend(smooth_normal.normalized())
+
+    return float_normals
+
+
 def get_normal_array(bmesh_, use_edge_angle, use_edge_sharp, split_angle):
     split_angle = math.degrees(split_angle)
     float_normals = []
