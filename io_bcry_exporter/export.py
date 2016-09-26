@@ -448,20 +448,17 @@ class CrytekDaeExporter:
                 bcPrint('"{}" object is being processed...'.format(object_.name))
 
                 start_time = clock()
-                self._write_positions(object_tris, bmesh_, mesh_node, geometry_name)
+                self._write_positions(bmesh_, mesh_node, geometry_name)
                 bcPrint('Positions have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 start_time = clock()
                 self._write_normals(object_tris, bmesh_, mesh_node, geometry_name)
                 bcPrint('Normals have been writed {:.4f} seconds.'.format(clock() - start_time))
 
-                bpy.ops.object.mode_set(mode='OBJECT')
                 start_time = clock()
-                self._write_uvs(object_tris, mesh_node, geometry_name)
+                self._write_uvs(object_, bmesh_, mesh_node, geometry_name)
                 bcPrint('UVs have been writed {:.4f} seconds.'.format(clock() - start_time))
 
-                bpy.ops.object.mode_set(mode='EDIT')
-                bmesh_ = bmesh.from_edit_mesh(object_tris.data)
                 start_time = clock()
                 self._write_vertex_colors(object_tris, bmesh_, mesh_node, geometry_name)
                 bcPrint(
@@ -487,7 +484,7 @@ class CrytekDaeExporter:
                     '"{}" object has been processed for "{}" node.'.format(
                         object_.name, group.name))
 
-    def _write_positions(self, object_, bmesh_, mesh_node, geometry_name):
+    def _write_positions(self, bmesh_, mesh_node, geometry_name):
         float_positions = []
         for vertex in bmesh_.verts:
             float_positions.extend(vertex.co)
@@ -524,17 +521,17 @@ class CrytekDaeExporter:
         source = utils.write_source(id_, "float", float_normals, "XYZ")
         mesh_node.appendChild(source)
 
-    def _write_uvs(self, object_, mesh_node, geometry_name):
-        uvdata = object_.data.uv_layers
-        if uvdata is None:
-            bcPrint("Your UV map is missing, adding...")
-            bpy.ops.mesh.uv_texture_add()
-        else:
-            bcPrint("UV map has been found.")
+    def _write_uvs(self, object_, bmesh_, mesh_node, geometry_name):
+        uv_layer = bmesh_.loops.layers.uv.active
+        if object_.data.uv_layers.active is None:
+            bcPrint("{} object has no a UV map, creating a default UV...".format(object_.name))
+            uv_layer = bmesh_.loops.layers.uv.new()
 
         float_uvs = []
-        for data_ in object_.data.uv_layers.active.data:
-            float_uvs.extend(data_.uv)
+        
+        for face in bmesh_.faces:
+            for loop in face.loops:
+                float_uvs.extend(loop[uv_layer].uv)
 
         id_ = "{!s}-uvs".format(geometry_name)
         source = utils.write_source(id_, "float", float_uvs, "ST")
@@ -564,8 +561,6 @@ class CrytekDaeExporter:
         mesh_node.appendChild(vertices)
 
     def _write_triangle_list(self, object_, bmesh_, mesh_node, geometry_name):
-        #bcmesh = bcrymesh.BCryMesh(object_, bmesh_)
-
         current_material_index = 0
         for material, materialname in self._get_materials_for_object(
                 object_).items():
