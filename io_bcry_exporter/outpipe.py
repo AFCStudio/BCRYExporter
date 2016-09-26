@@ -28,24 +28,24 @@ class OutPipe():
             print()
 
         if message_type == 'info':
-            print("[Info] CryBlend: {!r}".format(message))
+            print("[Info] BCry: {!r}".format(message))
 
         elif message_type == 'debug':
-            print("[Debug] CryBlend: {!r}".format(message))
+            print("[Debug] BCry: {!r}".format(message))
 
         elif message_type == 'warning':
-            print("[Warning] CryBlend: {!r}".format(message))
+            print("[Warning] BCry: {!r}".format(message))
 
         elif message_type == 'error':
-            print("[Error] CryBlend: {!r}".format(message))
+            print("[Error] BCry: {!r}".format(message))
 
         else:
-            raise exceptions.CryBlendException("No such message type {!r}".
+            raise exceptions.BCryException("No such message type {!r}".
                                                format(message_type))
 
 
 op = OutPipe()
 
 
-def cbPrint(msg, message_type='info', newline=False):
+def bcPrint(msg, message_type='info', newline=False):
     op.pump(msg, message_type, newline)

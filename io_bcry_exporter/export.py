@@ -24,7 +24,7 @@ else:
     from io_bcry_exporter import utils, material_utils, udp, exceptions
 
 from io_bcry_exporter.rc import RCInstance
-from io_bcry_exporter.outpipe import cbPrint
+from io_bcry_exporter.outpipe import bcPrint
 from io_bcry_exporter.utils import join
 
 from bpy_extras.io_utils import ExportHelper
@@ -445,36 +445,36 @@ class CrytekDaeExporter:
                 mesh_node = self._doc.createElement("mesh")
 
                 print()
-                cbPrint('"{}" object is being processed...'.format(object_.name))
+                bcPrint('"{}" object is being processed...'.format(object_.name))
 
                 start_time = clock()
                 self._write_positions(object_tris, bmesh_, mesh_node, geometry_name)
-                cbPrint('Positions have been writed {:.4f} seconds.'.format(clock() - start_time))
+                bcPrint('Positions have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 start_time = clock()
                 self._write_normals(object_tris, bmesh_, mesh_node, geometry_name)
-                cbPrint('Normals have been writed {:.4f} seconds.'.format(clock() - start_time))
+                bcPrint('Normals have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 bpy.ops.object.mode_set(mode='OBJECT')
                 start_time = clock()
                 self._write_uvs(object_tris, mesh_node, geometry_name)
-                cbPrint('UVs have been writed {:.4f} seconds.'.format(clock() - start_time))
+                bcPrint('UVs have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 bpy.ops.object.mode_set(mode='EDIT')
                 bmesh_ = bmesh.from_edit_mesh(object_tris.data)
                 start_time = clock()
                 self._write_vertex_colors(object_tris, bmesh_, mesh_node, geometry_name)
-                cbPrint(
+                bcPrint(
                     'Vertex colors have been writed {:.4f} seconds.'.format(
                         clock() - start_time))
 
                 start_time = clock()
                 self._write_vertices(mesh_node, geometry_name)
-                cbPrint('Vertices have been writed {:.4f} seconds.'.format(clock() - start_time))
+                bcPrint('Vertices have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 start_time = clock()
                 self._write_triangle_list(object_tris, bmesh_, mesh_node, geometry_name)
-                cbPrint('Triangle list have been writed {:.4f} seconds.'.format(clock() - start_time))
+                bcPrint('Triangle list have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 extra = self._create_double_sided_extra("MAYA")
                 mesh_node.appendChild(extra)
@@ -483,7 +483,7 @@ class CrytekDaeExporter:
 
                 utils.clear_bmesh(object_tris, layer_state, scene_layer)
                 bpy.ops.object.delete()
-                cbPrint(
+                bcPrint(
                     '"{}" object has been processed for "{}" node.'.format(
                         object_.name, group.name))
 
@@ -527,10 +527,10 @@ class CrytekDaeExporter:
     def _write_uvs(self, object_, mesh_node, geometry_name):
         uvdata = object_.data.uv_layers
         if uvdata is None:
-            cbPrint("Your UV map is missing, adding...")
+            bcPrint("Your UV map is missing, adding...")
             bpy.ops.mesh.uv_texture_add()
         else:
-            cbPrint("UV map has been found.")
+            bcPrint("UV map has been found.")
 
         float_uvs = []
         for data_ in object_.data.uv_layers.active.data:
@@ -742,7 +742,7 @@ class CrytekDaeExporter:
                         group_name not in bone_list):
                     continue
                 if vertex_group_count == 8:
-                    cbPrint("Too many bone references in {}:{} vertex group"
+                    bcPrint("Too many bone references in {}:{} vertex group"
                             .format(object_.name, group_name))
                     continue
                 group_weights.append(group.weight)
@@ -943,7 +943,7 @@ class CrytekDaeExporter:
         extra = None
         try:
             bonePhys = object_.pose.bones[bone.name]['phys_proxy']
-            cbPrint(bone.name + " physic proxy is " + bonePhys)
+            bcPrint(bone.name + " physic proxy is " + bonePhys)
 
             extra = self._doc.createElement("extra")
             techcry = self._doc.createElement("technique")
