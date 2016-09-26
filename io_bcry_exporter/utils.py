@@ -23,7 +23,7 @@ else:
     from io_bcry_exporter import material_utils, exceptions
 
 
-from io_bcry_exporter.outpipe import cbPrint
+from io_bcry_exporter.outpipe import bcPrint
 from mathutils import Matrix, Vector
 from xml.dom.minidom import Document, parseString
 import bpy
@@ -398,13 +398,13 @@ def trim_path_to(path, trim_to):
     components = path_normalized.split("/")
     for index, component in enumerate(components):
         if component == trim_to:
-            cbPrint("FOUND AN INSTANCE")
+            bcPrint("FOUND AN INSTANCE")
             break
-    cbPrint(index)
+    bcPrint(index)
     components_trimmed = components[index:]
-    cbPrint(components_trimmed)
+    bcPrint(components_trimmed)
     path_trimmed = build_path(*components_trimmed)
-    cbPrint(path_trimmed)
+    bcPrint(path_trimmed)
     return path_trimmed
 
 
@@ -482,7 +482,7 @@ def fix_weights():
         except:
             raise exceptions.BCryException(
                 "Please fix weightless vertices first.")
-    cbPrint("Weights Corrected.")
+    bcPrint("Weights Corrected.")
 
 
 def apply_modifiers(just_selected=False):
@@ -496,7 +496,7 @@ def apply_modifiers(just_selected=False):
                 mod_name = modifier.name
                 bpy.ops.object.modifier_apply(apply_as='DATA', modifier=mod_name)
 
-        cbPrint("Modifiers are applied for {} node.".format(node.name))
+        bcPrint("Modifiers are applied for {} node.".format(node.name))
 
 
 #------------------------------------------------------------------------------
@@ -802,7 +802,7 @@ def get_keyframes(armature):
         del locations
         del rotations
 
-    cbPrint("Keyframes have been appended to lists.")
+    bcPrint("Keyframes have been appended to lists.")
 
     return location_list, rotation_list
 
@@ -818,7 +818,7 @@ def set_keyframes(armature, location_list, rotation_list):
         set_keyframe(armature, frame, location_list, rotation_list)
 
     bpy.context.scene.frame_set(bpy.context.scene.frame_start)
-    cbPrint("Keyframes have been inserted to armature fakebones.")
+    bcPrint("Keyframes have been inserted to armature fakebones.")
 
 
 def set_keyframe(armature, frame, location_list, rotation_list):
@@ -868,7 +868,7 @@ def apply_animation_scale(armature):
         bpy.data.objects[empty.name].constraints[
             'Child Of'].subtarget = pose_bone.name
 
-        cbPrint("Baking animation on " + empty.name + "...")
+        bcPrint("Baking animation on " + empty.name + "...")
         bpy.ops.nla.bake(
             frame_start=scene.frame_start,
             frame_end=scene.frame_end,
@@ -884,7 +884,7 @@ def apply_animation_scale(armature):
     for empty in empties:
         empty.select = True
 
-    cbPrint("Baked Animation successfully on empties.")
+    bcPrint("Baked Animation successfully on empties.")
     deselect_all()
 
     set_active(armature)
@@ -908,7 +908,7 @@ def apply_animation_scale(armature):
 
         pose_bone.bone.select = True
 
-    cbPrint("Baking Animation on skeleton...")
+    bcPrint("Baking Animation on skeleton...")
     bpy.ops.nla.bake(
         frame_start=scene.frame_start,
         frame_end=scene.frame_end,
@@ -923,13 +923,13 @@ def apply_animation_scale(armature):
 
     deselect_all()
 
-    cbPrint("Clearing empty data...")
+    bcPrint("Clearing empty data...")
     for empty in empties:
         empty.select = True
 
     bpy.ops.object.delete()
 
-    cbPrint("Apply Animation was completed.")
+    bcPrint("Apply Animation was completed.")
 
 
 def get_animation_id(group):

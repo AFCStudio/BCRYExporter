@@ -67,7 +67,7 @@ from bpy.props import BoolProperty, EnumProperty, FloatVectorProperty, \
 from bpy.types import Menu, Panel
 from bpy_extras.io_utils import ExportHelper
 from io_bcry_exporter.configuration import Configuration
-from io_bcry_exporter.outpipe import cbPrint
+from io_bcry_exporter.outpipe import bcPrint
 from io_bcry_exporter.desc import list
 from xml.dom.minidom import Document, Element, parse, parseString
 import bpy.utils.previews
@@ -110,7 +110,7 @@ class FindRC(bpy.types.Operator, PathSelectTemplate):
 
     def process(self, filepath):
         Configuration.rc_path = filepath
-        cbPrint("Found RC at {!r}.".format(Configuration.rc_path), 'debug')
+        bcPrint("Found RC at {!r}.".format(Configuration.rc_path), 'debug')
 
     def invoke(self, context, event):
         self.filepath = Configuration.rc_path
@@ -130,7 +130,7 @@ to be able to export your textures as dds files.'''
 
     def process(self, filepath):
         Configuration.texture_rc_path = filepath
-        cbPrint("Found RC at {!r}.".format(
+        bcPrint("Found RC at {!r}.".format(
             Configuration.texture_rc_path),
             'debug')
 
@@ -154,7 +154,7 @@ for textures in .mtl file.'''
             raise exceptions.NoGameDirectorySelected
 
         Configuration.game_dir = filepath
-        cbPrint("Game directory: {!r}.".format(
+        bcPrint("Game directory: {!r}.".format(
             Configuration.game_dir),
             'debug')
 
@@ -553,7 +553,7 @@ class AddBranch(bpy.types.Operator):
 
             message = "Adding Branch"
             self.report({'INFO'}, message)
-            cbPrint(message)
+            bcPrint(message)
 
         return {'FINISHED'}
 
@@ -592,7 +592,7 @@ class AddBranchJoint(bpy.types.Operator):
 
             message = "Adding Branch Joint"
             self.report({'INFO'}, message)
-            cbPrint(message)
+            bcPrint(message)
 
         return {'FINISHED'}
 
@@ -736,7 +736,7 @@ class SetMaterialNames(bpy.types.Operator):
                                 materialOldName,
                                 slot.material.name)
                             self.report({'INFO'}, message)
-                            cbPrint(message)
+                            bcPrint(message)
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -756,7 +756,7 @@ physics, so they get lost.'''
         material_utils.remove_bcry_properties()
         message = "Removed BCry Exporter properties from material names"
         self.report({'INFO'}, message)
-        cbPrint(message)
+        bcPrint(message)
         return {'FINISHED'}
 
 
@@ -801,7 +801,7 @@ class AddMaterial(bpy.types.Operator):
                     _object.data.materials.append(material)
                 else:
                     # ignoring object without group
-                    cbPrint("Object " + _object.name +
+                    bcPrint("Object " + _object.name +
                             " not assigned to any group")
             message = "Assigned material"
         else:
@@ -931,7 +931,7 @@ class EditInverseKinematics(bpy.types.Operator):
 
     def execute(self, context):
         if self.bone is None:
-            cbPrint("Please select a bone in pose mode!")
+            bcPrint("Please select a bone in pose mode!")
             return {'FINISHED'}
 
         self.bone['phys_proxy'] = self.proxy_type
@@ -1019,7 +1019,7 @@ class EditPhysicProxy(bpy.types.Operator):
 
     def execute(self, context):
         if self.object_ is None:
-            cbPrint("Please select a object.")
+            bcPrint("Please select a object.")
             return {'FINISHED'}
 
         udp.edit_udp(
@@ -1114,7 +1114,7 @@ class EditRenderMesh(bpy.types.Operator):
 
     def execute(self, context):
         if self.object_ is None:
-            cbPrint("Please select a object.")
+            bcPrint("Please select a object.")
             return {'FINISHED'}
 
         udp.edit_udp(self.object_, "entity", "entity", self.is_entity)
@@ -1217,7 +1217,7 @@ class EditJointNode(bpy.types.Operator):
 
     def execute(self, context):
         if self.object_ is None:
-            cbPrint("Please select a object.")
+            bcPrint("Please select a object.")
             return {'FINISHED'}
 
         udp.edit_udp(self.object_, "limit", self.limit, self.is_limit)
@@ -1331,7 +1331,7 @@ class EditDeformable(bpy.types.Operator):
 
     def execute(self, context):
         if self.object_ is None:
-            cbPrint("Please select a object.")
+            bcPrint("Please select a object.")
             return {'FINISHED'}
 
         udp.edit_udp(
@@ -1406,7 +1406,7 @@ class AddMaterialPhysDefault(bpy.types.Operator):
     def execute(self, context):
         message = "Adding __physDefault"
         self.report({'INFO'}, message)
-        cbPrint(message)
+        bcPrint(message)
         return material_utils.add_phys_material(self, context, self.bl_label)
 
 
@@ -1418,7 +1418,7 @@ class AddMaterialPhysProxyNoDraw(bpy.types.Operator):
     def execute(self, context):
         message = "Adding __physProxyNoDraw"
         self.report({'INFO'}, message)
-        cbPrint(message)
+        bcPrint(message)
         return material_utils.add_phys_material(self, context, self.bl_label)
 
 
@@ -1430,7 +1430,7 @@ class AddMaterialPhysNone(bpy.types.Operator):
     def execute(self, context):
         message = "Adding __physNone"
         self.report({'INFO'}, message)
-        cbPrint(message)
+        bcPrint(message)
         return material_utils.add_phys_material(self, context, self.bl_label)
 
 
@@ -1451,7 +1451,7 @@ class AddMaterialPhysNoCollide(bpy.types.Operator):
     def execute(self, context):
         message = "Adding __physNoCollide"
         self.report({'INFO'}, message)
-        cbPrint(message)
+        bcPrint(message)
         return material_utils.add_phys_material(self, context, self.bl_label)
 
 
@@ -1481,16 +1481,16 @@ it's mesh before running this.'''
 
         vert_list = [vert for vert in mesh.vertices]
         context.tool_settings.mesh_select_mode = (True, False, False)
-        cbPrint("Locating degenerate faces.")
+        bcPrint("Locating degenerate faces.")
         degenerate_count = 0
 
         for poly in mesh.polygons:
             if poly.area < self.area_epsilon:
-                cbPrint("Found a degenerate face.")
+                bcPrint("Found a degenerate face.")
                 degenerate_count += 1
 
                 for v in poly.vertices:
-                    cbPrint("Selecting face vertices.")
+                    bcPrint("Selecting face vertices.")
                     vert_list[v].select = True
 
         if degenerate_count > 0:
@@ -1523,7 +1523,7 @@ it's mesh before running this.'''
         vert_list = [vert for vert in mesh.vertices]
         context.tool_settings.mesh_select_mode = (True, False, False)
         bpy.ops.object.mode_set(mode='OBJECT')
-        cbPrint("Locating degenerate faces.")
+        bcPrint("Locating degenerate faces.")
         for i in mesh.edges:
             counter = 0
             for polygon in mesh.polygons:
@@ -1531,9 +1531,9 @@ it's mesh before running this.'''
                         and i.vertices[1] in polygon.vertices):
                     counter += 1
             if counter > 2:
-                cbPrint('Found a multi-face line')
+                bcPrint('Found a multi-face line')
                 for v in i.vertices:
-                    cbPrint('Selecting line vertices.')
+                    bcPrint('Selecting line vertices.')
                     vert_list[v].select = True
         bpy.ops.object.mode_set(mode='EDIT')
         return {'FINISHED'}
@@ -1643,7 +1643,7 @@ class AddUVTexture(bpy.types.Operator):
                     bpy.ops.mesh.uv_texture_add()
                     message = "Added UV map to {}".format(object_.name)
                     self.report({'INFO'}, message)
-                    cbPrint(message)
+                    bcPrint(message)
 
         return {'FINISHED'}
 
@@ -2176,7 +2176,7 @@ class Export(bpy.types.Operator, ExportHelper):
             setattr(self, 'game_dir', Configuration.game_dir)
 
     def execute(self, context):
-        cbPrint(Configuration.rc_path, 'debug', True)
+        bcPrint(Configuration.rc_path, 'debug', True)
         try:
             config = Export.Config(config=self)
 
@@ -2190,7 +2190,7 @@ class Export(bpy.types.Operator, ExportHelper):
             self.filepath = '//'
 
         except exceptions.BCryException as exception:
-            cbPrint(exception.what(), 'error')
+            bcPrint(exception.what(), 'error')
             bpy.ops.screen.display_error(
                 'INVOKE_DEFAULT', message=exception.what())
 
@@ -2302,7 +2302,7 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
             setattr(self, 'game_dir', Configuration.game_dir)
 
     def execute(self, context):
-        cbPrint(Configuration.rc_path, 'debug')
+        bcPrint(Configuration.rc_path, 'debug')
         try:
             config = ExportAnimations.Config(config=self)
 
@@ -2317,7 +2317,7 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
             self.filepath = '//'
 
         except exceptions.BCryException as exception:
-            cbPrint(exception.what(), 'error')
+            bcPrint(exception.what(), 'error')
             bpy.ops.screen.display_error(
                 'INVOKE_DEFAULT', message=exception.what())
 

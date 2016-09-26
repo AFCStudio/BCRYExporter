@@ -21,7 +21,7 @@ else:
     from io_bcry_exporter import export, utils, exceptions
 
 from io_bcry_exporter.rc import RCInstance
-from io_bcry_exporter.outpipe import cbPrint
+from io_bcry_exporter.outpipe import bcPrint
 
 from xml.dom.minidom import Document, Element, parse, parseString
 import xml.dom.minidom
@@ -89,9 +89,9 @@ class CrytekDaeAnimationExporter(export.CrytekDaeExporter):
                 bpy.context.scene.frame_end = frame_end
 
                 print('')
-                cbPrint(group.name)
-                cbPrint("Animation is being preparing to process.")
-                cbPrint("Animation frame range are [{} - {}]".format(
+                bcPrint(group.name)
+                bcPrint("Animation is being preparing to process.")
+                bcPrint("Animation frame range are [{} - {}]".format(
                     frame_start, frame_end))
 
                 if node_type == 'i_caf':
@@ -107,7 +107,7 @@ class CrytekDaeAnimationExporter(export.CrytekDaeExporter):
                         utils.remove_fakebones()
                         utils.recover_bone_layers(object_, layers)
 
-                    cbPrint("Animation has been processed.")
+                    bcPrint("Animation has been processed.")
 
         bpy.context.scene.frame_current = initial_frame_active
         bpy.context.scene.frame_start = initial_frame_start

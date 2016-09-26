@@ -15,7 +15,7 @@
 
 
 import bpy
-from io_bcry_exporter.outpipe import cbPrint
+from io_bcry_exporter.outpipe import bcPrint
 from io_bcry_exporter.utils import get_filename
 import os
 import pickle
@@ -69,23 +69,23 @@ class __Configuration:
         return False
 
     def save(self):
-        cbPrint("Saving configuration file.", 'debug')
+        bcPrint("Saving configuration file.", 'debug')
 
         if os.path.isdir(self.__CONFIG_PATH):
             try:
                 with open(self.__CONFIG_FILEPATH, 'wb') as f:
                     pickle.dump(self.__CONFIG, f, -1)
-                    cbPrint("Configuration file saved.")
+                    bcPrint("Configuration file saved.")
 
-                cbPrint('Saved {}'.format(self.__CONFIG_FILEPATH))
+                bcPrint('Saved {}'.format(self.__CONFIG_FILEPATH))
 
             except:
-                cbPrint(
+                bcPrint(
                     "[IO] can not write: {}".format(
                         self.__CONFIG_FILEPATH), 'error')
 
         else:
-            cbPrint("Configuration file path is missing {}".format(
+            bcPrint("Configuration file path is missing {}".format(
                     self.__CONFIG_PATH),
                     'error')
 
@@ -98,9 +98,9 @@ class __Configuration:
             try:
                 with open(self.__CONFIG_FILEPATH, 'rb') as f:
                     new_configuration.update(pickle.load(f))
-                    cbPrint('Configuration file loaded.')
+                    bcPrint('Configuration file loaded.')
             except:
-                cbPrint("[IO] can not read: {}".format(self.__CONFIG_FILEPATH),
+                bcPrint("[IO] can not read: {}".format(self.__CONFIG_FILEPATH),
                         'error')
 
         return new_configuration

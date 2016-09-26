@@ -21,7 +21,7 @@ else:
     import bpy
     from io_bcry_exporter import utils
 
-from io_bcry_exporter.outpipe import cbPrint
+from io_bcry_exporter.outpipe import bcPrint
 import fnmatch
 import os
 import shutil
@@ -62,6 +62,8 @@ class _DAEConverter:
             rc_params = ["/verbose", "/threads=processors", "/refresh"]
             if self.__config.do_materials:
                 rc_params.append("/createmtl=1")
+            if self.__config.vcloth_pre_process:
+                rc_params.append("/wait=0 /forceVCloth")
 
             rc_process = run_rc(self.__config.rc_path, dae_path, rc_params)
 
@@ -297,12 +299,12 @@ class _TIFConverter:
             tiff_image_path = self.__get_temp_tiff_image_path(image)
 
             tiff_image_for_rc = utils.get_absolute_path_for_rc(tiff_image_path)
-            cbPrint(tiff_image_for_rc)
+            bcPrint(tiff_image_for_rc)
 
             try:
                 self.__create_normal_texture()
             except:
-                cbPrint("Failed to invert green channel")
+                bcPrint("Failed to invert green channel")
 
             rc_process = run_rc(self.__config.texture_rc_path,
                                 tiff_image_for_rc,
@@ -314,7 +316,7 @@ class _TIFConverter:
                 if ("_ddn" in image.name):
                     image.save()
             except:
-                cbPrint("Failed to invert green channel")
+                bcPrint("Failed to invert green channel")
 
             rc_process.wait()
 
@@ -354,10 +356,10 @@ class _TIFConverter:
     def __get_temp_tiff_image_path(self, image):
         # check if the image already is a .tif
         image_extension = utils.get_extension_from_path(image.filepath)
-        cbPrint(image_extension)
+        bcPrint(image_extension)
 
         if ".tif" == image_extension:
-            cbPrint(
+            bcPrint(
                 "Image {!r} is already a tif, not converting".format(
                     image.name), 'debug')
             return image.filepath
@@ -388,7 +390,7 @@ class _TIFConverter:
 
     def __save_tiffs(self):
         for tmp_image, dest_image in self.__tmp_images.items():
-            cbPrint("Moving tmp image: {!r} to {!r}".format(tmp_image,
+            bcPrint("Moving tmp image: {!r} to {!r}".format(tmp_image,
                                                             dest_image),
                     'debug')
             shutil.move(tmp_image, dest_image)
@@ -396,7 +398,7 @@ class _TIFConverter:
     def __remove_tmp_files(self):
         for tmp_image in self.__tmp_images:
             try:
-                cbPrint("Removing tmp image: {!r}".format(tmp_image), 'debug')
+                bcPrint("Removing tmp image: {!r}".format(tmp_image), 'debug')
                 os.remove(tmp_image)
             except FileNotFoundError:
                 pass
@@ -406,7 +408,7 @@ class _TIFConverter:
 
 
 def run_rc(rc_path, files_to_process, params=None):
-    cbPrint("RC Path: {}".format(os.path.abspath(rc_path)), newline=True)
+    bcPrint("RC Path: {}".format(os.path.abspath(rc_path)), newline=True)
     process_params = [rc_path]
 
     if isinstance(files_to_process, list):
@@ -416,8 +418,8 @@ def run_rc(rc_path, files_to_process, params=None):
 
     process_params.extend(params)
 
-    cbPrint("RC Parameters: {}".format(params))
-    cbPrint("Processing File: {}".format(files_to_process))
+    bcPrint("RC Parameters: {}".format(params))
+    bcPrint("Processing File: {}".format(files_to_process))
 
     try:
         run_object = subprocess.Popen(process_params)
