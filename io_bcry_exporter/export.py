@@ -544,24 +544,14 @@ class CrytekDaeExporter:
         float_colors = []
         alpha_found = False
 
-        if object_.data.tessface_vertex_colors:
-            color_layers = object_.data.tessface_vertex_colors
-            for color_layer in color_layers:
-                for fi, face in enumerate(color_layer.data):
-                    colors = [face.color1[:], face.color2[:], face.color3[:]]
-                    if len(bmesh_.faces[fi].verts) == 4:
-                        colors.append(face.color4[:])
-
-                    for color in colors:
-                        if color_layer.name.lower() == "alpha":
-                            alpha_found = True
-                            alpha = (color[0] + color[1] + color[2]) / 3
-                            float_colors.extend([1, 1, 1, alpha])
-                        else:
-                            float_colors.extend(color)
+        color_layer = bmesh_.loops.layers.color.active
+        if object_.data.vertex_colors:
+            for vert in bmesh_.verts:
+                loop = vert.link_loops[0]
+                float_colors.extend(loop[color_layer])
 
         if float_colors:
-            id_ = "{!s}-colors".format(geometry_name)
+            id_ = "{!s}-vcol".format(geometry_name)
             params = ("RGBA" if alpha_found else "RGB")
             source = utils.write_source(id_, "float", float_colors, params)
             mesh_node.appendChild(source)
@@ -626,7 +616,7 @@ class CrytekDaeExporter:
                     utils.write_input(
                         geometry_name,
                         3,
-                        'colors',
+                        'vcol',
                         'COLOR'))
 
             for input in inputs:
@@ -642,7 +632,7 @@ class CrytekDaeExporter:
     def _write_vertex_data(self, vert, normal, texcoord, vertex_colors):
         if vertex_colors:
             return "{:d} {:d} {:d} {:d} ".format(
-                vert, normal, texcoord, texcoord)
+                vert, normal, texcoord, vert)
         else:
             return "{:d} {:d} {:d} ".format(vert, normal, texcoord)
 
