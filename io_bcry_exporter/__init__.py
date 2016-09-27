@@ -2151,6 +2151,11 @@ class Export(bpy.types.Operator, ExportHelper):
         description="Use custom normals.",
         default=False,
     )
+    vcloth_pre_process = BoolProperty(
+        name="VCloth Pre-Process",
+        description="Export skin as simulating mesh for VCloth V2.",
+        default=False,
+    )
     do_materials = BoolProperty(
         name="Do Materials",
         description="Create MTL files for materials.",
@@ -2216,6 +2221,7 @@ class Export(bpy.types.Operator, ExportHelper):
                 'export_selected_nodes',
                 'apply_modifiers',
                 'custom_normals',
+                'vcloth_pre_process',
                 'do_materials',
                 'do_textures',
                 'make_chrparams',
@@ -2279,6 +2285,7 @@ class Export(bpy.types.Operator, ExportHelper):
         box.prop(self, "export_selected_nodes")
         box.prop(self, "apply_modifiers")
         box.prop(self, "custom_normals")
+        box.prop(self, "vcloth_pre_process")
 
         box = col.box()
         box.label("Material & Texture", icon="TEXTURE")

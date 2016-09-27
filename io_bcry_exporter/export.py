@@ -1048,6 +1048,11 @@ class CrytekDaeExporter:
 
             prop = self._doc.createTextNode("UseCustomNormals")
             properties.appendChild(prop)
+
+            if self._config.vcloth_pre_process and node_type == 'skin':
+                prop = self._doc.createTextNode("VClothPreProcess")
+                properties.appendChild(prop)
+
             prop = self._doc.createTextNode("CustomExportPath=")
             properties.appendChild(prop)
         else:
