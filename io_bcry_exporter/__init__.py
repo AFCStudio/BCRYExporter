@@ -1878,6 +1878,68 @@ class AddLocatorLocomotion(bpy.types.Operator):
         copy_location.subtarget = 'hips'
 
         return {'FINISHED'}
+
+
+class AddPrimitiveMesh(bpy.types.Operator):
+    '''Add primitive mesh for active skeleton.'''
+    bl_label = "Add Primitive Mesh"
+    bl_idname = "armature.add_primitive_mesh"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    root_bone = StringProperty(name="Root Bone", default="Root",
+                        description=desc.list['locator_root'])
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+
+        col.prop(self, "root_bone")
+        col.separator()
+
+
+    def invoke(self, context, event):
+        return self.execute(context)
+
+    def __init__(self):
+        armature = bpy.context.active_object
+        if not armature or armature.type != 'ARMATURE':
+            self.report({'ERROR'}, "Please select a armature object!")
+            return {'FINISHED'}
+
+        root_bone = utils.get_root_bone(armature)
+        self.root_bone = root_bone.name
+
+    def execute(self, context):
+        armature = bpy.context.active_object
+        if not armature or armature.type != 'ARMATURE':
+            self.report({'ERROR'}, "Please select a armature object!")
+            return {'FINISHED'}
+
+        bpy.ops.mesh.primitive_plane_add()
+        triangle = bpy.context.active_object
+        
+        bm = bmesh.new()
+        bm.verts.new((1.0, 1.0, 0.0))
+        bm.verts.new((-1.0, -1.0, 0.0))
+        bm.verts.new((1.0, -1.0, 0.0))
+        
+        bm.faces.new(bm.verts)
+        bm.to_mesh(triangle.data)
+        triangle.name = 'Triangle'
+        triangle.data.name = 'Triangle'
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all()
+        bpy.ops.object.vertex_group_assign_new()
+        triangle.vertex_groups[0].name = self.root_bone
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+        bpy.ops.object.modifier_add(type='ARMATURE')
+        triangle.modifiers['Armature'].object = armature
+        
+        triangle.parent = armature
+
+        return {'FINISHED'}
         
 
 class AddBoneGeometry(bpy.types.Operator):
@@ -2464,6 +2526,7 @@ class BoneUtilitiesPanel(View3DPanel, Panel):
         col.separator()
         col.operator("armature.add_root_bone", text="Add Root Bone")
         col.operator("armature.add_locator_locomotion", text="Add Locator Locomotion")
+        col.operator("armature.add_primitive_mesh", text="Add Primitive Mesh")
         col.operator(
             "ops.apply_animation_scaling",
             text="Apply Animation Scaling")
@@ -2690,6 +2753,10 @@ class BoneUtilitiesMenu(bpy.types.Menu):
         layout.operator(
             "armature.add_locator_locomotion",
             text="Add Locator Locomotion",
+            icon="BONE_DATA")
+        layout.operator(
+            "armature.add_primitive_mesh",
+            text="Add Primitive Mesh",
             icon="BONE_DATA")
         layout.operator(
             "ops.apply_animation_scaling",
@@ -2941,6 +3008,7 @@ def get_classes_to_register():
         RemoveMaterialNames,
         AddRootBone,
         AddLocatorLocomotion,
+        AddPrimitiveMesh,
         ApplyTransforms,
         AddProxy,
         AddBreakableJoint,
