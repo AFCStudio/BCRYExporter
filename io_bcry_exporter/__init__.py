@@ -819,6 +819,82 @@ class AddMaterial(bpy.types.Operator):
 
         return context.window_manager.invoke_props_dialog(self)
 
+
+class GenerateMaterials(bpy.types.Operator, ExportHelper):
+    '''Generate material files for CryEngine.'''
+    bl_label = "Generate Maetrials"
+    bl_idname = "material.generate_materials"
+    filename_ext = ".mtl"
+    filter_glob = StringProperty(default="*.mtl", options={'HIDDEN'})
+
+    export_selected_nodes = BoolProperty(
+        name="Just Selected Nodes",
+        description="Generate material files just for selected nodes.",
+        default=False,
+    )
+    convert_textures = BoolProperty(
+        name="Convert Textures",
+        description="Converts source textures to DDS while generating materials.",
+        default=False,
+    )
+    
+    merge_all_nodes = True
+    make_layer = False
+
+    class Config:
+
+        def __init__(self, config):
+            attributes = (
+                'filepath',
+                'export_selected_nodes',
+                'convert_textures'
+            )
+
+            for attribute in attributes:
+                setattr(self, attribute, getattr(config, attribute))
+
+            setattr(self, 'bcry_version', VERSION)
+            setattr(self, 'rc_path', Configuration.rc_path)
+            setattr(self, 'texture_rc_path', Configuration.texture_rc_path)
+            setattr(self, 'game_dir', Configuration.game_dir)
+
+    def execute(self, context):
+        bcPrint(Configuration.rc_path, 'debug')
+        try:
+            config = GenerateMaterials.Config(config=self)
+        
+            material_utils.generate_mtl_files(config)
+
+            self.filepath = '//'
+
+        except exceptions.BCryException as exception:
+            bcPrint(exception.what(), 'error')
+            bpy.ops.screen.display_error(
+                'INVOKE_DEFAULT', message=exception.what())
+
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        if not Configuration.configured():
+            self.report({'ERROR'}, "No RC found.")
+            return {'FINISHED'}
+
+        if not utils.get_export_nodes():
+            self.report({'ERROR'}, "No export nodes found.")
+            return {'FINISHED'}
+
+        return ExportHelper.invoke(self, context, event)
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+
+        box = col.box()
+        box.label("Generate Materials", icon="MATERIAL")
+        box.prop(self, "export_selected_nodes")
+        box.prop(self, "convert_textures")
+
+
 #------------------------------------------------------------------------------
 # (UDP) Inverse Kinematics:
 #------------------------------------------------------------------------------
@@ -2156,13 +2232,13 @@ class Export(bpy.types.Operator, ExportHelper):
         description="Export skin as simulating mesh for VCloth V2.",
         default=False,
     )
-    do_materials = BoolProperty(
-        name="Do Materials",
-        description="Create MTL files for materials.",
+    generate_materials = BoolProperty(
+        name="Generate Materials",
+        description="Generate material files for CryEngine.",
         default=False,
     )
-    do_textures = BoolProperty(
-        name="Do Textures",
+    convert_textures = BoolProperty(
+        name="Convert Textures",
         description="Converts source textures to DDS while exporting materials.",
         default=False,
     )
@@ -2222,8 +2298,8 @@ class Export(bpy.types.Operator, ExportHelper):
                 'apply_modifiers',
                 'custom_normals',
                 'vcloth_pre_process',
-                'do_materials',
-                'do_textures',
+                'generate_materials',
+                'convert_textures',
                 'make_chrparams',
                 'make_cdf',
                 'fix_weights',
@@ -2289,8 +2365,8 @@ class Export(bpy.types.Operator, ExportHelper):
 
         box = col.box()
         box.label("Material & Texture", icon="TEXTURE")
-        box.prop(self, "do_materials")
-        box.prop(self, "do_textures")
+        box.prop(self, "generate_materials")
+        box.prop(self, "convert_textures")
 
         box = col.box()
         box.label("Character", icon="ARMATURE_DATA")
@@ -2345,7 +2421,7 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
         default=False,
     )
     merge_all_nodes = True
-    do_materials = False
+    generate_materials = False
     make_layer = False
 
     class Config:
@@ -2354,7 +2430,7 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
             attributes = (
                 'filepath',
                 'merge_all_nodes',
-                'do_materials',
+                'generate_materials',
                 'export_for_lumberyard',
                 'make_layer',
                 'disable_rc',
@@ -2598,6 +2674,9 @@ class MaterialUtilitiesPanel(View3DPanel, Panel):
         col.operator(
             "material.remove_material_names",
             text="Undo Material Convention")
+        col.separator()
+        col.operator("material.generate_materials",
+            text="Generate Materials")
 
 
 class CustomPropertiesPanel(View3DPanel, Panel):
@@ -2857,6 +2936,11 @@ class MaterialUtilitiesMenu(bpy.types.Menu):
             "material.remove_material_names",
             text="Undo Material Convention",
             icon="MATERIAL")
+        layout.separator()
+        layout.operator(
+            "material.generate_materials",
+            text="Generate Materials",
+            icon="MATERIAL")
 
 
 class CustomPropertiesMenu(bpy.types.Menu):
@@ -3013,6 +3097,7 @@ def get_classes_to_register():
         AddMaterial,
         SetMaterialNames,
         RemoveMaterialNames,
+        GenerateMaterials,
         AddRootBone,
         AddLocatorLocomotion,
         AddPrimitiveMesh,

@@ -47,13 +47,6 @@ to_degrees = 180.0 / math.pi
 # Conversions:
 #------------------------------------------------------------------------------
 
-def color_to_string(color, a):
-    if type(color) in (float, int):
-        return "{:f} {:f} {:f} {:f}".format(color, color, color, a)
-    elif type(color).__name__ == "Color":
-        return "{:f} {:f} {:f} {:f}".format(color.r, color.g, color.b, a)
-
-
 def frame_to_time(frame):
     fps_base = bpy.context.scene.render.fps_base
     fps = bpy.context.scene.render.fps
@@ -412,29 +405,31 @@ def trim_path_to(path, trim_to):
 # File Clean-Up:
 #------------------------------------------------------------------------------
 
-def clean_file():
-    for texture in material_utils.get_textures():
-        try:
-            texture.image.name = replace_invalid_rc_characters(
-                texture.image.name)
-        except AttributeError:
-            pass
-    for material in material_utils.get_materials():
-        material.name = replace_invalid_rc_characters(material.name)
-    for node in get_type("objects"):
-        node.name = replace_invalid_rc_characters(node.name)
-        try:
-            node.data.name = replace_invalid_rc_characters(node.data.name)
-        except AttributeError:
-            pass
-        if node.type == "ARMATURE":
-            for bone in node.data.bones:
-                bone.name = replace_invalid_rc_characters(bone.name)
-    for node in get_export_nodes():
+def clean_file(just_selected=False):
+    for node in get_export_nodes(just_selected):
         node_name = get_node_name(node)
         nodetype = get_node_type(node)
         node_name = replace_invalid_rc_characters(node_name)
         node.name = "{}.{}".format(node_name, nodetype)
+        
+        for object_ in node.objects:
+            object_.name = replace_invalid_rc_characters(object_.name)
+            try:
+                object_.data.name = replace_invalid_rc_characters(object_.data.name)
+            except AttributeError:
+                pass
+            if object_.type == "ARMATURE":
+                for bone in object_.data.bones:
+                    bone.name = replace_invalid_rc_characters(bone.name)
+        
+        for material in material_utils.get_materials(just_selected):
+            material.name = replace_invalid_rc_characters(material.name)
+            
+            for image in material_utils.get_textures(material):
+                try:
+                    image.name = replace_invalid_rc_characters(image.name)
+                except AttributeError:
+                    pass
 
 
 def replace_invalid_rc_characters(string):
@@ -1213,14 +1208,26 @@ def generate_file(filepath, contents, overwrite=False):
         file.close()
 
 
-def generate_xml(filepath, contents, overwrite=False):
+def generate_xml(filepath, contents, overwrite=False, ind=4):
     if not os.path.exists(filepath) or overwrite:
         if isinstance(contents, str):
             script = parseString(contents)
         else:
             script = contents
-        contents = script.toprettyxml(indent="    ")
+        contents = script.toprettyxml(indent=' ' * ind)
         generate_file(filepath, contents, overwrite)
+
+
+def clear_xml_header(filepath):
+    lines = open(filepath, 'r').readlines()
+    if lines[0].find("<?xml version") == -1:
+        return filepath
+
+    lines = lines[1:]
+    file = open(filepath, 'w')
+    for line in lines:
+        file.write(line)
+    file.close()
 
 
 def remove_file(filepath):

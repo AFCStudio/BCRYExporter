@@ -60,8 +60,6 @@ class _DAEConverter:
 
         if not self.__config.disable_rc:
             rc_params = ["/verbose", "/threads=processors", "/refresh"]
-            if self.__config.do_materials:
-                rc_params.append("/createmtl=1")
             if self.__config.vcloth_pre_process:
                 rc_params.append("/wait=0 /forceVCloth")
 
@@ -71,13 +69,6 @@ class _DAEConverter:
                 rc_process.wait()
                 self.__recompile(dae_path)
                 self.__rename_anm_files(dae_path)
-
-            if self.__config.do_materials:
-                mtl_fix_thread = threading.Thread(
-                    target=self.__fix_normalmap_in_mtls,
-                    args=(rc_process, filepath)
-                )
-                mtl_fix_thread.start()
 
         if self.__config.make_layer:
             lyr_contents = self.__make_layer()
@@ -129,19 +120,6 @@ class _DAEConverter:
 
                     os.rename(src_name, dest_name)
 
-    def __fix_normalmap_in_mtls(self, rc_process, dae_file):
-        SUCCESS = 0
-
-        return_code = rc_process.wait()
-
-        if return_code == SUCCESS:
-            export_directory = os.path.dirname(dae_file)
-
-            mtl_files = self.__get_mtl_files_in_directory(export_directory)
-
-            for mtl_file_name in mtl_files:
-                self.__fix_normalmap_in_mtl(mtl_file_name)
-
     def __get_mtl_files_in_directory(self, directory):
         MTL_MATCH_STRING = "*.{!s}".format("mtl")
 
@@ -152,25 +130,6 @@ class _DAEConverter:
                 mtl_files.append(filepath)
 
         return mtl_files
-
-    def __fix_normalmap_in_mtl(self, mtl_file_name):
-        TMP_FILE_SUFFIX = ".tmp"
-        BAD_TAG_NAME = "<Texture Map=\"NormalMap\" File=\""
-        GOOD_TAG_NAME = "<Texture Map=\"Bumpmap\" File=\""
-
-        tmp_mtl_file_name = mtl_file_name + TMP_FILE_SUFFIX
-        mtl_old_file = open(mtl_file_name, "r")
-        mtl_new_file = open(tmp_mtl_file_name, "w")
-
-        for line in mtl_old_file:
-            line = line.replace(BAD_TAG_NAME, GOOD_TAG_NAME)
-            mtl_new_file.write(line)
-
-        mtl_old_file.close()
-        mtl_new_file.close()
-
-        os.remove(mtl_file_name)
-        os.rename(tmp_mtl_file_name, mtl_file_name)
 
     def __make_layer(self):
         layer_doc = Document()

@@ -15,68 +15,262 @@
 if "bpy" in locals():
     import imp
     imp.reload(utils)
+    imp.reload(exceptions)
 else:
     import bpy
-    from io_bcry_exporter import utils
-from bpy.props import *
-from bpy_extras.io_utils import ExportHelper
+    from io_bcry_exporter import utils, exceptions
+
+from io_bcry_exporter.rc import RCInstance
+from io_bcry_exporter.outpipe import bcPrint
+from collections import OrderedDict
+from xml.dom.minidom import Document, Element, parse, parseString
 import bpy
-import bpy.ops
-import bpy_extras
 import re
 import math
 import os
+import xml.dom.minidom
 
 
 #------------------------------------------------------------------------------
 # Generate Materials:
 #------------------------------------------------------------------------------
 
-def generate_mtl_file():
-    return None
+def generate_mtl_files(_config, materials=None):
+    print()
+    if materials == None:
+        materials = get_materials(_config.export_selected_nodes)
+
+    for node in get_material_groups(materials):
+        _doc = Document()
+        parent_material = _doc.createElement('Material')
+        parent_material.setAttribute("MtlFlags", "524544")
+        parent_material.setAttribute("vertModifType", "0")
+        sub_material = _doc.createElement('SubMaterials')
+        parent_material.appendChild(sub_material)
+        set_public_params(_doc, None, parent_material)
+
+        for material, material_name in materials.items():
+            if material_name.split('__')[0] != node:
+                continue
+
+            material_node = _doc.createElement('Material')
+
+            set_material_attributes(material, material_name, material_node)
+            add_textures(_doc, material, material_node, _config)
+            set_public_params(_doc, material, material_node)
+
+            sub_material.appendChild(material_node)
+
+        _doc.appendChild(parent_material)
+
+        filename = "{!s}.mtl".format(node)
+        filepath = os.path.join(os.path.dirname(_config.filepath), filename)
+        utils.generate_xml(filepath, _doc, True, 1)
+        utils.clear_xml_header(filepath)
+
+        bcPrint("'{}' material file has been generated.".format(filename))
+
+
+def get_material_groups(materials):
+    material_groups = []
+
+    for material, material_name in materials.items():
+        group_name = material_name.split('__')[0]
+
+        if not (group_name in material_groups):
+            material_groups.append(group_name)
+
+    return material_groups
+
+
+def get_materials(just_selected=False):
+    materials = OrderedDict()
+    material_counter = {}
+
+    for group in utils.get_mesh_export_nodes(just_selected):
+        material_counter[group.name] = 0
+        for object in group.objects:
+            for slot in object.material_slots:
+                if slot.material is None:
+                    continue
+
+                if slot.material not in materials:
+                    node_name = utils.get_node_name(group)
+
+                    node, index, name, physics = get_material_parts(
+                        node_name, slot.material.name)
+
+                    # check if material has no position defined
+                    if index == 0:
+                        material_counter[group.name] += 1
+                        index = material_counter[group.name]
+
+                    materials[slot.material] = "{}__{:02d}__{}__{}".format(
+                        node, index, name, physics)
+
+    return materials
+
+
+def set_material_attributes(material, material_name, material_node):
+    material_node.setAttribute("Name", get_material_name(material_name))
+    material_node.setAttribute("MtlFlags", "524416")
+    
+    shader = "Illum"
+    if "physProxyNoDraw" == get_material_physic(material_name):
+        shader = "Nodraw"
+    material_node.setAttribute("Shader", shader)
+    material_node.setAttribute("GenMask", "60400000")
+    material_node.setAttribute("StringGenMask", "%NORMAL_MAP%SPECULAR_MAP%SUBSURFACE_SCATTERING")
+    material_node.setAttribute("SurfaceType", "")
+    material_node.setAttribute("MatTemplate", "")
+
+    material_node.setAttribute("Diffuse", color_to_xml_string(material.diffuse_color))
+    material_node.setAttribute("Specular", color_to_xml_string(material.specular_color))
+    material_node.setAttribute("Opacity", str(material.alpha))
+    material_node.setAttribute("Shininess", str(material.specular_hardness))
+
+    material_node.setAttribute("vertModifType", "0")
+    material_node.setAttribute("LayerAct", "1")
+
+    if material.emit:
+        emit_color = "1,1,1,{}".format(str(int(material.emit * 100)))
+        material_node.setAttribute("Emittance", emit_color)
+
+
+def set_public_params(_doc, material, material_node):
+    public_params = _doc.createElement('PublicParams')
+    public_params.setAttribute("EmittanceMapGamma", "1")
+    public_params.setAttribute("SSSIndex", "0")
+    public_params.setAttribute("IndirectColor", "0.25, 0.25, 0.25")
+
+    material_node.appendChild(public_params)
+
+
+def add_textures(_doc, material, material_node, _config):
+    textures_node = _doc.createElement("Textures")
+
+    diffuse = get_diffuse_texture(material)
+    specular = get_specular_texture(material)
+    normal = get_normal_texture(material)
+
+    if diffuse:
+        texture_node = _doc.createElement('Texture')
+        texture_node.setAttribute("Map", "Diffuse")
+        path = get_image_path_for_game(diffuse, _config.game_dir)
+        texture_node.setAttribute("File", path)
+        textures_node.appendChild(texture_node)
+    else:
+        texture_node = _doc.createElement('Texture')
+        texture_node.setAttribute("Map", "Diffuse")
+        path = ""
+        texture_node.setAttribute("File", path)
+        textures_node.appendChild(texture_node)
+    if specular:
+        texture_node = _doc.createElement('Texture')
+        texture_node.setAttribute("Map", "Specular")
+        path = get_image_path_for_game(specular, _config.game_dir)
+        texture_node.setAttribute("File", path)
+        textures_node.appendChild(texture_node)
+    if normal:
+        texture_node = _doc.createElement('Texture')
+        texture_node.setAttribute("Map", "Normal")
+        path = get_image_path_for_game(normal, _config.game_dir)
+        texture_node.setAttribute("File", path)
+        textures_node.appendChild(texture_node)
+
+    if _config.convert_textures:
+        convert_image_to_dds([diffuse, specular, normal], _config)
+
+    material_node.appendChild(textures_node)
+
+
+#------------------------------------------------------------------------------
+# Convert DDS:
+#------------------------------------------------------------------------------
+
+def convert_image_to_dds(images, _config):
+    converter = RCInstance(_config)
+    converter.convert_tif(images)
 
 
 #------------------------------------------------------------------------------
 # Collections:
 #------------------------------------------------------------------------------
 
-def get_materials():
-    items = []
-    allowed = {"MESH"}
-    for object_ in utils.get_type("objects"):
-        if object_.type in allowed:
-            for material_slot in object_.material_slots:
-                items.append(material_slot.material)
+def get_textures(material):
+    images = []
 
-    return items
+    images.append(get_diffuse_texture(material))
+    images.append(get_specular_texture(material))
+    images.append(get_normal_texture(material))
 
+    return images
 
-def get_texture_nodes_for_cycles():
-    cycles_nodes = []
-
-    for material in get_materials():
-        if material.use_nodes:
+def get_diffuse_texture(material):
+    image = None
+    try:
+        if bpy.context.scene.render.engine == 'CYCLES':
             for node in material.node_tree.nodes:
-                if is_valid_cycles_texture_node(node):
-                    cycles_nodes.append(node)
+                if node.type == 'TEX_IMAGE':
+                    if node.name in ['Image Texture', 'Diffuse']:
+                        image = node.image
+                        if is_valid_image(image):
+                            return image
+        else:
+            for slot in material.texture_slots:
+                if slot.texture.type == 'IMAGE':
+                    if slot.use_map_color_diffuse:
+                        image = slot.texture.image
+                        if is_valid_image(image):
+                            return image
+    except:
+        pass
 
-    return cycles_nodes
+    return None
 
+def get_specular_texture(material):
+    image = None
+    try:
+        if bpy.context.scene.render.engine == 'CYCLES':
+            for node in material.node_tree.nodes:
+                if node.type == 'TEX_IMAGE':
+                    if node.name == 'Specular':
+                        image = node.image
+                        if is_valid_image(image):
+                            return image
+        else:
+            for slot in material.texture_slots:
+                if slot.texture.type == 'IMAGE':
+                    if slot.use_map_color_spec or slot.use_map_specular:
+                        image = slot.texture.image
+                        if is_valid_image(image):
+                            return image
+    except:
+        pass
 
-def get_texture_slots():
-    items = []
-    for material in get_materials():
-        items.extend(get_texture_slots_for_material(material))
+    return None
 
-    return items
+def get_normal_texture(material):
+    image = None
+    try:
+        if bpy.context.scene.render.engine == 'CYCLES':
+            for node in material.node_tree.nodes:
+                if node.type == 'TEX_IMAGE':
+                    if node.name == 'Normal':
+                        image = node.image
+                        if is_valid_image(image):
+                            return image
+        else:
+            for slot in material.texture_slots:
+                if slot.texture.type == 'IMAGE':
+                    if slot.use_map_color_normal:
+                        image = slot.texture.image
+                        if is_valid_image(image):
+                            return image
+    except:
+        pass
 
-
-def get_textures():
-    items = []
-    for texture_slot in get_texture_slots():
-        items.append(texture_slot.texture)
-
-    return items
+    return None
 
 
 #------------------------------------------------------------------------------
@@ -88,6 +282,13 @@ def color_to_string(color, a):
         return "{:f} {:f} {:f} {:f}".format(color, color, color, a)
     elif type(color).__name__ == "Color":
         return "{:f} {:f} {:f} {:f}".format(color.r, color.g, color.b, a)
+
+
+def color_to_xml_string(color):
+    if type(color) in (float, int):
+        return "{:f},{:f},{:f}".format(color, color, color)
+    elif type(color).__name__ == "Color":
+        return "{:f},{:f},{:f}".format(color.r, color.g, color.b)
 
 
 #------------------------------------------------------------------------------
@@ -225,14 +426,37 @@ def is_bcry_material(material_name):
     else:
         return False
 
-def add_phys_material(self, context, physName):
-    if not physName.startswith("__"):
-        physName = "__" + physName
+
+def is_bcry_material_with_numbers(material_name):
+    if re.search("[0-9]+__.*", material_name):
+        return True
+    else:
+        return False
+
+
+def get_material_name(material_name):
+    try:
+        return material_name.split('__')[2]
+    except:
+        raise exceptions.BCryException("Material name is not convenient for BCry!")
+        
+
+def get_material_physic(material_name):
+    index = material_name.find("__phys")
+    if index != -1:
+        return material_name[index + 2:]
+
+    return "physDefault"
+
+
+def add_phys_material(self, context, phys_name):
+    if not phys_name.startswith("__"):
+        phys_name = "__" + phys_name
 
     me = bpy.context.active_object
     if me.active_material:
         me.active_material.name = replace_phys_material(
-            me.active_material.name, physName)
+            me.active_material.name, phys_name)
 
     return {'FINISHED'}
 
@@ -248,77 +472,11 @@ def replace_phys_material(material_name, phys):
 # Textures:
 #------------------------------------------------------------------------------
 
-def get_texture_nodes_for_material(material):
-    cycles_nodes = []
-
-    if material.use_nodes:
-        for node in material.node_tree.nodes:
-            if is_valid_cycles_texture_node(node):
-                cycles_nodes.append(node)
-
-    return cycles_nodes
-
-
-def get_texture_slots_for_material(material):
-    texture_slots = []
-    for texture_slot in material.texture_slots:
-        if texture_slot and texture_slot.texture.type == 'IMAGE':
-            texture_slots.append(texture_slot)
-
-    validate_texture_slots(texture_slots)
-
-    return texture_slots
-
-
-def validate_texture_slots(texture_slots):
-    texture_types = count_texture_types(texture_slots)
-    raise_exception_if_textures_have_same_type(texture_types)
-
-
-def count_texture_types(texture_slots):
-    texture_types = {
-        'DIFFUSE': 0,
-        'SPECULAR': 0,
-        'NORMAL MAP': 0
-    }
-
-    for texture_slot in texture_slots:
-        if texture_slot.use_map_color_diffuse:
-            texture_types['DIFFUSE'] += 1
-        if texture_slot.use_map_color_spec:
-            texture_types['SPECULAR'] += 1
-        if texture_slot.use_map_normal:
-            texture_types['NORMAL MAP'] += 1
-
-    return texture_types
-
-
-def raise_exception_if_textures_have_same_type(texture_types):
-    ERROR_TEMPLATE = "There is more than one texture of type {!r}."
-    error_messages = []
-
-    for type_name, type_count in texture_types.items():
-        if type_count > 1:
-            error_messages.append(ERROR_TEMPLATE.format(type_name.lower()))
-
-    if error_messages:
-        raise exceptions.BCryException(
-            "\n".join(error_messages) +
-            "\n" +
-            "Please correct that and try again.")
-
-
 def is_valid_image(image):
-    return image.has_data and image.filepath
-
-
-def is_valid_cycles_texture_node(node):
-    ALLOWED_NODE_NAMES = ('Image Texture', 'Specular', 'Normal')
-    if node.type == 'TEX_IMAGE' and node.name in ALLOWED_NODE_NAMES:
-        if node.image:
-            return True
-
-    return False
+    try:
+        return image.has_data and image.filepath
+    except:
+        return False
 
 
 def get_image_path_for_game(image, game_dir):
