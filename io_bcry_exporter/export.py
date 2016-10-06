@@ -180,8 +180,7 @@ class CrytekDaeExporter:
         parent_element.appendChild(libgeo)
         for group in utils.get_mesh_export_nodes(self._config.export_selected_nodes):
             for object_ in group.objects:
-                object_tris = utils.duplicate_object(object_)
-                bmesh_, layer_state, scene_layer = utils.get_triangulated_bmesh(object_tris)
+                bmesh_, layer_state, scene_layer = utils.get_bmesh(object_)
                 geometry_node = self._doc.createElement("geometry")
                 geometry_name = utils.get_geometry_name(group, object_)
                 geometry_node.setAttribute("id", geometry_name)
@@ -195,7 +194,7 @@ class CrytekDaeExporter:
                 bcPrint('Positions have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 start_time = clock()
-                self._write_normals(object_tris, bmesh_, mesh_node, geometry_name)
+                self._write_normals(object_, bmesh_, mesh_node, geometry_name)
                 bcPrint('Normals have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 start_time = clock()
@@ -203,7 +202,7 @@ class CrytekDaeExporter:
                 bcPrint('UVs have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 start_time = clock()
-                self._write_vertex_colors(object_tris, bmesh_, mesh_node, geometry_name)
+                self._write_vertex_colors(object_, bmesh_, mesh_node, geometry_name)
                 bcPrint(
                     'Vertex colors have been writed {:.4f} seconds.'.format(
                         clock() - start_time))
@@ -213,7 +212,7 @@ class CrytekDaeExporter:
                 bcPrint('Vertices have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 start_time = clock()
-                self._write_triangle_list(object_tris, bmesh_, mesh_node, geometry_name)
+                self._write_triangle_list(object_, bmesh_, mesh_node, geometry_name)
                 bcPrint('Triangle list have been writed {:.4f} seconds.'.format(clock() - start_time))
 
                 extra = self._create_double_sided_extra("MAYA")
@@ -221,8 +220,7 @@ class CrytekDaeExporter:
                 geometry_node.appendChild(mesh_node)
                 libgeo.appendChild(geometry_node)
 
-                utils.clear_bmesh(object_tris, layer_state, scene_layer)
-                bpy.ops.object.delete()
+                utils.clear_bmesh(object_, layer_state, scene_layer)
                 bcPrint(
                     '"{}" object has been processed for "{}" node.'.format(
                         object_.name, group.name))
@@ -304,6 +302,7 @@ class CrytekDaeExporter:
         mesh_node.appendChild(vertices)
 
     def _write_triangle_list(self, object_, bmesh_, mesh_node, geometry_name):
+        tessfaces = utils.get_tessfaces(bmesh_)
         current_material_index = 0
         for material, materialname in self._m_exporter.get_materials_for_object(
                 object_).items():
@@ -311,15 +310,21 @@ class CrytekDaeExporter:
             triangle_count = 0
             normal_uv_index = 0
             for face in bmesh_.faces:
+                norm_uv_indices = {}
+
+                for index in range(0, len(face.verts)):
+                    norm_uv_indices[str(face.verts[index].index)] = normal_uv_index + index
+
                 if face.material_index == current_material_index:
-                    triangle_count += 1
-                    for vert in face.verts:
-                        dae_vertex = self._write_vertex_data(
-                            vert.index, normal_uv_index, normal_uv_index, object_.data.vertex_colors)
-                        triangles = join(triangles, dae_vertex)
-                        normal_uv_index += 1
-                else:
-                    normal_uv_index += len(face.verts)
+                    for tessface in tessfaces[face.index]:
+                        triangle_count += 1
+                        for vert in tessface:
+                            normal_uv = norm_uv_indices[str(vert)]
+                            dae_vertex = self._write_vertex_data(
+                                vert, normal_uv, normal_uv, object_.data.vertex_colors)
+                            triangles = join(triangles, dae_vertex)
+
+                normal_uv_index += len(face.verts)
 
             current_material_index += 1
 
@@ -367,12 +372,12 @@ class CrytekDaeExporter:
             triangle_list.appendChild(p)
             mesh_node.appendChild(triangle_list)
 
-    def _write_vertex_data(self, vert, normal, texcoord, vertex_colors):
+    def _write_vertex_data(self, vert, normal, uv, vertex_colors):
         if vertex_colors:
             return "{:d} {:d} {:d} {:d} ".format(
-                vert, normal, texcoord, vert)
+                vert, normal, uv, vert)
         else:
-            return "{:d} {:d} {:d} ".format(vert, normal, texcoord)
+            return "{:d} {:d} {:d} ".format(vert, normal, uv)
 
     def _create_double_sided_extra(self, profile):
         extra = self._doc.createElement("extra")

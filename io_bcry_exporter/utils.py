@@ -126,41 +126,6 @@ def get_geometry_name(group, object_):
     return geometry_name
 
 
-def duplicate_object(object_):
-    deselect_all()
-    set_active(object_)
-    object_.select = True
-    bpy.ops.object.duplicate()
-    return bpy.context.active_object
-
-
-def get_triangulated_bmesh(object_):
-    set_active(object_)
-
-    # bmesh may be gotten only in edit mode for active object.
-    # Unfortunately Blender goes in edit mode just objects
-    # in which first layer with bpy.ops.object.mode_set(mode='EDIT')
-    # So we must temporarily activate first layer for objects which it is not 
-    # already in first layer. Also scene first layer must be active.
-    # That lacking related with Blender, if it will fix in future that 
-    # code will be clean.
-
-    scene_first_layer = bpy.context.scene.layers[0]
-    bpy.context.scene.layers[0] = True
-
-    layer_state = not object_.layers[0]
-    if layer_state:
-        object_.layers[0] = True
-
-    
-    bpy.ops.object.mode_set(mode='EDIT')
-    
-    bmesh_ = bmesh.from_edit_mesh(object_.data)
-    bmesh.ops.triangulate(bmesh_, faces=bmesh_.faces)
-
-    return bmesh_, layer_state, scene_first_layer
-
-
 def get_bmesh(object_):
     set_active(object_)
 
@@ -191,6 +156,26 @@ def clear_bmesh(object_, layer_state, scene_first_layer):
 
     if layer_state:
         object_.layers[0] = False
+
+
+def get_tessfaces(bmesh_):
+    tessfaces = []
+    tfs = bmesh_.calc_tessface()
+    
+    for face in bmesh_.faces:
+        #initialize tessfaces array
+        tessfaces.append([])
+    
+    for tf in tfs:
+        vert_list = []
+        for loop in tf:
+            #tessfaces[loop.face.index].append(loop.vert.index)
+            vert_list.append(loop.vert.index)
+            
+        tessfaces[tf[0].face.index].append(vert_list)
+
+    return tessfaces
+    
 
 
 def get_custom_normals(bmesh_, use_edge_angle, split_angle):
