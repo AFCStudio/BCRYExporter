@@ -16,12 +16,12 @@
 if "bpy" in locals():
     import imp
     imp.reload(utils)
-    imp.reload(material_utils)
+    imp.reload(export_materials)
     imp.reload(udp)
     imp.reload(exceptions)
 else:
     import bpy
-    from io_bcry_exporter import utils, material_utils, udp, exceptions
+    from io_bcry_exporter import utils, export_materials, udp, exceptions
 
 from io_bcry_exporter.rc import RCInstance
 from io_bcry_exporter.outpipe import bcPrint
@@ -47,7 +47,7 @@ class CrytekDaeExporter:
     def __init__(self, config):
         self._config = config
         self._doc = Document()
-        self._materials = self._get_materials()
+        self._m_exporter = export_materials.CrytekMaterialExporter(config)
 
     def export(self):
         self._prepare_for_export()
@@ -58,6 +58,9 @@ class CrytekDaeExporter:
         root_element.setAttribute("version", "1.4.1")
         self._doc.appendChild(root_element)
         self._create_file_header(root_element)
+        
+        if self._config.generate_materials:
+            self._m_exporter.generate_materials()
 
         # Just here for future use:
         self._export_library_cameras(root_element)
@@ -86,45 +89,8 @@ class CrytekDaeExporter:
 
         write_scripts(self._config)
 
-    def _get_materials(self):
-        materials = OrderedDict()
-        material_counter = {}
-
-        for group in utils.get_mesh_export_nodes(
-                self._config.export_selected_nodes):
-            material_counter[group.name] = 50
-            for object in group.objects:
-                for slot in object.material_slots:
-                    if slot.material is None:
-                        continue
-
-                    if slot.material not in materials:
-                        node_name = utils.get_node_name(group)
-
-                        node, index, name, physics = material_utils.get_material_parts(
-                            node_name, slot.material.name)
-
-                        # check if material has no position defined
-                        if index == 0:
-                            material_counter[group.name] += 1
-                            index = material_counter[group.name]
-
-                        materials[slot.material] = "{}__{:02d}__{}__{}".format(
-                            node, index, name, physics)
-
-        return materials
-
-    def _get_materials_for_object(self, object_):
-        materials = OrderedDict()
-        for material, materialname in self._materials.items():
-            for object_material in object_.data.materials:
-                if material.name == object_material.name:
-                    materials[material] = materialname
-
-        return materials
-
     def _prepare_for_export(self):
-        utils.clean_file()
+        utils.clean_file(self._config.export_selected_nodes)
 
         if self._config.apply_modifiers:
             utils.apply_modifiers(self._config.export_selected_nodes)
@@ -162,9 +128,17 @@ class CrytekDaeExporter:
         up_axis.appendChild(z_up)
         asset.appendChild(up_axis)
 
+#------------------------------------------------------------------
+# Library Cameras:
+#------------------------------------------------------------------
+
     def _export_library_cameras(self, root_element):
         library_cameras = self._doc.createElement('library_cameras')
         root_element.appendChild(library_cameras)
+
+#------------------------------------------------------------------
+# Library Lights:
+#------------------------------------------------------------------
 
     def _export_library_lights(self, root_element):
         library_lights = self._doc.createElement('library_lights')
@@ -176,240 +150,17 @@ class CrytekDaeExporter:
 
     def _export_library_images(self, parent_element):
         library_images = self._doc.createElement('library_images')
+        self._m_exporter.export_library_images(library_images)
         parent_element.appendChild(library_images)
-
-        if bpy.context.scene.render.engine == 'CYCLES':
-            images = self._get_nodes_images_in_export_nodes()
-        else:
-            images = self._get_image_textures_in_export_nodes()
-
-        for image in images:
-            image_element = self._export_library_image(image)
-            library_images.appendChild(image_element)
-
-        if self._config.do_textures:
-            self._convert_images_to_dds(images)
-
-    def _export_library_image(self, image):
-        image_path = material_utils.get_image_path_for_game(image,
-                                                   self._config.game_dir)
-
-        image_element = self._doc.createElement('image')
-        image_element.setAttribute('id', image.name)
-        image_element.setAttribute('name', image.name)
-        init_from = self._doc.createElement('init_from')
-        path_node = self._doc.createTextNode(image_path)
-        init_from.appendChild(path_node)
-        image_element.appendChild(init_from)
-
-        return image_element
-
-    def _get_nodes_images_in_export_nodes(self):
-        images = []
-
-        nodes = material_utils.get_texture_nodes_for_cycles()
-
-        for node in nodes:
-            try:
-                if material_utils.is_valid_image(node.image):
-                    images.append(node.image)
-
-            except AttributeError:
-                # don't care about non-image textures
-                pass
-
-        # return only unique images
-        return list(set(images))
-
-    def _get_image_textures_in_export_nodes(self):
-        images = []
-        textures = material_utils.get_textures()
-
-        for texture in textures:
-            try:
-                if material_utils.is_valid_image(texture.image):
-                    images.append(texture.image)
-
-            except AttributeError:
-                # don't care about non-image textures
-                pass
-
-        # return only unique images
-        return list(set(images))
-
-    def _convert_images_to_dds(self, images):
-        converter = RCInstance(self._config)
-        converter.convert_tif(images)
 
 #--------------------------------------------------------------
 # Library Effects:
 #--------------------------------------------------------------
 
     def _export_library_effects(self, parent_element):
-        current_element = self._doc.createElement('library_effects')
-        parent_element.appendChild(current_element)
-        for material, materialname in self._materials.items():
-            self._export_library_effects_material(
-                material, materialname, current_element)
-
-    def _export_library_effects_material(
-            self, material, materialname, current_element):
-        images = [[], [], []]
-
-        is_cycles_render = bpy.context.scene.render.engine == 'CYCLES'
-
-        if is_cycles_render:
-            self._get_cycles_render_images(material, images)
-        else:
-            self._get_blender_render_images(material, images)
-
-        effect_node = self._doc.createElement("effect")
-        effect_node.setAttribute("id", "{}_fx".format(materialname))
-        profile_node = self._doc.createElement("profile_COMMON")
-        for image in images:
-            if len(image) != 0:
-                profile_node.appendChild(image[1])
-                profile_node.appendChild(image[2])
-        technique_common = self._doc.createElement("technique")
-        technique_common.setAttribute("sid", "common")
-
-        phong = self._create_material_node(material, images)
-        technique_common.appendChild(phong)
-        profile_node.appendChild(technique_common)
-
-        extra = self._create_double_sided_extra("GOOGLEEARTH")
-        profile_node.appendChild(extra)
-        effect_node.appendChild(profile_node)
-
-        extra = self._create_double_sided_extra("MAX3D")
-        effect_node.appendChild(extra)
-        current_element.appendChild(effect_node)
-
-    def _get_cycles_render_images(self, material, images):
-        cycles_nodes = material_utils.get_texture_nodes_for_material(material)
-        for cycles_node in cycles_nodes:
-            image = cycles_node.image
-            if not image:
-                raise exceptions.BCryException(
-                    "One of texture slots has no image assigned.")
-
-            surface, sampler = self._create_surface_and_sampler(image.name)
-            if cycles_node.name == "Image Texture":
-                images[0] = [image.name, surface, sampler]
-            if cycles_node.name == "Specular":
-                images[1] = [image.name, surface, sampler]
-            if cycles_node.name == "Normal":
-                images[2] = [image.name, surface, sampler]
-
-    def _get_blender_render_images(self, material, images):
-        texture_slots = material_utils.get_texture_slots_for_material(material)
-        for texture_slot in texture_slots:
-            image = texture_slot.texture.image
-            if not image:
-                raise exceptions.BCryException(
-                    "One of texture slots has no image assigned.")
-
-            surface, sampler = self._create_surface_and_sampler(image.name)
-            if texture_slot.use_map_color_diffuse:
-                images[0] = [image.name, surface, sampler]
-            if texture_slot.use_map_color_spec:
-                images[1] = [image.name, surface, sampler]
-            if texture_slot.use_map_normal:
-                images[2] = [image.name, surface, sampler]
-
-    def _create_surface_and_sampler(self, image_name):
-        surface = self._doc.createElement("newparam")
-        surface.setAttribute("sid", "{}-surface".format(image_name))
-        surface_node = self._doc.createElement("surface")
-        surface_node.setAttribute("type", "2D")
-        init_from_node = self._doc.createElement("init_from")
-        temp_node = self._doc.createTextNode(image_name)
-        init_from_node.appendChild(temp_node)
-        surface_node.appendChild(init_from_node)
-        surface.appendChild(surface_node)
-        sampler = self._doc.createElement("newparam")
-        sampler.setAttribute("sid", "{}-sampler".format(image_name))
-        sampler_node = self._doc.createElement("sampler2D")
-        source_node = self._doc.createElement("source")
-        temp_node = self._doc.createTextNode(
-            "{}-surface".format(image_name))
-        source_node.appendChild(temp_node)
-        sampler_node.appendChild(source_node)
-        sampler.appendChild(sampler_node)
-
-        return surface, sampler
-
-    def _create_material_node(self, material, images):
-        phong = self._doc.createElement("phong")
-
-        emission = self._create_color_node(material, "emission")
-        ambient = self._create_color_node(material, "ambient")
-        if len(images[0]) != 0:
-            diffuse = self._create_texture_node(images[0][0], "diffuse")
-        else:
-            diffuse = self._create_color_node(material, "diffuse")
-        if len(images[1]) != 0:
-            specular = self._create_texture_node(images[1][0], "specular")
-        else:
-            specular = self._create_color_node(material, "specular")
-
-        shininess = self._create_attribute_node(material, "shininess")
-        index_refraction = self._create_attribute_node(
-            material, "index_refraction")
-
-        phong.appendChild(emission)
-        phong.appendChild(ambient)
-        phong.appendChild(diffuse)
-        phong.appendChild(specular)
-        phong.appendChild(shininess)
-        phong.appendChild(index_refraction)
-        if len(images[2]) != 0:
-            normal = self._create_texture_node(images[2][0], "normal")
-            phong.appendChild(normal)
-
-        return phong
-
-    def _create_color_node(self, material, type_):
-        node = self._doc.createElement(type_)
-        color = self._doc.createElement("color")
-        color.setAttribute("sid", type_)
-        col = material_utils.get_material_color(material, type_)
-        color_text = self._doc.createTextNode(col)
-        color.appendChild(color_text)
-        node.appendChild(color)
-
-        return node
-
-    def _create_texture_node(self, image_name, type_):
-        node = self._doc.createElement(type_)
-        texture = self._doc.createElement("texture")
-        texture.setAttribute("texture", "{}-sampler".format(image_name))
-        node.appendChild(texture)
-
-        return node
-
-    def _create_attribute_node(self, material, type_):
-        node = self._doc.createElement(type_)
-        float = self._doc.createElement("float")
-        float.setAttribute("sid", type_)
-        val = material_utils.get_material_attribute(material, type_)
-        value = self._doc.createTextNode(val)
-        float.appendChild(value)
-        node.appendChild(float)
-
-        return node
-
-    def _create_double_sided_extra(self, profile):
-        extra = self._doc.createElement("extra")
-        technique = self._doc.createElement("technique")
-        technique.setAttribute("profile", profile)
-        double_sided = self._doc.createElement("double_sided")
-        double_sided_value = self._doc.createTextNode("1")
-        double_sided.appendChild(double_sided_value)
-        technique.appendChild(double_sided)
-        extra.appendChild(technique)
-
-        return extra
+        library_effects = self._doc.createElement('library_effects')
+        self._m_exporter.export_library_effects(library_effects)
+        parent_element.appendChild(library_effects)
 
 #------------------------------------------------------------------
 # Library Materials:
@@ -417,15 +168,7 @@ class CrytekDaeExporter:
 
     def _export_library_materials(self, parent_element):
         library_materials = self._doc.createElement('library_materials')
-
-        for material, materialname in self._materials.items():
-            material_element = self._doc.createElement('material')
-            material_element.setAttribute('id', materialname)
-            instance_effect = self._doc.createElement('instance_effect')
-            instance_effect.setAttribute('url', '#{}_fx'.format(materialname))
-            material_element.appendChild(instance_effect)
-            library_materials.appendChild(material_element)
-
+        self._m_exporter.export_library_materials(library_materials)
         parent_element.appendChild(library_materials)
 
 #------------------------------------------------------------------
@@ -562,7 +305,7 @@ class CrytekDaeExporter:
 
     def _write_triangle_list(self, object_, bmesh_, mesh_node, geometry_name):
         current_material_index = 0
-        for material, materialname in self._get_materials_for_object(
+        for material, materialname in self._m_exporter.get_materials_for_object(
                 object_).items():
             triangles = ''
             triangle_count = 0
@@ -630,6 +373,18 @@ class CrytekDaeExporter:
                 vert, normal, texcoord, vert)
         else:
             return "{:d} {:d} {:d} ".format(vert, normal, texcoord)
+
+    def _create_double_sided_extra(self, profile):
+        extra = self._doc.createElement("extra")
+        technique = self._doc.createElement("technique")
+        technique.setAttribute("profile", profile)
+        double_sided = self._doc.createElement("double_sided")
+        double_sided_value = self._doc.createTextNode("1")
+        double_sided.appendChild(double_sided_value)
+        technique.appendChild(double_sided)
+        extra.appendChild(technique)
+
+        return extra
 
 # -------------------------------------------------------------------------
 # Library Controllers: --> Skeleton Armature and List of Bone Names
@@ -1014,7 +769,7 @@ class CrytekDaeExporter:
         bind_material = self._doc.createElement('bind_material')
         technique_common = self._doc.createElement('technique_common')
 
-        for material, materialname in self._get_materials_for_object(
+        for material, materialname in self._m_exporter.get_materials_for_object(
                 object_).items():
             instance_material = self._doc.createElement(
                 'instance_material')
