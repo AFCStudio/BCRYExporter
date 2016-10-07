@@ -175,7 +175,6 @@ def get_tessfaces(bmesh_):
         tessfaces[tf[0].face.index].append(vert_list)
 
     return tessfaces
-    
 
 
 def get_custom_normals(bmesh_, use_edge_angle, split_angle):
@@ -190,7 +189,7 @@ def get_custom_normals(bmesh_, use_edge_angle, split_angle):
             for vertex in face.verts:
                 smooth_normal = face.normal.normalized()
                 for link_face in vertex.link_faces:
-                    if face.index is link_face.index:
+                    if face.index == link_face.index:
                         continue
                     if link_face.smooth:
                         if not use_edge_angle:
@@ -209,7 +208,6 @@ def get_custom_normals(bmesh_, use_edge_angle, split_angle):
 
 
 def get_normal_array(bmesh_, use_edge_angle, use_edge_sharp, split_angle):
-    split_angle = math.degrees(split_angle)
     float_normals = []
     
     for face in bmesh_.faces:
@@ -220,7 +218,7 @@ def get_normal_array(bmesh_, use_edge_angle, use_edge_sharp, split_angle):
             for vertex in face.verts:
                 smooth_normal = face.normal.normalized()
                 for link_face in vertex.link_faces:
-                    if face.index is link_face.index:
+                    if face.index == link_face.index:
                         continue
                     if link_face.smooth:
                         if not use_edge_angle and not use_edge_sharp:
@@ -229,35 +227,58 @@ def get_normal_array(bmesh_, use_edge_angle, use_edge_sharp, split_angle):
                         elif use_edge_angle and not use_edge_sharp:
                             face_angle = face.normal.normalized().dot(link_face.normal.normalized())
                             face_angle = min(1.0, max(face_angle, -1.0))
-                            face_angle = math.degrees(math.acos(face_angle))
+                            face_angle = math.acos(face_angle)
                             if face_angle < split_angle:
                                 smooth_normal += link_face.normal.normalized()
 
                         elif use_edge_sharp and not use_edge_angle:
-                            edge = None
-                            for edge1 in face.edges:
-                                for edge2 in link_face.edges:
-                                    if edge1.index is edge2.index:
-                                        edge = edge1
-                            if edge and edge.smooth:
-                                smooth_normal += link_face.normal.normalized()
+                            is_neighbor_face = False
+                            for edge in vertex.link_edges:
+                                if (edge in face.edges) and (edge in link_face.edges):
+                                    is_neighbor_face = True
+                                    if edge.smooth:
+                                        smooth_normal += link_face.normal.normalized()
+
+                            if not is_neighbor_face:
+                                if check_sharp_edges(vertex, face, None, link_face):
+                                    smooth_normal += link_face.normal.normalized()
 
                         elif use_edge_angle and use_edge_sharp:
                             face_angle = face.normal.normalized().dot(link_face.normal.normalized())
                             face_angle = min(1.0, max(face_angle, -1.0))
-                            face_angle = math.degrees(math.acos(face_angle))
+                            face_angle = math.acos(face_angle)
                             if face_angle < split_angle:
-                                edge = None
-                                for edge1 in face.edges:
-                                    for edge2 in link_face.edges:
-                                        if edge1.index is edge2.index:
-                                            edge = edge1
-                                if edge and edge.smooth:
-                                    smooth_normal += link_face.normal.normalized()
+                                is_neighbor_face = False
+                                for edge in vertex.link_edges:
+                                    if (edge in face.edges) and (edge in link_face.edges):
+                                        is_neighbor_face = True
+                                        if edge.smooth:
+                                            smooth_normal += link_face.normal.normalized()
+
+                                if not is_neighbor_face:
+                                    if check_sharp_edges(vertex, face, None, link_face):
+                                        smooth_normal += link_face.normal.normalized()
 
                 float_normals.extend(smooth_normal.normalized())
 
     return float_normals
+
+
+def check_sharp_edges(vertex, current_face, previous_face, target_face):
+    for trans_edge in current_face.edges:
+        if trans_edge in vertex.link_edges:
+            for neighbor_face in trans_edge.link_faces:
+                if neighbor_face == current_face or neighbor_face == previous_face:
+                    continue
+                if trans_edge.smooth:
+                    if neighbor_face == target_face:
+                        return True
+                    else:
+                        new_previous_face = current_face
+                        return check_sharp_edges(vertex, neighbor_face,
+                                            new_previous_face, target_face)
+
+    return False
 
 
 #------------------------------------------------------------------------------
