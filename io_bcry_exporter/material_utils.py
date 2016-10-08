@@ -449,7 +449,7 @@ def get_material_physic(material_name):
     return "physDefault"
 
 
-def add_phys_material(self, context, phys_name):
+def set_material_physic(self, context, phys_name):
     if not phys_name.startswith("__"):
         phys_name = "__" + phys_name
 

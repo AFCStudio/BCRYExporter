@@ -699,7 +699,7 @@ class SetMaterialNames(bpy.types.Operator):
             return {'FINISHED'}
 
         if self.just_rephysic:
-            return material_utils.add_phys_material(self, context, self.material_phys)
+            return material_utils.set_material_physic(self, context, self.material_phys)
 
         # Revert all materials to fetch also those that are no longer in a group
         # and store their possible physics properties in a dictionary.
@@ -1474,61 +1474,68 @@ class FixWheelTransforms(bpy.types.Operator):
 # Material Physics:
 #------------------------------------------------------------------------------
 
-class AddMaterialPhysDefault(bpy.types.Operator):
-    '''__physDefault will be added to the material name.'''
+class SetMaterialPhysDefault(bpy.types.Operator):
+    '''The render geometry is used as physics proxy. This\
+ is expensive for complex objects, so use this only for simple objects\
+ like cubes or if you really need to fully physicalize an object.'''
     bl_label = "__physDefault"
-    bl_idname = "material.add_phys_default"
+    bl_idname = "material.set_phys_default"
 
     def execute(self, context):
-        message = "Adding __physDefault"
+        material_name = bpy.context.active_object.active_material.name
+        message = "{} material physic has been set to physDefault".format(material_name)
         self.report({'INFO'}, message)
         bcPrint(message)
-        return material_utils.add_phys_material(self, context, self.bl_label)
+        return material_utils.set_material_physic(self, context, bl_label)
 
 
-class AddMaterialPhysProxyNoDraw(bpy.types.Operator):
-    '''__physProxyNoDraw will be added to the material name.'''
+class SetMaterialPhysProxyNoDraw(bpy.types.Operator):
+    '''Mesh is used exclusively for collision detection and is not rendered.'''
     bl_label = "__physProxyNoDraw"
-    bl_idname = "material.add_phys_proxy_no_draw"
+    bl_idname = "material.set_phys_proxy_no_draw"
 
     def execute(self, context):
-        message = "Adding __physProxyNoDraw"
-        self.report({'INFO'}, message)
+        material_name = bpy.context.active_object.active_material.name
+        message = "{} material physic has been set to physProxyNoDraw".format(material_name)
         bcPrint(message)
-        return material_utils.add_phys_material(self, context, self.bl_label)
+        return material_utils.set_material_physic(self, context, self.bl_label)
 
 
-class AddMaterialPhysNone(bpy.types.Operator):
-    '''__physNone will be added to the material name.'''
+class SetMaterialPhysNone(bpy.types.Operator):
+    '''The render geometry have no physic just render it.'''
     bl_label = "__physNone"
-    bl_idname = "material.add_phys_none"
+    bl_idname = "material.set_phys_none"
 
     def execute(self, context):
-        message = "Adding __physNone"
-        self.report({'INFO'}, message)
+        material_name = bpy.context.active_object.active_material.name
+        message = "{} material physic has been set to physNone".format(material_name)
         bcPrint(message)
-        return material_utils.add_phys_material(self, context, self.bl_label)
+        return material_utils.set_material_physic(self, context, self.bl_label)
 
 
-class AddMaterialPhysObstruct(bpy.types.Operator):
-    '''__physObstruct will be added to the material name.'''
+class SetMaterialPhysObstruct(bpy.types.Operator):
+    '''Used for Soft Cover to block AI view (i.e. on dense foliage).'''
     bl_label = "__physObstruct"
-    bl_idname = "material.add_phys_obstruct"
+    bl_idname = "material.set_phys_obstruct"
 
     def execute(self, context):
-        return material_utils.add_phys_material(self, context, self.bl_label)
-
-
-class AddMaterialPhysNoCollide(bpy.types.Operator):
-    '''__physNoCollide will be added to the material name.'''
-    bl_label = "__physNoCollide"
-    bl_idname = "material.add_phys_no_collide"
-
-    def execute(self, context):
-        message = "Adding __physNoCollide"
-        self.report({'INFO'}, message)
+        material_name = bpy.context.active_object.active_material.name
+        message = "{} material physic has been set to physObstruct".format(material_name)
         bcPrint(message)
-        return material_utils.add_phys_material(self, context, self.bl_label)
+        return material_utils.set_material_physic(self, context, self.bl_label)
+
+
+class SetMaterialPhysNoCollide(bpy.types.Operator):
+    '''Special purpose proxy which is used by the engine\
+ to detect player interaction (e.g. for vegetation touch bending).'''
+    bl_label = "__physNoCollide"
+    bl_idname = "material.set_phys_no_collide"
+
+    def execute(self, context):
+        material_name = bpy.context.active_object.active_material.name
+        message = "{} material physic has been set to physNoCollide".format(material_name)
+        bcPrint(message)
+        return material_utils.set_material_physic(self, context, self.bl_label)
 
 
 #------------------------------------------------------------------------------
@@ -2991,34 +2998,34 @@ class ConfigurationsMenu(bpy.types.Menu):
             icon="FILE_FOLDER")
 
 
-class AddMaterialPhysicsMenu(bpy.types.Menu):
-    bl_label = "Add Material Physics"
-    bl_idname = "menu.add_material_physics"
+class SetMaterialPhysicsMenu(bpy.types.Menu):
+    bl_label = "Set Material Physics"
+    bl_idname = "menu.set_material_physics"
 
     def draw(self, context):
         layout = self.layout
 
-        layout.label(text="Add Material Physics")
+        layout.label(text="Set Material Physics")
         layout.separator()
         layout.operator(
-            "material.add_phys_default",
-            text="__physDefault",
+            "material.set_phys_default",
+            text="physDefault",
             icon='PHYSICS')
         layout.operator(
-            "material.add_phys_proxy_no_draw",
-            text="__physProxyNoDraw",
+            "material.set_phys_proxy_no_draw",
+            text="physProxyNoDraw",
             icon='PHYSICS')
         layout.operator(
-            "material.add_phys_none",
-            text="__physNone",
+            "material.set_phys_none",
+            text="physNone",
             icon='PHYSICS')
         layout.operator(
-            "material.add_phys_obstruct",
-            text="__physObstruct",
+            "material.set_phys_obstruct",
+            text="physObstruct",
             icon='PHYSICS')
         layout.operator(
-            "material.add_phys_no_collide",
-            text="__physNoCollide",
+            "material.set_phys_no_collide",
+            text="physNoCollide",
             icon='PHYSICS')
 
 
@@ -3115,11 +3122,11 @@ def get_classes_to_register():
 
         FixWheelTransforms,
 
-        AddMaterialPhysDefault,
-        AddMaterialPhysProxyNoDraw,
-        AddMaterialPhysNone,
-        AddMaterialPhysObstruct,
-        AddMaterialPhysNoCollide,
+        SetMaterialPhysDefault,
+        SetMaterialPhysProxyNoDraw,
+        SetMaterialPhysNone,
+        SetMaterialPhysObstruct,
+        SetMaterialPhysNoCollide,
 
         FindDegenerateFaces,
         FindMultifaceLines,
@@ -3157,7 +3164,7 @@ def get_classes_to_register():
         CustomPropertiesMenu,
         ConfigurationsMenu,
 
-        AddMaterialPhysicsMenu,
+        SetMaterialPhysicsMenu,
         RemoveUnusedVertexGroups,
         BCryReducedMenu,
     )
@@ -3174,7 +3181,7 @@ def physics_menu(self, context):
     layout = self.layout
     layout.separator()
     layout.label("BCry Exporter")
-    layout.menu("menu.add_material_physics", icon="PHYSICS")
+    layout.menu("menu.set_material_physics", icon="PHYSICS")
     layout.separator()
 
 
