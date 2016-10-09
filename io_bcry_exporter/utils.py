@@ -534,6 +534,24 @@ def get_mesh_export_nodes(just_selected=False):
     return export_nodes
 
 
+def get_chr_node_from_skeleton(armature):
+    for child in armature.children:
+        for group in child.users_group:
+            if group.name.endswith('.chr'):
+                return group
+
+    return None
+
+
+def get_chr_object_from_skeleton(armature):
+    for child in armature.children:
+        for group in child.users_group:
+            if group.name.endswith('.chr'):
+                return child
+
+    return None
+
+
 def get_chr_names(just_selected=False):
     chr_names = []
 
@@ -987,10 +1005,11 @@ def find_cga_node_from_anm_node(anm_group):
 
 
 #------------------------------------------------------------------------------
-# Bone Geometry:
+# Bone Physics:
 #------------------------------------------------------------------------------
 
-def get_bone_geometry(bone_name):
+def get_bone_geometry(bone):
+    bone_name = bone.name
     if bone_name.endswith("_Phys"):
         bone_name = bone_name[:-5]
 
@@ -1004,15 +1023,79 @@ def is_bone_geometry(object_):
         return False
 
 
-def is_physical(object_):
-    if object_.name.endswith("_Phys"):
+def is_physic_bone(bone):
+    if bone.name.endswith("_Phys"):
         return True
     else:
         return False
 
 
-def physicalize(object_):
-    object_.name = "{}_Phys".format(object_.name)
+def make_physic_bone(bone):
+    if bone.name.endswith('.001'):
+        bone.name = bone.name.replace('.001', '_Phys')
+    else:
+        bone.name = "{}_Phys".format(bone.name)
+
+
+def get_bone_material_type(bone, bone_type):
+    if bone_type == 'leg' or bone_type == 'arm' or bone_type == 'foot':
+        left_list = ['left', '.l']
+        if is_in_list(bone.name, left_list):
+            return "l{}".format(bone_type)
+        else:
+            return "r{}".format(bone_type)
+
+    elif bone_type == 'other':
+        return 'primitive'
+
+    return bone_type
+
+
+def get_bone_type(bone):
+    if is_leg_bone(bone):
+        return 'leg'
+    elif is_arm_bone(bone):
+        return 'arm'
+    elif is_torso_bone(bone):
+        return 'torso'
+    elif is_head_bone(bone):
+        return 'head'
+    elif is_foot_bone(bone):
+        return 'foot'
+    else:
+        return 'other'
+
+
+def is_leg_bone(bone):
+    leg = ['leg', 'shin', 'thigh', 'calf']
+    return is_in_list(bone.name, leg)
+
+
+def is_arm_bone(bone):
+    arm = ['arm', 'hand']
+    return is_in_list(bone.name, arm)
+
+
+def is_torso_bone(bone):
+    torso = ['hips', 'pelvis', 'spine', 'chest', 'torso']
+    return is_in_list(bone.name, torso)
+
+
+def is_head_bone(bone):
+    head = ['head', 'neck']
+    return is_in_list(bone.name, head)
+
+
+def is_foot_bone(bone):
+    foot = ['foot', 'toe']
+    return is_in_list(bone.name, foot)
+
+
+def is_in_list(str, list_):
+    for sub in list_:
+        if str.lower().find(sub) != -1:
+            return True
+    return False
 
 
 #------------------------------------------------------------------------------

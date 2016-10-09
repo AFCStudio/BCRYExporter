@@ -2025,6 +2025,487 @@ class AddPrimitiveMesh(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class PhysicalizeSkeleton(bpy.types.Operator):
+    '''Create physic skeleton and physical proxies for bones.'''
+    bl_label = "Physicalize Skeleton"
+    bl_idname = "armature.physicalize_skeleton"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    physic_skeleton = BoolProperty(name='Physic Skeleton', default=True,
+                            description='Creates physic skeleton.')
+    physic_proxies = BoolProperty(name='Physic Proxies', default=True,
+                            description='Creates physic proxies.')
+    physic_proxy_settings = BoolProperty(name='Physic Proxy Settings', default=True,
+                            description='Fill physic proxy settings to default.')
+    physic_ik_settings = BoolProperty(name='IK Settings', default=True,
+                            description='Fill IK settings to default.')
+
+    radius_torso = FloatProperty(name='Torso Radius', default=0.12,
+                            min=0.01, precision=3, step=0.1,
+                            description='Torso bones radius')
+    radius_head = FloatProperty(name='Head Radius', default=0.1,
+                            min=0.01, precision=3, step=0.1,
+                            description='Head bones radius')
+    radius_arm = FloatProperty(name='Arm Radius', default=0.04,
+                            min=0.01, precision=3, step=0.1,
+                            description='Arm bones radius')
+    radius_leg = FloatProperty(name='Leg Radius', default=0.05,
+                            min=0.01, precision=3, step=0.1,
+                            description='Leg bones radius')
+    radius_foot = FloatProperty(name='Foot Radius', default=0.05,
+                            min=0.01, precision=3, step=0.1,
+                            description='Foot bones radius')
+    radius_other = FloatProperty(name='Other Radius', default=0.05,
+                            min=0.01, precision=3, step=0.1,
+                            description='Other bones radius')
+
+    physic_materials = BoolProperty(name='Create Physic Materials', default=True,
+                            description='Creates materials for bone proxies.')
+    physic_alpha = FloatProperty(name='Physic Alpha', default=0.2,
+                            min=0.0, max=1.0, step=1.0,
+                            description='Set physic proxy alpha value.')
+    use_single_material = BoolProperty(name='Use Single Material', default=False,
+                            description='Use single material for all bone proxies.')
+    
+    def __init__(self):
+        armature = bpy.context.active_object
+        if armature.type != 'ARMATURE':
+            self.report({'ERROR'}, 'You have to select a armature object!')
+            return {'FINISHED'}
+
+        group = utils.get_chr_node_from_skeleton(armature)
+        if not group:
+            self.report({'ERROR'}, 'Your armature has to has a primitive mesh which added to a CHR node!')
+            return {'FINISHED'}
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.label("Physicalize Options:")
+        col.prop(self, "physic_skeleton")
+        col.prop(self, "physic_proxies")
+        col.prop(self, "physic_proxy_settings")
+        col.prop(self, "physic_ik_settings")
+        col.separator()
+        
+        col.label("Physic Proxy Sizes:")
+        col.prop(self, "radius_torso")
+        col.prop(self, "radius_head")
+        col.prop(self, "radius_arm")
+        col.prop(self, "radius_leg")
+        col.prop(self, "radius_foot")
+        col.prop(self, "radius_other")
+        col.separator()
+        col.separator()
+
+        col.label("Physic Materials:")
+        col.prop(self, "physic_materials")
+        col.prop(self, "physic_alpha")
+        col.prop(self, "use_single_material")
+        col.separator()
+        col.separator()
+    
+    def execute(self, context):
+        armature = bpy.context.active_object
+        materials = {}
+        physic_armature = None
+        group = utils.get_chr_node_from_skeleton(armature)
+        self.__create_materials(armature, materials)
+        bpy.ops.object.mode_set(mode='EDIT')
+
+        for bone in armature.pose.bones:
+            print(bone.name)
+            if not bone.bone.select:
+                continue
+
+            if self.physic_proxies:            
+                name = "{}_boneGeometry".format(bone.name)
+                bone_radius = {}
+                bone_radius['torso'] = self.radius_torso
+                bone_radius['head'] = self.radius_head
+                bone_radius['arm'] = self.radius_arm
+                bone_radius['leg'] = self.radius_leg
+                bone_radius['foot'] = self.radius_foot
+                bone_radius['other'] = self.radius_other
+                bone_type = utils.get_bone_type(bone)
+                rd = bone_radius[bone_type]
+                
+                bpy.ops.mesh.primitive_cube_add(radius=rd, location=(0, 0, 0))
+                object_ = bpy.context.active_object
+                object_.name = name
+                object_.data.name = name
+                
+                bpy.ops.object.mode_set(mode='EDIT')
+                
+                bm = bmesh.from_edit_mesh(object_.data)
+                
+                for face in bm.faces:
+                    if face.normal.y == -1.0:
+                        for vert in face.verts:
+                            vert.co.y = 0.0
+                    elif face.normal.y == 1.0:
+                        for vert in face.verts:
+                            vert.co.y = bone.length
+                
+                bpy.ops.object.mode_set(mode='OBJECT')
+                
+                object_.matrix_world = bone.matrix.copy()
+
+                if group:
+                    group.objects.link(object_)
+
+                object_.show_transparent = True
+                object_.show_wire = True
+                
+                if self.physic_materials:
+                    mat = None
+                    if self.use_single_material:
+                        mat = materials['single']
+                    else:
+                        mat = materials[utils.get_bone_material_type(bone, bone_type)]
+
+                    mat.use_transparency = True
+                    mat.alpha = self.physic_alpha
+                    if object_.material_slots:
+                        object_.material_slot[0].material = mat
+                    else:
+                        bpy.ops.object.material_slot_add()
+                        if object_.material_slots:
+                            object_.material_slots[0].material = mat
+
+                    bpy.ops.mesh.uv_texture_add()
+                    
+                object_.select = False
+                
+                
+                if self.physic_proxy_settings:
+                    if bone_type == 'spine' or bone_type == 'head':
+                        bone['phys_proxy'] = 'sphere'
+                    elif bone_type == 'arm' or bone_type == 'leg' or bone_type == 'foot':
+                        bone['phys_proxy'] = 'capsule'
+                    else:
+                        bone['phys_proxy'] = 'capsule'
+                        
+                    bone['Spring'] = (0.0, 0.0, 0.0)
+                    bone['Spring Tension'] = (1.0, 1.0, 1.0)
+                    bone['Damping'] = (1.0, 1.0, 1.0)
+                    
+                    hips_list = ['hips', 'pelvis']
+                    if utils.is_in_list(bone.name, hips_list):
+                        bone['Damping'] = (0.0, 0.0, 0.0)
+
+                if self.physic_ik_settings:
+                    self.__set_ik(bone)
+
+
+        if self.physic_skeleton:
+            bpy.context.scene.objects.active = armature
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.armature.duplicate()
+            bpy.ops.armature.separate()
+        
+            bpy.ops.object.mode_set(mode='OBJECT')
+        
+            armature_name = "{}.001".format(armature.name)
+            physic_name = "{}_Phys".format(armature.name)
+            armature.select = False
+            location = armature.location.copy()
+            location.x -= 1.63
+
+            physic_armature = bpy.data.objects[armature_name]
+            physic_armature.name = physic_name
+            physic_armature.data.name = physic_name
+
+            physic_armature.select = True
+            bpy.context.scene.objects.active = physic_armature
+        
+            physic_armature.location = location
+            physic_armature.draw_type = 'WIRE'
+            
+            if group:
+                group.objects.link(physic_armature)
+        
+            for bone in physic_armature.data.bones:
+                utils.make_physic_bone(bone)
+
+            physic_armature.select = False
+
+
+        self.__set_primitive_mesh_material(armature, materials)
+
+        armature.select = True
+        bpy.context.scene.objects.active = armature
+
+        
+        return {'FINISHED'}
+
+    def __set_primitive_mesh_material(self, armature, materials):
+        object_ = utils.get_chr_object_from_skeleton(armature)
+        object_.select = True
+        bpy.context.scene.objects.active = object_
+        mat = None
+        if self.use_single_material:
+            mat = materials['single']
+        else:
+            mat = materials['primitive']
+
+        if object_.material_slots:
+            object_.material_slot[0].material = mat
+        else:
+            bpy.ops.object.material_slot_add()
+            if object_.material_slots:
+                object_.material_slots[0].material = mat
+
+        object_.select = False
+
+    def __create_materials(self, armature, materials):
+        if self.use_single_material:
+            single_material_name = "{}__01__proxy_bones__physProxyNoDraw".format(armature.name)
+            if single_material_name in bpy.data.materials:
+                materials['single'] = bpy.data.materials[single_material_name]
+            else:
+                materials['single'] = bpy.data.materials.new(single_material_name)
+                
+            materials['single'].diffuse_color = (0.016, 0.016, 0.016)
+            return
+        
+        mat_primitive_name = "{}__01__No_Draw__physProxyNoDraw".format(armature.name)
+        mat_larm_name = "{}__02__Skel_Arm_Left__physProxyNoDraw".format(armature.name)
+        mat_rarm_name = "{}__03__Skel_Arm_Right__physProxyNoDraw".format(armature.name)
+        mat_lleg_name = "{}__04__Skel_Leg_Left__physProxyNoDraw".format(armature.name)
+        mat_rleg_name = "{}__05__Skel_Leg_Right__physProxyNoDraw".format(armature.name)
+        mat_torso_name = "{}__06__Skel_Torso__physProxyNoDraw".format(armature.name)
+        mat_head_name = "{}__07__Skel_Head__physProxyNoDraw".format(armature.name)
+        mat_lfoot_name = "{}__08__Skel_Foot_Left__physProxyNoDraw".format(armature.name)
+        mat_rfoot_name = "{}__09__Skel_Foot_Right__physProxyNoDraw".format(armature.name)
+
+        if mat_primitive_name in bpy.data.materials:
+            materials['primitive'] = bpy.data.materials[mat_primitive_name]
+        else:
+            materials['primitive'] = bpy.data.materials.new(mat_primitive_name)
+
+        if mat_larm_name in bpy.data.materials:
+            materials['larm'] = bpy.data.materials[mat_larm_name]
+        else:
+            materials['larm'] = bpy.data.materials.new(mat_larm_name)
+
+        if mat_rarm_name in bpy.data.materials:
+            materials['rarm'] = bpy.data.materials[mat_rarm_name]
+        else:
+            materials['rarm'] = bpy.data.materials.new(mat_rarm_name)
+
+        if mat_lleg_name in bpy.data.materials:
+            materials['lleg'] = bpy.data.materials[mat_lleg_name]
+        else:
+            materials['lleg'] = bpy.data.materials.new(mat_lleg_name)
+
+        if mat_rleg_name in bpy.data.materials:
+            materials['rleg'] = bpy.data.materials[mat_rleg_name]
+        else:
+            materials['rleg'] = bpy.data.materials.new(mat_rleg_name)
+
+        if mat_torso_name in bpy.data.materials:
+            materials['torso'] = bpy.data.materials[mat_torso_name]
+        else:
+            materials['torso'] = bpy.data.materials.new(mat_torso_name)
+
+        if mat_head_name in bpy.data.materials:
+            materials['head'] = bpy.data.materials[mat_head_name]
+        else:
+            materials['head'] = bpy.data.materials.new(mat_head_name)
+
+        if mat_lfoot_name in bpy.data.materials:
+            materials['lfoot'] = bpy.data.materials[mat_lfoot_name]
+        else:
+            materials['lfoot'] = bpy.data.materials.new(mat_lfoot_name)
+
+        if mat_rfoot_name in bpy.data.materials:
+            materials['rfoot'] = bpy.data.materials[mat_rfoot_name]
+        else:
+            materials['rfoot'] = bpy.data.materials.new(mat_rfoot_name)
+        
+        materials['larm'].diffuse_color = (0.800, 0.008, 0.019)
+        materials['rarm'].diffuse_color = (1.000, 0.774, 0.013)
+        materials['lleg'].diffuse_color = (0.023, 0.114, 1.000)
+        materials['rleg'].diffuse_color = (0.013, 1.000, 0.048)
+        materials['torso'].diffuse_color = (0.016, 0.016, 0.016)
+        materials['head'].diffuse_color = (0.000, 0.450, 0.464)
+        materials['lfoot'].diffuse_color = (1.000, 0.000, 0.632)
+        materials['rfoot'].diffuse_color = (1.000, 0.32, 0.093)
+
+    def __set_ik(self, bone):
+        if utils.is_in_list(bone.name, ['spine']):
+            bone.lock_ik_x = False
+            bone.lock_ik_y = False
+            bone.lock_ik_z = False
+
+            bone.ik_min_x = math.radians(-18)
+            bone.ik_min_y = math.radians(-18)
+            bone.ik_min_z = math.radians(-18)
+
+            bone.ik_max_x = math.radians(18)
+            bone.ik_max_y = math.radians(18)
+            bone.ik_max_z = math.radians(18)
+            
+        elif utils.is_in_list(bone.name, ['head']):
+            bone.lock_ik_x = False
+            bone.lock_ik_y = False
+            bone.lock_ik_z = False
+
+            bone.ik_min_x = math.radians(-30)
+            bone.ik_min_y = math.radians(-70)
+            bone.ik_min_z = math.radians(-20)
+
+            bone.ik_max_x = math.radians(30)
+            bone.ik_max_y = math.radians(70)
+            bone.ik_max_z = math.radians(20)
+
+        elif utils.is_in_list(bone.name, ['upper_arm']):
+            bone.lock_ik_x = False
+            bone.lock_ik_y = True
+            bone.lock_ik_z = False
+
+            bone.ik_min_x = math.radians(-60)
+            bone.ik_min_y = math.radians(-180)
+            if utils.is_in_list(bone.name, ['left', '.l']):
+                bone.ik_min_z = math.radians(-90)
+            else:
+                bone.ik_min_z = math.radians(-140)
+
+            bone.ik_max_x = math.radians(120)
+            bone.ik_max_y = math.radians(180)
+            if utils.is_in_list(bone.name, ['left', '.l']):
+                bone.ik_max_z = math.radians(140)
+            else:
+                bone.ik_max_z = math.radians(90)
+                
+        elif utils.is_in_list(bone.name, ['forearm']):
+            bone.lock_ik_x = False
+            bone.lock_ik_y = True
+            bone.lock_ik_z = True
+
+            bone.ik_min_x = math.radians(-34)
+            bone.ik_min_y = math.radians(-180)
+            bone.ik_min_z = math.radians(-180)
+
+            bone.ik_max_x = math.radians(120)
+            bone.ik_max_y = math.radians(180)
+            bone.ik_max_z = math.radians(180)
+
+        elif utils.is_in_list(bone.name, ['thigh']):
+            bone.lock_ik_x = False
+            bone.lock_ik_y = True
+            bone.lock_ik_z = False
+
+            bone.ik_min_x = math.radians(-90)
+            bone.ik_min_y = math.radians(-180)
+            if utils.is_in_list(bone.name, ['left', '.l']):
+                bone.ik_min_z = math.radians(-90)
+            else:
+                bone.ik_min_z = math.radians(-60)
+
+            bone.ik_max_x = math.radians(80)
+            bone.ik_max_y = math.radians(180)
+            if utils.is_in_list(bone.name, ['left', '.l']):
+                bone.ik_max_z = math.radians(60)
+            else:
+                bone.ik_max_z = math.radians(90)
+
+        elif utils.is_in_list(bone.name, ['shin']):
+            bone.lock_ik_x = False
+            bone.lock_ik_y = True
+            bone.lock_ik_z = True
+
+            bone.ik_min_x = math.radians(0)
+            bone.ik_min_y = math.radians(-180)
+            bone.ik_min_z = math.radians(-180)
+
+            bone.ik_max_x = math.radians(120)
+            bone.ik_max_y = math.radians(180)
+            bone.ik_max_z = math.radians(180)
+
+        elif utils.is_in_list(bone.name, ['foot']):
+            bone.lock_ik_x = False
+            bone.lock_ik_y = False
+            bone.lock_ik_z = False
+
+            bone.ik_min_x = math.radians(-60)
+            bone.ik_min_y = math.radians(-4)
+            bone.ik_min_z = math.radians(-30)
+
+            bone.ik_max_x = math.radians(15)
+            bone.ik_max_y = math.radians(4)
+            bone.ik_max_z = math.radians(30)
+            
+        else:
+            bone.lock_ik_x = False
+            bone.lock_ik_y = False
+            bone.lock_ik_z = False
+
+            bone.ik_min_x = math.radians(-180)
+            bone.ik_min_y = math.radians(-180)
+            bone.ik_min_z = math.radians(-180)
+
+            bone.ik_max_x = math.radians(180)
+            bone.ik_max_y = math.radians(180)
+            bone.ik_max_z = math.radians(180)
+
+class ClearSkeletonPhysics(bpy.types.Operator):
+    '''Clear physics from selected skeleton.'''
+    bl_label = "Clear Skeleton Physics"
+    bl_idname = "armature.clear_skeleton_physics"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    physic_skeleton = BoolProperty(name='Remove Physic Skeleton', default=True,
+                            description='Removes physic skeleton.')
+    physic_proxies = BoolProperty(name='Clear Physic Proxies', default=True,
+                            description='Clears physic proxies.')
+    
+    def __init__(self):
+        armature = bpy.context.active_object
+        if armature.type != 'ARMATURE':
+            self.report({'ERROR'}, 'You have to select a armature object!')
+            return {'FINISHED'}
+
+        group = utils.get_chr_node_from_skeleton(armature)
+        if not group:
+            self.report({'ERROR'}, 'Your armature has to has a primitive mesh which added to a CHR node!')
+            return {'FINISHED'}
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.label("Dephysicalize Options:")
+        col.prop(self, "physic_skeleton")
+        col.prop(self, "physic_proxies")
+        col.separator()
+        col.separator()
+    
+    def execute(self, context):
+        armature = bpy.context.active_object
+        physic_armature = None
+        physic_name = "{}_Phys".format(armature.name)
+        group = utils.get_chr_node_from_skeleton(armature)
+
+        if self.physic_proxies and group:
+            armature.select = False
+            for object_ in group.objects:
+                if utils.is_bone_geometry(object_):
+                    object_.select = True
+                    bpy.context.scene.objects.active = object_
+            bpy.ops.object.delete()
+
+        if self.physic_skeleton and (physic_name in bpy.data.objects):
+            physic_armature = bpy.data.objects[physic_name]
+            
+            armature.select = False
+            physic_armature.select = True
+            bpy.context.scene.objects.active = physic_armature
+            bpy.ops.object.delete()
+
+        return {'FINISHED'}
+
+
 class ApplyAnimationScale(bpy.types.Operator):
     '''Select to apply animation skeleton scaling and rotation'''
     bl_label = "Apply Animation Scaling"
@@ -2468,6 +2949,11 @@ class BoneUtilitiesPanel(View3DPanel, Panel):
             text="Edit Inverse Kinematics")
         col.separator()
 
+        col.label("Physics", icon="PHYSICS")
+        col.separator()
+        col.operator("armature.physicalize_skeleton", text="Physicalize Skeleton")
+        col.operator("armature.clear_skeleton_physics", text="Clear Skeleton Physics")
+
 
 class MeshUtilitiesPanel(View3DPanel, Panel):
     bl_label = "Mesh Utilities"
@@ -2693,6 +3179,16 @@ class BoneUtilitiesMenu(bpy.types.Menu):
             text="Edit Inverse Kinematics",
             icon="CONSTRAINT")
         layout.separator()
+
+        layout.label(text="Physics")
+        layout.operator(
+            "armature.physicalize_skeleton",
+            text="Physicalize Skeleton",
+            icon='PHYSICS')
+        layout.operator(
+            "armature.clear_skeleton_physics",
+            text="Clear Skeleton Physics",
+            icon='PHYSICS')
 
 
 class MeshUtilitiesMenu(bpy.types.Menu):
@@ -2927,6 +3423,9 @@ def get_classes_to_register():
         AddBranchJoint,
 
         EditInverseKinematics,
+        PhysicalizeSkeleton,
+        ClearSkeletonPhysics,
+
         EditRenderMesh,
         EditPhysicProxy,
         EditJointNode,
