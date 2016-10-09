@@ -2023,157 +2023,6 @@ class AddPrimitiveMesh(bpy.types.Operator):
         triangle.parent = armature
 
         return {'FINISHED'}
-        
-
-class AddBoneGeometry(bpy.types.Operator):
-    '''Add BoneGeometry for bones in selected armatures.'''
-    bl_label = "Add BoneGeometry"
-    bl_idname = "armature.add_bone_geometry"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    view_align = BoolProperty(
-        name="Align to View",
-        default=False,
-    )
-    location = FloatVectorProperty(
-        name="Location",
-        subtype='TRANSLATION',
-    )
-    rotation = FloatVectorProperty(
-        name="Rotation",
-        subtype='EULER',
-    )
-
-    def execute(self, context):
-        verts_loc, faces = add_bone_geometry()
-
-        for object_ in bpy.context.selected_objects:
-            if object_.type == 'ARMATURE' and not utils.is_physical(object_):
-                for bone in object_.data.bones:
-                    mesh = bpy.data.meshes.new(
-                        "{}_boneGeometry".format(bone.name)
-                    )
-                    bm = bmesh.new()
-
-                    for v_co in verts_loc:
-                        bm.verts.new(v_co)
-
-                    if hasattr(bm.verts, "ensure_lookup_table"):
-                        bm.verts.ensure_lookup_table()
-
-                    for f_idx in faces:
-                        bm.faces.new([bm.verts[i] for i in f_idx])
-
-                    bm.to_mesh(mesh)
-                    mesh.update()
-
-                    bmatrix = bone.head_local
-                    self.location[0] = bmatrix[0]
-                    self.location[1] = bmatrix[1]
-                    self.location[2] = bmatrix[2]
-
-                    # Add the mesh as an object into the scene
-                    # with this utility module
-                    from bpy_extras import object_utils
-                    object_utils.object_data_add(
-                        context, mesh, operator=self
-                    )
-                    bpy.ops.mesh.uv_texture_add()
-
-        return {'FINISHED'}
-
-    def invoke(self, context, event):
-        has_armature = False
-        for object_ in context.selected_objects:
-            if object_.type == "ARMATURE":
-                has_armature = True
-                break
-
-        if not has_armature:
-            self.report(
-                {'ERROR'},
-                "Select one or more armatures in OBJECT mode.")
-            return {'FINISHED'}
-
-        return self.execute(context)
-
-
-def add_bone_geometry():
-    """
-    This function takes inputs and returns vertex and face arrays.
-    No actual mesh data creation is done here.
-    """
-
-    verts = [(-0.5, -0.5, -0.5),
-             (-0.5, 0.5, -0.5),
-             (0.5, 0.5, -0.5),
-             (0.5, -0.5, -0.5),
-             (-0.5, -0.5, 0.5),
-             (-0.5, 0.5, 0.5),
-             (0.5, 0.5, 0.5),
-             (0.5, -0.5, 0.5),
-             ]
-
-    faces = [(0, 1, 2, 3),
-             (4, 7, 6, 5),
-             (0, 4, 5, 1),
-             (1, 5, 6, 2),
-             (2, 6, 7, 3),
-             (4, 0, 3, 7),
-             ]
-
-    return verts, faces
-
-
-class RemoveBoneGeometry(bpy.types.Operator):
-    '''Remove all bone geometry from the scene.'''
-    bl_label = "Remove BoneGeometry"
-    bl_idname = "armature.remove_bone_geometry"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        bpy.ops.object.mode_set(mode='OBJECT')
-        utils.deselect_all()
-
-        for object_ in bpy.data.objects:
-            if utils.is_bone_geometry(object_):
-                object_.select = True
-
-        bpy.ops.object.delete()
-
-        return {'FINISHED'}
-
-
-class RenamePhysBones(bpy.types.Operator):
-    '''Renames bones with _Phys extension.'''
-    bl_label = "Rename Phys Bones"
-    bl_idname = "armature.rename_phys_bones"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        for object_ in bpy.context.selected_objects:
-            if (object_.type == 'ARMATURE'):
-                utils.physicalize(object_)
-                for bone in object_.data.bones:
-                    if not utils.is_physical(bone):
-                        utils.physicalize(bone)
-
-        return {'FINISHED'}
-
-    def invoke(self, context, event):
-        has_armature = False
-        for object_ in context.selected_objects:
-            if object_.type == "ARMATURE":
-                has_armature = True
-                break
-
-        if not has_armature:
-            self.report(
-                {'ERROR'},
-                "Select one or more armatures in OBJECT mode.")
-            return {'FINISHED'}
-
-        return self.execute(context)
 
 
 class ApplyAnimationScale(bpy.types.Operator):
@@ -2619,14 +2468,6 @@ class BoneUtilitiesPanel(View3DPanel, Panel):
             text="Edit Inverse Kinematics")
         col.separator()
 
-        col.label("Physics", icon="PHYSICS")
-        col.separator()
-        col.operator("armature.add_bone_geometry", text="Add Bone Geometry")
-        col.operator(
-            "armature.remove_bone_geometry",
-            text="Remove Bone Geometry")
-        col.operator("armature.rename_phys_bones", text="Rename Phys Bones")
-
 
 class MeshUtilitiesPanel(View3DPanel, Panel):
     bl_label = "Mesh Utilities"
@@ -2852,20 +2693,6 @@ class BoneUtilitiesMenu(bpy.types.Menu):
             text="Edit Inverse Kinematics",
             icon="CONSTRAINT")
         layout.separator()
-
-        layout.label(text="Physics")
-        layout.operator(
-            "armature.add_bone_geometry",
-            text="Add Bone Geometry",
-            icon="PHYSICS")
-        layout.operator(
-            "armature.remove_bone_geometry",
-            text="Remove Bone Geometry",
-            icon="PHYSICS")
-        layout.operator(
-            "armature.rename_phys_bones",
-            text="Rename Phys Bones",
-            icon="PHYSICS")
 
 
 class MeshUtilitiesMenu(bpy.types.Menu):
@@ -3119,10 +2946,6 @@ def get_classes_to_register():
         RemoveAllWeight,
         FindNoUVs,
         AddUVTexture,
-
-        RenamePhysBones,
-        AddBoneGeometry,
-        RemoveBoneGeometry,
 
         ApplyAnimationScale,
 
