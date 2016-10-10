@@ -2111,10 +2111,10 @@ class PhysicalizeSkeleton(bpy.types.Operator):
         physic_armature = None
         group = utils.get_chr_node_from_skeleton(armature)
         self.__create_materials(armature, materials)
+        armature.data.pose_position = 'REST'
         bpy.ops.object.mode_set(mode='EDIT')
 
         for bone in armature.pose.bones:
-            print(bone.name)
             if not bone.bone.select:
                 continue
 
@@ -2236,7 +2236,9 @@ class PhysicalizeSkeleton(bpy.types.Operator):
         armature.select = True
         bpy.context.scene.objects.active = armature
 
-        
+        armature.data.pose_position = 'POSE'
+
+
         return {'FINISHED'}
 
     def __set_primitive_mesh_material(self, armature, materials):
