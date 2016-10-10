@@ -20,12 +20,13 @@
 # Name:        __init__.py
 # Purpose:     Primary python file for BCry Exporter add-on
 #
-# Author:      Angelo J. Miner,
-#              Mikołaj Milej, Daniel White, Özkan Afacan,
+# Author:      Özkan Afacan,
+#              Angelo J. Miner, Mikołaj Milej, Daniel White,
 #              Oscar Martin Garcia, David Marcelis, Duo Oratar
 #
 # Created:     23/02/2012
 # Copyright:   (c) Angelo J. Miner 2012
+# Copyright:   (c) Özkan Afacan 2016
 # License:     GPLv2+
 #------------------------------------------------------------------------------
 
@@ -35,8 +36,8 @@ bl_info = {
     "author": "Özkan Afacan, Angelo J. Miner, Mikołaj Milej, Daniel White, "
               "Oscar Martin Garcia, Duo Oratar, David Marcelis",
     "blender": (2, 70, 0),
-    "version": (1, 0, 0),
-    "location": "BCry Exporter Menu",
+    "version": (5, 0, 0),
+    "location": "BCRY Exporter Menu",
     "description": "Export assets from Blender to CryEngine 3",
     "warning": "",
     "wiki_url": "https://github.com/AFCStudio/BCryExporter/wiki",
@@ -3052,7 +3053,7 @@ class ExportPanel(View3DPanel, Panel):
 
 
 class BCryMainMenu(bpy.types.Menu):
-    bl_label = 'BCry Exporter'
+    bl_label = 'BCRY 5 Exporter'
     bl_idname = 'view3d.BCry_main_menu'
 
     def draw(self, context):

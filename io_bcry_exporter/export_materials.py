@@ -2,7 +2,7 @@
 # Name:        export_materials.py
 # Purpose:     Material exporter to CryEngine.
 #
-# Author:      Özkan Afacan
+# Author:      Özkan Afacan,
 #              Angelo J. Miner, Mikołaj Milej, Daniel White,
 #              Oscar Martin Garcia, Duo Oratar, David Marcelis
 #

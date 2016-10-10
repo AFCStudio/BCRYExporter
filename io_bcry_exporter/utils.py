@@ -2,12 +2,13 @@
 # Name:        utils.py
 # Purpose:     Utility functions for use throughout the add-on
 #
-# Author:      Angelo J. Miner,
-#              Mikołaj Milej, Daniel White, Özkan Afacan,
+# Author:      Özkan Afacan,
+#              Angelo J. Miner, Mikołaj Milej, Daniel White,
 #              Oscar Martin Garcia, Duo Oratar, David Marcelis 
 #
 # Created:     23/02/2012
 # Copyright:   (c) Angelo J. Miner 2012
+# Copyright:   (c) Özkan Afacan 2016
 # Licence:     GPLv2+
 #------------------------------------------------------------------------------
 
