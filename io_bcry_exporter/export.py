@@ -614,7 +614,7 @@ class CrytekDaeExporter:
                     self._write_bone_list([utils.get_root_bone(
                         object_.parent)], object_, parent_node, group)
 
-            elif object_.type == "ARMATURE" and utils.is_physical(object_):
+            elif object_.type == "ARMATURE" and utils.is_physic_bone(object_):
                 self._write_bone_list([utils.get_root_bone(
                     object_)], object_, parent_node, group)
 
@@ -639,7 +639,7 @@ class CrytekDaeExporter:
             if fakebone is not None:
                 self._write_transforms(fakebone, node)
 
-                bone_geometry = utils.get_bone_geometry(bone.name)
+                bone_geometry = utils.get_bone_geometry(bone)
                 if bone_geometry is not None:
                     instance = self._create_bone_instance(
                         bone, bone_geometry)
@@ -650,8 +650,8 @@ class CrytekDaeExporter:
                     if extra is not None:
                         node.appendChild(extra)
 
-            elif utils.is_physical(bone):
-                bone_geometry = utils.get_bone_geometry(bone.name)
+            elif utils.is_physic_bone(bone):
+                bone_geometry = utils.get_bone_geometry(bone)
                 if bone_geometry is not None:
                     self._write_transforms(bone_geometry, node)
 
@@ -928,7 +928,7 @@ class CrytekDaeExporter:
 
     def _create_ik_properties(self, bone, object_):
         props = ""
-        if utils.is_physical(bone):
+        if utils.is_physic_bone(bone):
 
             armature_object = bpy.data.objects[object_.name[:-5]]
             pose_bone = armature_object.pose.bones[bone.name[:-5]]
