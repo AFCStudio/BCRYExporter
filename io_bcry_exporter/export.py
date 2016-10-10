@@ -2,13 +2,14 @@
 # Name:        export.py
 # Purpose:     Main exporter to CryEngine
 #
-# Author:      Angelo J. Miner,
-#              Mikołaj Milej, Özkan Afacan, Daniel White,
+# Author:      Özkan Afacan,
+#              Angelo J. Miner, Mikołaj Milej, Daniel White,
 #              Oscar Martin Garcia, Duo Oratar, David Marcelis
 #              Some code borrowed from fbx exporter Campbell Barton
 #
 # Created:     23/01/2012
 # Copyright:   (c) Angelo J. Miner 2012
+# Copyright:   (c) Özkan Afacan 2016
 # License:     GPLv2+
 #------------------------------------------------------------------------------
 

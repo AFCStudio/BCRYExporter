@@ -7,6 +7,7 @@
 #
 # Created:     23/06/2013
 # Copyright:   (c) Mikołaj Milej 2013
+# Copyright:   (c) Özkan Afacan 2016
 # License:     GPLv2+
 #------------------------------------------------------------------------------
 
