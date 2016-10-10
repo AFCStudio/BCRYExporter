@@ -2193,16 +2193,6 @@ class ApplyAnimationScale(bpy.types.Operator):
         return self.execute(context)
 
 
-class RemoveFakebones(bpy.types.Operator):
-    '''(Deprecated) Remove all fakebones for backward compatibility'''
-    bl_label = "Remove All FakeBones"
-    bl_idname = "scene.remove_fake_bones"
-
-    def execute(self, context):
-        utils.remove_fakebones()
-        return {'FINISHED'}
-
-
 #------------------------------------------------------------------------------
 # Export Handler:
 #------------------------------------------------------------------------------
@@ -2627,7 +2617,6 @@ class BoneUtilitiesPanel(View3DPanel, Panel):
         col.operator(
             "object.edit_inverse_kinematics",
             text="Edit Inverse Kinematics")
-        col.operator("scene.remove_fake_bones", text="Remove Old Fakebones")
         col.separator()
 
         col.label("Physics", icon="PHYSICS")
@@ -2862,10 +2851,6 @@ class BoneUtilitiesMenu(bpy.types.Menu):
             "object.edit_inverse_kinematics",
             text="Edit Inverse Kinematics",
             icon="CONSTRAINT")
-        layout.operator(
-            "scene.remove_fake_bones",
-            text="Remove Old Fakebones",
-            icon='CONSTRAINT')
         layout.separator()
 
         layout.label(text="Physics")
@@ -3138,7 +3123,6 @@ def get_classes_to_register():
         RenamePhysBones,
         AddBoneGeometry,
         RemoveBoneGeometry,
-        RemoveFakebones,
 
         ApplyAnimationScale,
 
