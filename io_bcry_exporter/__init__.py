@@ -208,7 +208,24 @@ class AddCryExportNode(bpy.types.Operator):
 
     def __init__(self):
         bpy.ops.object.mode_set(mode='OBJECT')
-        node_name = bpy.context.active_object.name
+        object_ = bpy.context.active_object
+        self.node_name = object_.name
+        self.node_type = 'cgf'
+
+        if object_.type != 'MESH':
+            self.report(
+                {'ERROR'},
+                "Selected object is not a mesh! Please select a mesh object.")
+            return {'FINISHED'}
+
+        if object_.parent and object_.parent.type == 'ARMATURE':
+            if len(object_.data.vertices) <= 4:
+                self.node_type = 'chr'
+                self.node_name = object_.parent.name
+            else:
+                self.node_type = 'skin'
+        elif object_.animation_data:
+            self.node_type = 'cga'
 
     def execute(self, context):
         if bpy.context.selected_objects:
