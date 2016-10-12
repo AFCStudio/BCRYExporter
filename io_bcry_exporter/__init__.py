@@ -1997,10 +1997,6 @@ class AddPrimitiveMesh(bpy.types.Operator):
         col.prop(self, "root_bone")
         col.separator()
 
-
-    def invoke(self, context, event):
-        return self.execute(context)
-
     def __init__(self):
         armature = bpy.context.active_object
         if not armature or armature.type != 'ARMATURE':
@@ -2039,6 +2035,21 @@ class AddPrimitiveMesh(bpy.types.Operator):
         triangle.modifiers['Armature'].object = armature
         
         triangle.parent = armature
+
+        material_ = None
+        mat_name = "{}__01__No_Draw__physProxyNoDraw".format(armature.name)
+
+        if mat_name in bpy.data.materials:
+            material_ = bpy.data.materials[mat_name]
+        else:
+            material_ = bpy.data.materials.new(mat_name)
+
+        if triangle.material_slots:
+            triangle.material_slots[0].material = material_
+        else:
+            bpy.ops.object.material_slot_add()
+            if triangle.material_slots:
+                triangle.material_slots[0].material = material_
 
         return {'FINISHED'}
 
