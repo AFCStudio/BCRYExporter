@@ -1040,6 +1040,23 @@ class EditInverseKinematics(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self)
 
 
+class ApplyAnimationScale(bpy.types.Operator):
+    '''Select to apply animation skeleton scaling and rotation'''
+    bl_label = "Apply Animation Scaling"
+    bl_idname = "ops.apply_animation_scaling"
+
+    def execute(self, context):
+        utils.apply_animation_scale(bpy.context.active_object)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        if context.object is None or context.object.type != "ARMATURE" or context.object.mode != "OBJECT":
+            self.report({'ERROR'}, "Select an armature in OBJECT mode.")
+            return {'FINISHED'}
+
+        return self.execute(context)
+
+
 #------------------------------------------------------------------------------
 # (UDP) Physics Proxy:
 #------------------------------------------------------------------------------
@@ -2524,23 +2541,6 @@ class ClearSkeletonPhysics(bpy.types.Operator):
             bpy.ops.object.delete()
 
         return {'FINISHED'}
-
-
-class ApplyAnimationScale(bpy.types.Operator):
-    '''Select to apply animation skeleton scaling and rotation'''
-    bl_label = "Apply Animation Scaling"
-    bl_idname = "ops.apply_animation_scaling"
-
-    def execute(self, context):
-        utils.apply_animation_scale(bpy.context.active_object)
-        return {'FINISHED'}
-
-    def invoke(self, context, event):
-        if context.object is None or context.object.type != "ARMATURE" or context.object.mode != "OBJECT":
-            self.report({'ERROR'}, "Select an armature in OBJECT mode.")
-            return {'FINISHED'}
-
-        return self.execute(context)
 
 
 #------------------------------------------------------------------------------
