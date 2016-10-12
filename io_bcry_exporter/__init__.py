@@ -465,6 +465,80 @@ class ApplyTransforms(bpy.types.Operator):
 # CryEngine-Related Tools:
 #------------------------------------------------------------------------------
 
+class GenerateLODs(bpy.types.Operator):
+    '''Generate LOD meshes for selected object.'''
+    bl_label = "Generate LOD Meshes"
+    bl_idname = "mesh.generate_lod_meshes"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    lod_count = IntProperty(name="LOD Count", default=2, min=1, max=5, step=1,
+                        description="LOD count to generate.")
+    decimate_ratio = FloatProperty(name="Decimate Ratio", default=0.5,
+                        min=0.001, max=1.000, precision=3, step=0.1,
+                        description="Decimate ratio for LODs.")
+    view_offset = FloatProperty(name="View Offset", default=1.5, precision=3,
+                        description="View offset in scene.")
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.prop(self, "lod_count")
+        col.prop(self, "decimate_ratio")
+        col = layout.column()
+        col.prop(self, "view_offset")
+        col.separator()
+
+    def __init__(self):
+        object_ = bpy.context.active_object
+        if not object_ or object_.type != 'MESH':
+            self.report({'ERROR'}, "Please select a mesh object!")
+            return {'FINISHED'}
+
+    def execute(self, context):
+        object_ = bpy.context.active_object
+    
+        for obj in bpy.context.scene.objects:
+            if object_.name != obj.name:
+                obj.select = False
+
+        node = None
+        ALLOWED_NODE_TYPES = ('cgf', 'cga', 'skin')
+        for group in object_.users_group:
+            if utils.is_export_node(group):
+                node_type = utils.get_node_type(group)
+                if node_type in ALLOWED_NODE_TYPES:
+                    node = group
+                    break
+
+        bpy.ops.object.duplicate()
+        lod = bpy.context.active_object
+        lod.location.x += self.view_offset
+
+        bpy.ops.object.modifier_add(type='DECIMATE')
+        decimate = lod.modifiers[len(lod.modifiers) - 1]
+        decimate.ratio = self.decimate_ratio
+
+        lod_name = "{}_LOD1".format(object_.name)
+        lod.name = lod_name
+        lod.data.name = lod_name
+
+        for index in range(2, self.lod_count + 1):
+            bpy.ops.object.duplicate()
+
+            lod = bpy.context.active_object
+            lod.location.x += self.view_offset
+
+            decimate = lod.modifiers[len(lod.modifiers) - 1]
+
+            decimate.ratio = self.decimate_ratio / math.pow(2, index)
+            
+            lod_name = "{}_LOD{}".format(object_.name, index)
+            lod.name = lod_name
+            lod.data.name = lod_name
+
+        return {'FINISHED'}
+
+
 class AddProxy(bpy.types.Operator):
     '''Click to add proxy to selected mesh. The proxy will always display as a box but will \
 be converted to the selected shape in CryEngine.'''
@@ -3014,6 +3088,10 @@ class MeshUtilitiesPanel(View3DPanel, Panel):
         layout = self.layout
         col = layout.column(align=True)
 
+        col.label(text="LODs", icon="EDIT_VEC")
+        col.separator()
+        col.operator("mesh.generate_lod_meshes", text="Create LODs")
+
         col.label(text="Weight Repair", icon="WPAINT_HLT")
         col.separator()
         col.operator("mesh.find_weightless", text="Find Weightless")
@@ -3249,6 +3327,13 @@ class MeshUtilitiesMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
+        
+        layout.label(text="LODs")
+        layout.operator(
+            "mesh.generate_lod_meshes",
+            text="Generate LODs",
+            icon="EDIT_VEC")
+        layout.separator()
 
         layout.label(text="Weight Repair")
         layout.operator(
@@ -3473,6 +3558,8 @@ def get_classes_to_register():
         AddBreakableJoint,
         AddBranch,
         AddBranchJoint,
+        
+        GenerateLODs,
 
         EditInverseKinematics,
         PhysicalizeSkeleton,

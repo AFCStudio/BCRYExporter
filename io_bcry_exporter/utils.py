@@ -153,6 +153,8 @@ def get_geometry_name(group, object_):
     node_name = get_node_name(group)
     if is_bone_geometry(object_):
         return "{}_{}".format(node_name, object_.name)
+    elif is_lod_geometry(object_):
+        return "{}_{}".format(node_name, changed_lod_name(object_.name))
     else:
         return "{}_{}_geometry".format(node_name, object_.name)
 
@@ -1033,6 +1035,33 @@ def find_cga_node_from_anm_node(anm_group):
             if get_node_type(group) == 'cga':
                 return group
     return None
+
+
+#------------------------------------------------------------------------------
+# LOD Functions:
+#------------------------------------------------------------------------------
+
+def is_lod_geometry(object_):
+    return object_.name[:-1].endswith('_LOD')
+
+
+def is_has_lod(object_):
+    return ("{}_LOD1".format(object_.name) in bpy.data.objects)
+
+
+def changed_lod_name(lod_name):
+    index = lod_name[len(lod_name) - 1]
+    return "_lod{}_{}".format(index, lod_name[:-5])
+
+
+def get_lod_geometries(object_):
+    lods = []
+    lod_base_name = "{}_LOD".format(object_.name)
+    for obj in bpy.data.objects:
+        if obj.name.startswith(lod_base_name):
+            lods.append(obj)
+
+    return lods
 
 
 #------------------------------------------------------------------------------
