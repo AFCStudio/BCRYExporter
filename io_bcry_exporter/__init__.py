@@ -2955,18 +2955,18 @@ class BoneUtilitiesPanel(View3DPanel, Panel):
         col.label("Skeleton", icon="ARMATURE_DATA")
         col.separator()
         col.operator("armature.add_root_bone", text="Add Root Bone")
-        col.operator("armature.add_locator_locomotion", text="Add Locator Locomotion")
         col.operator("armature.add_primitive_mesh", text="Add Primitive Mesh")
-        col.operator(
-            "ops.apply_animation_scaling",
-            text="Apply Animation Scaling")
+        col.operator("armature.add_locator_locomotion", text="Add Locator Locomotion")
         col.separator()
 
         col.label(text="Bone", icon="BONE_DATA")
         col.separator()
         col.operator(
             "object.edit_inverse_kinematics",
-            text="Edit Inverse Kinematics")
+            text="Edit Bone Physic and IKs")
+        col.operator(
+            "ops.apply_animation_scaling",
+            text="Apply Animation Scaling")
         col.separator()
 
         col.label("Physics", icon="PHYSICS")
@@ -3180,24 +3180,24 @@ class BoneUtilitiesMenu(bpy.types.Menu):
             text="Add Root Bone",
             icon="BONE_DATA")
         layout.operator(
-            "armature.add_locator_locomotion",
-            text="Add Locator Locomotion",
-            icon="BONE_DATA")
-        layout.operator(
             "armature.add_primitive_mesh",
             text="Add Primitive Mesh",
             icon="BONE_DATA")
         layout.operator(
-            "ops.apply_animation_scaling",
-            text="Apply Animation Scaling",
-            icon='BONE_DATA')
+            "armature.add_locator_locomotion",
+            text="Add Locator Locomotion",
+            icon="BONE_DATA")
         layout.separator()
 
         layout.label(text="Bone")
         layout.operator(
             "object.edit_inverse_kinematics",
-            text="Edit Inverse Kinematics",
-            icon="CONSTRAINT")
+            text="Set Bone Physic and IKs",
+            icon="OUTLINER_DATA_ARMATURE")
+        layout.operator(
+            "ops.apply_animation_scaling",
+            text="Apply Animation Scaling",
+            icon='OUTLINER_DATA_ARMATURE')
         layout.separator()
 
         layout.label(text="Physics")
