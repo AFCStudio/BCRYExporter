@@ -2149,15 +2149,16 @@ class PhysicalizeSkeleton(bpy.types.Operator):
                             vert.co.y = bone.length
                 
                 bpy.ops.object.mode_set(mode='OBJECT')
-                
+
                 object_.matrix_world = bone.matrix.copy()
+                bpy.ops.object.transform_apply(scale=True)
 
                 if group:
                     group.objects.link(object_)
 
                 object_.show_transparent = True
                 object_.show_wire = True
-                
+
                 if self.physic_materials:
                     mat = None
                     if self.use_single_material:
@@ -2175,10 +2176,10 @@ class PhysicalizeSkeleton(bpy.types.Operator):
                             object_.material_slots[0].material = mat
 
                     bpy.ops.mesh.uv_texture_add()
-                    
+
                 object_.select = False
-                
-                
+
+
                 if self.physic_proxy_settings:
                     if bone_type == 'spine' or bone_type == 'head':
                         bone['phys_proxy'] = 'sphere'
@@ -2200,13 +2201,15 @@ class PhysicalizeSkeleton(bpy.types.Operator):
 
 
         if self.physic_skeleton:
-            bpy.context.scene.objects.active = armature
-            bpy.ops.object.mode_set(mode='EDIT')
-            bpy.ops.armature.duplicate()
-            bpy.ops.armature.separate()
-        
             bpy.ops.object.mode_set(mode='OBJECT')
-        
+            bpy.context.scene.objects.active = armature
+            armature.select = True
+            bpy.ops.object.duplicate()
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.armature.select_all(action='INVERT')
+            bpy.ops.armature.delete()
+            bpy.ops.object.mode_set(mode='OBJECT')
+
             armature_name = "{}.001".format(armature.name)
             physic_name = "{}_Phys".format(armature.name)
             armature.select = False
@@ -2222,9 +2225,6 @@ class PhysicalizeSkeleton(bpy.types.Operator):
         
             physic_armature.location = location
             physic_armature.draw_type = 'WIRE'
-            
-            if group:
-                group.objects.link(physic_armature)
         
             for bone in physic_armature.data.bones:
                 utils.make_physic_bone(bone)
@@ -2242,6 +2242,23 @@ class PhysicalizeSkeleton(bpy.types.Operator):
 
         return {'FINISHED'}
 
+    def __check_parent_relations(self, armature, physic_armature):
+        for phys_bone in physic_armature.pose.bones:
+            if not phys_bone.parent:
+                bone_name = phys_bone.name[:-5]
+                bone = armature.pose.bones[bone_name]
+                while True:
+                    if bone.parent == None:
+                        break
+
+                    bone = bone.parent
+                    phys_bone_name = "{}_Phys".format(bone.name)
+                    if phys_bone_name in physic_armature.pose.bones:
+                        phys_edit_bone = physic_armature.data.edit_bones[phys_bone.name]
+                        phys_parent_edit_bone = physic_armature.data.edit_bones[phys_bone_name]
+                        phys_edit_bone.parent = phys_parent_edit_bone
+                        break
+
     def __set_primitive_mesh_material(self, armature, materials):
         object_ = utils.get_chr_object_from_skeleton(armature)
         object_.select = True
@@ -2253,7 +2270,7 @@ class PhysicalizeSkeleton(bpy.types.Operator):
             mat = materials['primitive']
 
         if object_.material_slots:
-            object_.material_slot[0].material = mat
+            object_.material_slots[0].material = mat
         else:
             bpy.ops.object.material_slot_add()
             if object_.material_slots:
