@@ -73,6 +73,18 @@ def transform_bone_matrix(bone):
     return bone_matrix
 
 
+def transform_animation_matrix(matrix):
+    eu = matrix.to_euler()
+    eu.rotate_axis('Z', math.pi / 2.0)
+    eu.rotate_axis('X', math.pi)
+
+    new_matrix = eu.to_matrix()
+    new_matrix = new_matrix.to_4x4()
+    new_matrix.translation = matrix.translation
+
+    return new_matrix
+
+
 def frame_to_time(frame):
     fps_base = bpy.context.scene.render.fps_base
     fps = bpy.context.scene.render.fps
@@ -826,21 +838,17 @@ def get_keyframes(armature):
         rotations = {}
 
         for bone in armature.pose.bones:
-            fakeBone = bpy.data.objects[bone.name]
-
+            bone_matrix = transform_animation_matrix(bone.matrix)
             if bone.parent and bone.parent.parent:
-                parentMatrix = bpy.data.objects[
-                    bone.parent.name].matrix_world
+                parent_matrix = transform_animation_matrix(bone.parent.matrix)
+                bone_matrix = parent_matrix.inverted() * bone_matrix
+            elif not bone.parent:
+                bone_matrix = Matrix()
 
-                animatrix = parentMatrix.inverted() * fakeBone.matrix_world
-                lm, rm, sm = animatrix.decompose()
-                locations[bone.name] = lm
-                rotations[bone.name] = rm.to_euler()
+            loc, rot, scl = bone_matrix.decompose()
 
-            else:
-                lm, rm, sm = fakeBone.matrix_world.decompose()
-                locations[bone.name] = lm
-                rotations[bone.name] = rm.to_euler()
+            locations[bone.name] = loc
+            rotations[bone.name] = rot.to_euler()
 
         location_list.append(locations.copy())
         rotation_list.append(rotations.copy())
