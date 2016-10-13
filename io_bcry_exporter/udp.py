@@ -106,14 +106,14 @@ def get_bone_ik_max_min(pose_bone):
     if pose_bone.lock_ik_x:
         xIK = '_xmax={!s}'.format(0.0) + '_xmin={!s}'.format(0.0)
     else:
-        xIK = '_xmax={!s}'.format(math.degrees(pose_bone.ik_max_x)) \
-            + '_xmin={!s}'.format(math.degrees(pose_bone.ik_min_x))
+        xIK = '_xmax={!s}'.format(math.degrees(-pose_bone.ik_min_y)) \
+            + '_xmin={!s}'.format(math.degrees(-pose_bone.ik_max_y))
 
     if pose_bone.lock_ik_y:
         yIK = '_ymax={!s}'.format(0.0) + '_ymin={!s}'.format(0.0)
     else:
-        yIK = '_ymax={!s}'.format(math.degrees(pose_bone.ik_max_y)) \
-            + '_ymin={!s}'.format(math.degrees(pose_bone.ik_min_y))
+        yIK = '_ymax={!s}'.format(math.degrees(-pose_bone.ik_min_x)) \
+            + '_ymin={!s}'.format(math.degrees(-pose_bone.ik_max_x))
 
     if pose_bone.lock_ik_z:
         zIK = '_zmax={!s}'.format(0.0) + '_zmin={!s}'.format(0.0)

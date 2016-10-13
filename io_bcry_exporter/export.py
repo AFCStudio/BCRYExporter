@@ -940,14 +940,14 @@ class CrytekDaeExporter:
 
             props = join(
                 xIK,
-                '_xdamping={}'.format(damping[0]),
-                '_xspringangle={}'.format(spring[0]),
-                '_xspringtension={}'.format(spring_tension[0]),
+                '_xdamping={}'.format(damping[1]),
+                '_xspringangle={}'.format(spring[1]),
+                '_xspringtension={}'.format(spring_tension[1]),
 
                 yIK,
-                '_ydamping={}'.format(damping[1]),
-                '_yspringangle={}'.format(spring[1]),
-                '_yspringtension={}'.format(spring_tension[1]),
+                '_ydamping={}'.format(damping[0]),
+                '_yspringangle={}'.format(spring[0]),
+                '_yspringtension={}'.format(spring_tension[0]),
 
                 zIK,
                 '_zdamping={}'.format(damping[2]),
