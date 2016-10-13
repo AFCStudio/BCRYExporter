@@ -181,6 +181,9 @@ class CrytekDaeExporter:
         parent_element.appendChild(libgeo)
         for group in utils.get_mesh_export_nodes(self._config.export_selected_nodes):
             for object_ in group.objects:
+                if object_.type != 'MESH':
+                    continue
+
                 bmesh_, layer_state, scene_layer = utils.get_bmesh(object_)
                 geometry_node = self._doc.createElement("geometry")
                 geometry_name = utils.get_geometry_name(group, object_)
@@ -569,10 +572,6 @@ class CrytekDaeExporter:
             node.setAttribute("LumberyardExportNode", "1")
             node.setIdAttribute("id")
 
-        bpy.ops.mesh.primitive_cube_add(location=(0, 0, 0))
-        self._write_transforms(bpy.context.active_object, node)
-        bpy.ops.object.delete(use_global=False)
-
         root_objects = []
         for object_ in group.objects:
             if utils.is_visual_scene_node_writed(object_, group):
@@ -609,12 +608,14 @@ class CrytekDaeExporter:
                 parent_node.appendChild(node)
 
                 if object_.parent is not None and object_.parent.type == "ARMATURE":
+                    armature = object_.parent
                     self._write_bone_list([utils.get_root_bone(
-                        object_.parent)], object_, parent_node, group)
+                        armature)], object_, parent_node, group)
 
-            elif object_.type == "ARMATURE" and utils.is_physic_bone(object_):
-                self._write_bone_list([utils.get_root_bone(
-                    object_)], object_, parent_node, group)
+                    armature_physic = utils.get_armature_physic(armature)
+                    if armature_physic:
+                        self._write_bone_list([utils.get_root_bone(
+                            armature_physic)], armature_physic, parent_node, group)
 
         return parent_node
 
@@ -639,8 +640,9 @@ class CrytekDaeExporter:
 
                 bone_geometry = utils.get_bone_geometry(bone)
                 if bone_geometry is not None:
+                    geo_name = utils.get_geometry_name(group, bone_geometry)
                     instance = self._create_bone_instance(
-                        bone, bone_geometry)
+                        bone_geometry, geo_name)
                     node.appendChild(instance)
 
                     extra = self._create_physic_proxy_for_bone(
@@ -650,19 +652,19 @@ class CrytekDaeExporter:
 
             elif utils.is_physic_bone(bone):
                 bone_geometry = utils.get_bone_geometry(bone)
-                if bone_geometry is not None:
-                    self._write_transforms(bone_geometry, node)
+                if fakebone is not None:
+                    self._write_transforms(fakebone, node)
 
             parent_node.appendChild(node)
 
             if bone.children:
                 self._write_bone_list(bone.children, object_, node, group)
 
-    def _create_bone_instance(self, bone, bone_geometry):
+    def _create_bone_instance(self, bone_geometry, geometry_name):
         instance = None
 
         instance = self._doc.createElement("instance_geometry")
-        instance.setAttribute("url", "#{}_boneGeometry".format(bone.name))
+        instance.setAttribute("url", "#{}".format(geometry_name))
         bm = self._doc.createElement("bind_material")
         tc = self._doc.createElement("technique_common")
 

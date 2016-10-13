@@ -151,8 +151,10 @@ def get_xsi_filetype_value(node):
 
 def get_geometry_name(group, object_):
     node_name = get_node_name(group)
-    geometry_name = "{}_{}_geometry".format(node_name, object_.name)
-    return geometry_name
+    if is_bone_geometry(object_):
+        return "{}_{}".format(node_name, object_.name)
+    else:
+        return "{}_{}_geometry".format(node_name, object_.name)
 
 
 def get_bmesh(object_):
@@ -1064,6 +1066,14 @@ def make_physic_bone(bone):
         bone.name = bone.name.replace('.001', '_Phys')
     else:
         bone.name = "{}_Phys".format(bone.name)
+
+
+def get_armature_physic(armature):
+    physic_name = "{}_Phys".format(armature.name)
+    if physic_name in bpy.data.objects:
+        return bpy.data.objects[physic_name]
+    else:
+        return None
 
 
 def get_bone_material_type(bone, bone_type):
