@@ -456,13 +456,10 @@ class CrytekDaeExporter:
 
         bones = utils.get_bones(armature)
         bone_matrices = []
-        for bone in bones:
-            fakebone = utils.get_fakebone(bone.name)
-            if fakebone is None:
-                return
-            matrix_local = copy.deepcopy(fakebone.matrix_local)
-            utils.negate_z_axis_of_matrix(matrix_local)
-            bone_matrices.extend(utils.matrix_to_array(matrix_local))
+        for bone in armature.pose.bones:
+
+            bone_matrix = utils.transform_bone_matrix(bone)
+            bone_matrices.extend(utils.matrix_to_array(bone_matrix))
 
         id_ = "{!s}_{!s}-matrices".format(armature.name, object_.name)
         source = utils.write_source(id_, "float4x4", bone_matrices, [])
@@ -726,14 +723,14 @@ class CrytekDaeExporter:
         return trans
 
     def _create_rotation_node(self, object_):
-        rotx = self._write_rotation(
-            "X", "1 0 0 {:f}", object_.rotation_euler[0])
-        roty = self._write_rotation(
-            "Y", "0 1 0 {:f}", object_.rotation_euler[1])
         rotz = self._write_rotation(
-            "Z", "0 0 1 {:f}", object_.rotation_euler[2])
+            "z", "0 0 1 {:f}", object_.rotation_euler[2])
+        roty = self._write_rotation(
+            "y", "0 1 0 {:f}", object_.rotation_euler[1])
+        rotx = self._write_rotation(
+            "x", "1 0 0 {:f}", object_.rotation_euler[0])
 
-        return rotx, roty, rotz
+        return rotz, roty, rotx
 
     def _write_rotation(self, axis, textFormat, rotation):
         rot = self._doc.createElement("rotate")

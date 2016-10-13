@@ -48,6 +48,31 @@ to_degrees = 180.0 / math.pi
 # Conversions:
 #------------------------------------------------------------------------------
 
+def transform_bone_matrix(bone):
+    if not bone.parent:
+        return Matrix()
+
+    i1 = Vector((1.0, 0.0, 0.0))
+    i2 = Vector((0.0, 1.0, 0.0))
+    i3 = Vector((0.0, 0.0, 1.0))
+
+    x_axis = bone.y_axis
+    y_axis = bone.x_axis
+    z_axis = -bone.z_axis
+
+    row_x = Vector((x_axis * i1, x_axis * i2, x_axis * i3))
+    row_y = Vector((y_axis * i1, y_axis * i2, y_axis * i3))
+    row_z = Vector((z_axis * i1, z_axis * i2, z_axis * i3))
+
+    trans_matrix = Matrix((row_x, row_y, row_z))
+
+    location = trans_matrix * bone.matrix.translation
+    bone_matrix = trans_matrix.to_4x4()
+    bone_matrix.translation = -location
+
+    return bone_matrix
+
+
 def frame_to_time(frame):
     fps_base = bpy.context.scene.render.fps_base
     fps = bpy.context.scene.render.fps
@@ -86,15 +111,6 @@ def join(*items):
     for item in items:
         strings.append(str(item))
     return "".join(strings)
-
-
-#------------------------------------------------------------------------------
-# Matrix Manipulations:
-#------------------------------------------------------------------------------
-
-def negate_z_axis_of_matrix(matrix_local):
-    for i in range(0, 3):
-        matrix_local[i][3] = -matrix_local[i][3]
 
 
 #------------------------------------------------------------------------------
@@ -747,9 +763,13 @@ def add_fakebones(group=None):
 
     scene.frame_set(scene.frame_start)
     for pose_bone in armature.pose.bones:
-        bmatrix = pose_bone.bone.head_local
-        bpy.ops.mesh.primitive_cube_add(radius=.01, location=bmatrix)
+        bone_matrix = transform_bone_matrix(pose_bone)
+        loc, rot, scl = bone_matrix.decompose()
+
+        bpy.ops.mesh.primitive_cube_add(radius=.01)
         fakebone = bpy.context.active_object
+        fakebone.matrix_world = bone_matrix
+        fakebone.scale = (1, 1, 1)
         fakebone.name = pose_bone.name
         fakebone["fakebone"] = "fakebone"
         scene.objects.active = armature
