@@ -2798,6 +2798,7 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
     merge_all_nodes = True
     generate_materials = False
     make_layer = False
+    vcloth_pre_process = False
 
     class Config:
 
@@ -2805,6 +2806,7 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
             attributes = (
                 'filepath',
                 'merge_all_nodes',
+                'vcloth_pre_process',
                 'generate_materials',
                 'export_for_lumberyard',
                 'make_layer',
