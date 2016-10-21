@@ -1811,7 +1811,7 @@ class FindWeightless(bpy.types.Operator):
 
 
 class RemoveAllWeight(bpy.types.Operator):
-    '''Select vertices from which to remove weight in edit mode.'''
+    '''Clear all wight information from selected mesh.'''
     bl_label = "Remove All Weight from Selected Vertices"
     bl_idname = "mesh.remove_weight"
 
@@ -1836,8 +1836,7 @@ class RemoveAllWeight(bpy.types.Operator):
 
 
 class FindNoUVs(bpy.types.Operator):
-    '''Use this with no objects selected in object mode \
-to find all items without UVs.'''
+    '''Find objects have no any UV.'''
     bl_label = "Find All Objects with No UV's"
     bl_idname = "scene.find_no_uvs"
 
@@ -2333,7 +2332,6 @@ class PhysicalizeSkeleton(bpy.types.Operator):
                     bpy.ops.mesh.uv_texture_add()
 
                 object_.select = False
-
 
                 if self.physic_proxy_settings:
                     if bone_type == 'spine' or bone_type == 'head':
