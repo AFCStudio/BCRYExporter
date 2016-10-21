@@ -297,7 +297,8 @@ def get_normal_array(bmesh_, use_edge_angle, use_edge_sharp, split_angle):
                 for vertex_normal in v_normals:
                     area_sum += vertex_normal[1]
                 for vertex_normal in v_normals:
-                    smooth_normal += vertex_normal[0] * (vertex_normal[1] / area_sum)
+                    if area_sum:
+                        smooth_normal += vertex_normal[0] * (vertex_normal[1] / area_sum)
                 float_normals.extend(smooth_normal.normalized())
 
     return float_normals
