@@ -403,16 +403,19 @@ class CrytekDaeExporter:
     def _export_library_controllers(self, parent_element):
         library_node = self._doc.createElement("library_controllers")
 
+        ALLOWED_NODE_TYPES = ('chr', 'skin')
         for group in utils.get_mesh_export_nodes(
                     self._config.export_selected_nodes):
-            for object_ in group.objects:
-                if not utils.is_bone_geometry(object_):
-                    armature = utils.get_armature_for_object(object_)
-                    if armature is not None:
-                        self._process_bones(library_node,
-                                            group,
-                                            object_,
-                                            armature)
+            node_type = utils.get_node_type(group)
+            if node_type in ALLOWED_NODE_TYPES:
+                for object_ in group.objects:
+                    if not utils.is_bone_geometry(object_):
+                        armature = utils.get_armature_for_object(object_)
+                        if armature is not None:
+                            self._process_bones(library_node,
+                                                group,
+                                                object_,
+                                                armature)
 
         parent_element.appendChild(library_node)
 
@@ -431,7 +434,7 @@ class CrytekDaeExporter:
         utils.write_matrix(Matrix(), bind_shape_matrix)
         skin_node.appendChild(bind_shape_matrix)
 
-        self._process_bone_joints(object_, armature, skin_node)
+        self._process_bone_joints(object_, armature, skin_node, group)
         self._process_bone_matrices(object_, armature, skin_node)
         self._process_bone_weights(object_, armature, skin_node)
 
@@ -442,11 +445,10 @@ class CrytekDaeExporter:
         joints.appendChild(input)
         skin_node.appendChild(joints)
 
-    def _process_bone_joints(self, object_, armature, skin_node):
+    def _process_bone_joints(self, object_, armature, skin_node, group):
 
         bones = utils.get_bones(armature)
         id_ = "{!s}_{!s}-joints".format(armature.name, object_.name)
-        group = utils.get_armature_node(object_)
         bone_names = []
         for bone in bones:
             props_name = self._create_properties_name(bone, group)
@@ -600,7 +602,7 @@ class CrytekDaeExporter:
                 self._write_transforms(object_, node)
 
                 ALLOWED_NODE_TYPES = ('cgf', 'cga', 'chr', 'skin')
-                if utils.get_node_type(group) in ALLOWED_NODE_TYPES:
+                if node_type in ALLOWED_NODE_TYPES:
                     instance = self._create_instance(group, object_)
                     if instance is not None:
                         node.appendChild(instance)
@@ -610,14 +612,14 @@ class CrytekDaeExporter:
                     node.appendChild(udp_extra)
 
                 parent_node.appendChild(node)
-
-                if object_.parent is not None and object_.parent.type == "ARMATURE":
                 
                 if utils.is_has_lod(object_):
                     sub_node = node
                     for lod in utils.get_lod_geometries(object_):
                         sub_node = self._write_lods(lod, sub_node, group)
 
+                if node_type in ('chr', 'skin') and object_.parent \
+                                        and object_.parent.type == "ARMATURE":
                     armature = object_.parent
                     self._write_bone_list([utils.get_root_bone(
                         armature)], object_, parent_node, group)
@@ -792,8 +794,9 @@ class CrytekDaeExporter:
 
     def _create_instance(self, group, object_):
         armature = utils.get_armature_for_object(object_)
+        node_type = utils.get_node_type(group)
         instance = None
-        if armature is not None:
+        if armature and node_type in ('chr', 'skin'):
             instance = self._doc.createElement("instance_controller")
             # This binds the mesh object to the armature in control of it
             instance.setAttribute("url", "#{!s}_{!s}".format(
