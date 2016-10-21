@@ -2149,8 +2149,8 @@ class AddPrimitiveMesh(bpy.types.Operator):
         
         bm.faces.new(bm.verts)
         bm.to_mesh(triangle.data)
-        triangle.name = 'Triangle'
-        triangle.data.name = 'Triangle'
+        triangle.name = 'No_Draw'
+        triangle.data.name = 'No_Draw'
 
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all()
