@@ -757,7 +757,7 @@ class SetMaterialNames(bpy.types.Operator):
             ("physObstruct", "Obstruct", desc.list['physObstruct']),
             ("physNone", "None", desc.list['physNone'])
         ),
-        default="physDefault")
+        default="physNone")
 
     just_rephysic = BoolProperty(
         name="Only Physic",
@@ -869,7 +869,7 @@ class AddMaterial(bpy.types.Operator):
             ("physObstruct", "Obstruct", list['physObstruct']),
             ("physNone", "None", list['physNone']),
         ),
-        default="physDefault",
+        default="physNone",
     )
 
     def execute(self, context):
