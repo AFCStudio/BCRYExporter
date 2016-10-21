@@ -67,8 +67,11 @@ class _DAEConverter:
 
             if rc_process is not None:
                 rc_process.wait()
-                self.__recompile(dae_path)
-                self.__rename_anm_files(dae_path)
+
+                if not self.__config.is_animation_process:
+                    self.__recompile(dae_path)
+                else:
+                    self.__rename_anm_files(dae_path)
 
         if self.__config.make_layer:
             lyr_contents = self.__make_layer()
