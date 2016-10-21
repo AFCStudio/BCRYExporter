@@ -362,7 +362,7 @@ def get_material_parts(node, material):
     group = node
     index = 0
     name = material
-    physics = "physDefault"
+    physics = "physNone"
 
     if count == 1:
         # name
@@ -391,7 +391,7 @@ def get_material_parts(node, material):
 
     name = utils.replace_invalid_rc_characters(name)
     if physics not in VALID_PHYSICS:
-        physics = "physDefault"
+        physics = "physNone"
 
     return group, index, name, physics
 
@@ -447,7 +447,7 @@ def get_material_physic(material_name):
     if index != -1:
         return material_name[index + 2:]
 
-    return "physDefault"
+    return "physNone"
 
 
 def set_material_physic(self, context, phys_name):
