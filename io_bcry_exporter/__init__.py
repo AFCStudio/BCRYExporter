@@ -1739,18 +1739,43 @@ it's mesh before running this.'''
 
 
 class FindWeightless(bpy.types.Operator):
-    '''Select the object in object mode with nothing in its mesh selected \
-before running this'''
+    '''Finds out unassigned vertices to any bone.'''
     bl_label = "Find Weightless Vertices"
     bl_idname = "mesh.find_weightless"
 
-    # Minimum net weight to be considered non-weightless
     weight_epsilon = 0.0001
 
-    # Weightless: a vertex not belonging to any groups or with a net weight of
-    # 0
+    message = ""
+    vert_count = 0
+
     def execute(self, context):
+        return {"FINISHED"}
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.label(self.message)
+        col.separator()
+        
+        if self.vert_count:
+            col.separator()
+            col.operator("view3d.view_selected", text="Focus")
+            col.separator()
+
+    def __init__(self):
+        self.vert_count = 0
+
+        if bpy.context.active_object is None or bpy.context.active_object.type != "MESH":
+            self.report({'ERROR'}, "Please select a mesh in OBJECT mode.")
+            return None
+
         object_ = bpy.context.active_object
+        if object_.parent == None or object_.parent.type != 'ARMATURE':
+            self.report({'ERROR'}, "Please select a mesh in OBJECT mode.")
+            return None
+
+        armature = object_.parent
+
         bpy.ops.object.mode_set(mode="EDIT")
         bpy.ops.mesh.select_all(action="DESELECT")
         bpy.ops.object.mode_set(mode="OBJECT")
@@ -1758,22 +1783,33 @@ before running this'''
             for v in object_.data.vertices:
                 if (not v.groups):
                     v.select = True
+                    self.vert_count += 1
                 else:
                     weight = 0
                     for g in v.groups:
-                        weight += g.weight
+                        group_name = object_.vertex_groups[g.group].name
+                        if group_name in armature.pose.bones:
+                            weight += g.weight
                     if (weight < self.weight_epsilon):
                         v.select = True
         object_.data.update()
-        bpy.ops.object.mode_set(mode="EDIT")
-        return {"FINISHED"}
+
+        if self.vert_count == 0:
+            self.message = "Selected mesh has no any weightless vertex."
+        else:
+            self.message = "Selected mesh has {} weightless vertices.".format(self.vert_count)
+            bpy.ops.object.mode_set(mode="EDIT")
 
     def invoke(self, context, event):
         if context.object is None or context.object.type != "MESH":
-            self.report({'ERROR'}, "Select a mesh in OBJECT mode.")
+            self.report({'ERROR'}, "Please select a mesh in OBJECT mode.")
+            return {'FINISHED'}
+        object_ = context.object
+        if object_.parent == None or object_.parent.type != 'ARMATURE':
+            self.report({'ERROR'}, "Please select a mesh in OBJECT mode.")
             return {'FINISHED'}
 
-        return self.execute(context)
+        return context.window_manager.invoke_props_dialog(self)
 
 
 class RemoveAllWeight(bpy.types.Operator):
