@@ -585,8 +585,12 @@ class CrytekDaeExporter:
 
     def _write_visual_scene_node(self, objects, parent_node, group):
         for object_ in objects:
-            if object_.type == "MESH" and not utils.is_fakebone(object_):
-                prop_name = join(object_.name,
+            if object_.type == "MESH" and not utils.is_fakebone(object_) \
+                    and not utils.is_lod_geometry(object_):
+                prop_name = object_.name
+                node_type = utils.get_node_type(group)
+                if node_type in ('chr', 'skin'):
+                    prop_name = join(object_.name,
                                  self._create_properties_name(object_, group))
                 node = self._doc.createElement("node")
                 node.setAttribute("id", prop_name)
@@ -608,6 +612,12 @@ class CrytekDaeExporter:
                 parent_node.appendChild(node)
 
                 if object_.parent is not None and object_.parent.type == "ARMATURE":
+                
+                if utils.is_has_lod(object_):
+                    sub_node = node
+                    for lod in utils.get_lod_geometries(object_):
+                        sub_node = self._write_lods(lod, sub_node, group)
+
                     armature = object_.parent
                     self._write_bone_list([utils.get_root_bone(
                         armature)], object_, parent_node, group)
@@ -618,6 +628,34 @@ class CrytekDaeExporter:
                             armature_physic)], armature_physic, parent_node, group)
 
         return parent_node
+
+    def _write_lods(self, object_, parent_node, group):
+        #prop_name = object_.name
+        prop_name = utils.changed_lod_name(object_.name)
+        node_type = utils.get_node_type(group)
+        if node_type in ('chr', 'ckin'):
+            prop_name = join(object_.name,
+                        self._create_properties_name(object_, group))
+        node = self._doc.createElement("node")
+        node.setAttribute("id", prop_name)
+        node.setAttribute("name", prop_name)
+        node.setIdAttribute("id")
+
+        self._write_transforms(object_, node)
+
+        ALLOWED_NODE_TYPES = ('cgf', 'cga', 'chr', 'skin')
+        if utils.get_node_type(group) in ALLOWED_NODE_TYPES:
+            instance = self._create_instance(group, object_)
+            if instance is not None:
+                node.appendChild(instance)
+
+        udp_extra = self._create_user_defined_property(object_)
+        if udp_extra is not None:
+            node.appendChild(udp_extra)
+
+        parent_node.appendChild(node)
+        
+        return node
 
     def _write_bone_list(self, bones, object_, parent_node, group):
         scene = bpy.context.scene
