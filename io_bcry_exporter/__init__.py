@@ -1789,6 +1789,7 @@ class FindWeightless(bpy.types.Operator):
                             weight += g.weight
                     if (weight < self.weight_epsilon):
                         v.select = True
+                        self.vert_count += 1
         object_.data.update()
 
         if self.vert_count == 0:
