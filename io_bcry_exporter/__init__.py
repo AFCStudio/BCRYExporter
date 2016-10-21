@@ -2184,18 +2184,20 @@ class PhysicalizeSkeleton(bpy.types.Operator):
                 bpy.ops.object.mode_set(mode='EDIT')
                 
                 bm = bmesh.from_edit_mesh(object_.data)
+                scale_vertor = (1.07, 1.07, 1.07)
                 
                 for face in bm.faces:
-                    if face.normal.y == -1.0:
+                    if face.normal.x == -1.0:
                         for vert in face.verts:
-                            vert.co.y = 0.0
-                    elif face.normal.y == 1.0:
+                            vert.co.x = 0.0
+                    elif face.normal.x == 1.0:
                         for vert in face.verts:
-                            vert.co.y = bone.length
+                            vert.co.x = bone.length
+                        bmesh.ops.scale(bm, vec=scale_vertor, verts=face.verts)
                 
                 bpy.ops.object.mode_set(mode='OBJECT')
 
-                object_.matrix_world = bone.matrix.copy()
+                object_.matrix_world = utils.transform_animation_matrix(bone.matrix)
                 bpy.ops.object.transform_apply(scale=True)
 
                 if group:
