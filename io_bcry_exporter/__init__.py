@@ -1063,12 +1063,9 @@ class EditInverseKinematics(bpy.types.Operator):
         if armature is None or armature.type != "ARMATURE":
             return None
 
-        for temp_bone in armature.pose.bones:
-            if temp_bone.bone.select:
-                self.bone = temp_bone
-                break
-
-        if self.bone is None:
+        if bpy.context.active_pose_bone:
+            self.bone = bpy.context.active_pose_bone
+        else:
             return None
 
         try:
@@ -1125,7 +1122,7 @@ class EditInverseKinematics(bpy.types.Operator):
     def invoke(self, context, event):
         if (context.object is None or context.object.type != "ARMATURE" or
                 context.object.mode != "POSE" or self.bone is None):
-            self.report({'ERROR'}, "Select a bone in POSE mode.")
+            self.report({'ERROR'}, "Please select a bone in POSE mode!")
             return {'FINISHED'}
 
         return context.window_manager.invoke_props_dialog(self)
@@ -1792,6 +1789,7 @@ class FindWeightless(bpy.types.Operator):
                             weight += g.weight
                     if (weight < self.weight_epsilon):
                         v.select = True
+                        self.vert_count += 1
         object_.data.update()
 
         if self.vert_count == 0:
@@ -1813,7 +1811,7 @@ class FindWeightless(bpy.types.Operator):
 
 
 class RemoveAllWeight(bpy.types.Operator):
-    '''Select vertices from which to remove weight in edit mode.'''
+    '''Clear all wight information from selected mesh.'''
     bl_label = "Remove All Weight from Selected Vertices"
     bl_idname = "mesh.remove_weight"
 
@@ -1838,8 +1836,7 @@ class RemoveAllWeight(bpy.types.Operator):
 
 
 class FindNoUVs(bpy.types.Operator):
-    '''Use this with no objects selected in object mode \
-to find all items without UVs.'''
+    '''Find objects have no any UV.'''
     bl_label = "Find All Objects with No UV's"
     bl_idname = "scene.find_no_uvs"
 
@@ -2149,8 +2146,8 @@ class AddPrimitiveMesh(bpy.types.Operator):
         
         bm.faces.new(bm.verts)
         bm.to_mesh(triangle.data)
-        triangle.name = 'Triangle'
-        triangle.data.name = 'Triangle'
+        triangle.name = 'No_Draw'
+        triangle.data.name = 'No_Draw'
 
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all()
@@ -2335,7 +2332,6 @@ class PhysicalizeSkeleton(bpy.types.Operator):
                     bpy.ops.mesh.uv_texture_add()
 
                 object_.select = False
-
 
                 if self.physic_proxy_settings:
                     if bone_type == 'spine' or bone_type == 'head':
