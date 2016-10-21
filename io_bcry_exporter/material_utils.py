@@ -213,7 +213,8 @@ def get_diffuse_texture(material):
         if bpy.context.scene.render.engine == 'CYCLES':
             for node in material.node_tree.nodes:
                 if node.type == 'TEX_IMAGE':
-                    if node.name in ['Image Texture', 'Diffuse']:
+                    if node.name == 'Image Texture' or \
+                                    node.name.lower().find('diffuse') != -1:
                         image = node.image
                         if is_valid_image(image):
                             return image
@@ -235,7 +236,7 @@ def get_specular_texture(material):
         if bpy.context.scene.render.engine == 'CYCLES':
             for node in material.node_tree.nodes:
                 if node.type == 'TEX_IMAGE':
-                    if node.name == 'Specular':
+                    if node.name.lower().find('specular') != -1:
                         image = node.image
                         if is_valid_image(image):
                             return image
@@ -257,7 +258,7 @@ def get_normal_texture(material):
         if bpy.context.scene.render.engine == 'CYCLES':
             for node in material.node_tree.nodes:
                 if node.type == 'TEX_IMAGE':
-                    if node.name == 'Normal':
+                    if node.name.lower().find('normal') != -1:
                         image = node.image
                         if is_valid_image(image):
                             return image
