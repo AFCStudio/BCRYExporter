@@ -1761,7 +1761,9 @@ before running this'''
                 else:
                     weight = 0
                     for g in v.groups:
-                        weight += g.weight
+                        group_name = object_.vertex_groups[g.group].name
+                        if group_name in armature.pose.bones:
+                            weight += g.weight
                     if (weight < self.weight_epsilon):
                         v.select = True
         object_.data.update()
