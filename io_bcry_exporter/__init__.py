@@ -2739,6 +2739,8 @@ class Export(bpy.types.Operator, ExportHelper):
         default=False,
     )
 
+    is_animation_process = False
+
     class Config:
 
         def __init__(self, config):
@@ -2759,7 +2761,8 @@ class Export(bpy.types.Operator, ExportHelper):
                 'disable_rc',
                 'save_dae',
                 'save_tiffs',
-                'run_in_profiler'
+                'run_in_profiler',
+                'is_animation_process'
             )
 
             for attribute in attributes:
@@ -2875,6 +2878,7 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
     generate_materials = False
     make_layer = False
     vcloth_pre_process = False
+    is_animation_process = True
 
     class Config:
 
@@ -2885,6 +2889,7 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
                 'vcloth_pre_process',
                 'generate_materials',
                 'export_for_lumberyard',
+                'is_animation_process',
                 'make_layer',
                 'disable_rc',
                 'save_dae',
