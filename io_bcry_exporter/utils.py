@@ -726,13 +726,6 @@ def get_node_type(node):
     return node_components[-1]
 
 
-def get_armature_node(object_):
-    ALLOWED_NODE_TYPES = ("cga", "anm", "chr", "skin", "i_caf")
-    for group in object_.users_group:
-        if get_node_type(group) in ALLOWED_NODE_TYPES:
-            return group
-
-
 def is_visual_scene_node_writed(object_, group):
     if is_bone_geometry(object_):
         return False
