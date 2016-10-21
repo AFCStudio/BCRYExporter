@@ -1063,12 +1063,9 @@ class EditInverseKinematics(bpy.types.Operator):
         if armature is None or armature.type != "ARMATURE":
             return None
 
-        for temp_bone in armature.pose.bones:
-            if temp_bone.bone.select:
-                self.bone = temp_bone
-                break
-
-        if self.bone is None:
+        if bpy.context.active_pose_bone:
+            self.bone = bpy.context.active_pose_bone
+        else:
             return None
 
         try:
@@ -1125,7 +1122,7 @@ class EditInverseKinematics(bpy.types.Operator):
     def invoke(self, context, event):
         if (context.object is None or context.object.type != "ARMATURE" or
                 context.object.mode != "POSE" or self.bone is None):
-            self.report({'ERROR'}, "Select a bone in POSE mode.")
+            self.report({'ERROR'}, "Please select a bone in POSE mode!")
             return {'FINISHED'}
 
         return context.window_manager.invoke_props_dialog(self)
