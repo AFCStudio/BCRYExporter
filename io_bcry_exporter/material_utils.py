@@ -37,7 +37,7 @@ import xml.dom.minidom
 
 def generate_mtl_files(_config, materials=None):
     print()
-    if materials == None:
+    if materials is None:
         materials = get_materials(_config.export_selected_nodes)
 
     for node in get_material_groups(materials):
@@ -114,18 +114,24 @@ def get_materials(just_selected=False):
 def set_material_attributes(material, material_name, material_node):
     material_node.setAttribute("Name", get_material_name(material_name))
     material_node.setAttribute("MtlFlags", "524416")
-    
+
     shader = "Illum"
     if "physProxyNoDraw" == get_material_physic(material_name):
         shader = "Nodraw"
     material_node.setAttribute("Shader", shader)
     material_node.setAttribute("GenMask", "60400000")
-    material_node.setAttribute("StringGenMask", "%NORMAL_MAP%SPECULAR_MAP%SUBSURFACE_SCATTERING")
+    material_node.setAttribute(
+        "StringGenMask",
+        "%NORMAL_MAP%SPECULAR_MAP%SUBSURFACE_SCATTERING")
     material_node.setAttribute("SurfaceType", "")
     material_node.setAttribute("MatTemplate", "")
 
-    material_node.setAttribute("Diffuse", color_to_xml_string(material.diffuse_color))
-    material_node.setAttribute("Specular", color_to_xml_string(material.specular_color))
+    material_node.setAttribute(
+        "Diffuse", color_to_xml_string(
+            material.diffuse_color))
+    material_node.setAttribute(
+        "Specular", color_to_xml_string(
+            material.specular_color))
     material_node.setAttribute("Opacity", str(material.alpha))
     material_node.setAttribute("Shininess", str(material.specular_hardness))
 
@@ -207,6 +213,7 @@ def get_textures(material):
 
     return images
 
+
 def get_diffuse_texture(material):
     image = None
     try:
@@ -230,6 +237,7 @@ def get_diffuse_texture(material):
 
     return None
 
+
 def get_specular_texture(material):
     image = None
     try:
@@ -251,6 +259,7 @@ def get_specular_texture(material):
         pass
 
     return None
+
 
 def get_normal_texture(material):
     image = None
@@ -440,8 +449,9 @@ def get_material_name(material_name):
     try:
         return material_name.split('__')[2]
     except:
-        raise exceptions.BCryException("Material name is not convenient for BCry!")
-        
+        raise exceptions.BCryException(
+            "Material name is not convenient for BCry!")
+
 
 def get_material_physic(material_name):
     index = material_name.find("__phys")

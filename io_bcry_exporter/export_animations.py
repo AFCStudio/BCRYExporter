@@ -4,7 +4,7 @@
 #
 # Author:      Özkan Afacan,
 #              Angelo J. Miner, Mikołaj Milej, Daniel White,
-#              Oscar Martin Garcia, Duo Oratar, David Marcelis 
+#              Oscar Martin Garcia, Duo Oratar, David Marcelis
 #
 # Created:     13/06/2016
 # Copyright:   (c) Özkan Afacan 2016

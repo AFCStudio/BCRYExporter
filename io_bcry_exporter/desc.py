@@ -179,7 +179,7 @@ list['locator_root'] = """Skeleton Root Bone: The Locator Locomotion bone\
 
 list['locator_move'] = """Movement Reference Bone: The Locator Locomotion\
  use that bone to copy movements from selected axis."""
- 
+
 #------------------------------------------------------------------------------
 # Export:
 #------------------------------------------------------------------------------

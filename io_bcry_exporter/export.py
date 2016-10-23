@@ -59,7 +59,7 @@ class CrytekDaeExporter:
         root_element.setAttribute("version", "1.4.1")
         self._doc.appendChild(root_element)
         self._create_file_header(root_element)
-        
+
         if self._config.generate_materials:
             self._m_exporter.generate_materials()
 
@@ -179,7 +179,8 @@ class CrytekDaeExporter:
     def _export_library_geometries(self, parent_element):
         libgeo = self._doc.createElement("library_geometries")
         parent_element.appendChild(libgeo)
-        for group in utils.get_mesh_export_nodes(self._config.export_selected_nodes):
+        for group in utils.get_mesh_export_nodes(
+                self._config.export_selected_nodes):
             for object_ in group.objects:
                 if object_.type != 'MESH':
                     continue
@@ -191,33 +192,47 @@ class CrytekDaeExporter:
                 mesh_node = self._doc.createElement("mesh")
 
                 print()
-                bcPrint('"{}" object is being processed...'.format(object_.name))
+                bcPrint(
+                    '"{}" object is being processed...'.format(
+                        object_.name))
 
                 start_time = clock()
                 self._write_positions(bmesh_, mesh_node, geometry_name)
-                bcPrint('Positions have been writed {:.4f} seconds.'.format(clock() - start_time))
+                bcPrint(
+                    'Positions have been writed {:.4f} seconds.'.format(
+                        clock() - start_time))
 
                 start_time = clock()
                 self._write_normals(object_, bmesh_, mesh_node, geometry_name)
-                bcPrint('Normals have been writed {:.4f} seconds.'.format(clock() - start_time))
+                bcPrint(
+                    'Normals have been writed {:.4f} seconds.'.format(
+                        clock() - start_time))
 
                 start_time = clock()
                 self._write_uvs(object_, bmesh_, mesh_node, geometry_name)
-                bcPrint('UVs have been writed {:.4f} seconds.'.format(clock() - start_time))
+                bcPrint(
+                    'UVs have been writed {:.4f} seconds.'.format(
+                        clock() - start_time))
 
                 start_time = clock()
-                self._write_vertex_colors(object_, bmesh_, mesh_node, geometry_name)
+                self._write_vertex_colors(
+                    object_, bmesh_, mesh_node, geometry_name)
                 bcPrint(
                     'Vertex colors have been writed {:.4f} seconds.'.format(
                         clock() - start_time))
 
                 start_time = clock()
                 self._write_vertices(mesh_node, geometry_name)
-                bcPrint('Vertices have been writed {:.4f} seconds.'.format(clock() - start_time))
+                bcPrint(
+                    'Vertices have been writed {:.4f} seconds.'.format(
+                        clock() - start_time))
 
                 start_time = clock()
-                self._write_triangle_list(object_, bmesh_, mesh_node, geometry_name)
-                bcPrint('Triangle list have been writed {:.4f} seconds.'.format(clock() - start_time))
+                self._write_triangle_list(
+                    object_, bmesh_, mesh_node, geometry_name)
+                bcPrint(
+                    'Triangle list have been writed {:.4f} seconds.'.format(
+                        clock() - start_time))
 
                 extra = self._create_double_sided_extra("MAYA")
                 mesh_node.appendChild(extra)
@@ -257,10 +272,10 @@ class CrytekDaeExporter:
         float_normals = None
         if self._config.custom_normals:
             float_normals = utils.get_custom_normals(bmesh_, use_edge_angle,
-                                               split_angle)
+                                                     split_angle)
         else:
             float_normals = utils.get_normal_array(bmesh_, use_edge_angle,
-                                               use_edge_sharp, split_angle)
+                                                   use_edge_sharp, split_angle)
 
         id_ = "{!s}-normal".format(geometry_name)
         source = utils.write_source(id_, "float", float_normals, "XYZ")
@@ -269,11 +284,13 @@ class CrytekDaeExporter:
     def _write_uvs(self, object_, bmesh_, mesh_node, geometry_name):
         uv_layer = bmesh_.loops.layers.uv.active
         if object_.data.uv_layers.active is None:
-            bcPrint("{} object has no a UV map, creating a default UV...".format(object_.name))
+            bcPrint(
+                "{} object has no a UV map, creating a default UV...".format(
+                    object_.name))
             uv_layer = bmesh_.loops.layers.uv.new()
 
         float_uvs = []
-        
+
         for face in bmesh_.faces:
             for loop in face.loops:
                 float_uvs.extend(loop[uv_layer].uv)
@@ -317,7 +334,8 @@ class CrytekDaeExporter:
                 norm_uv_indices = {}
 
                 for index in range(0, len(face.verts)):
-                    norm_uv_indices[str(face.verts[index].index)] = normal_uv_index + index
+                    norm_uv_indices[
+                        str(face.verts[index].index)] = normal_uv_index + index
 
                 if face.material_index == current_material_index:
                     for tessface in tessfaces[face.index]:
@@ -405,7 +423,7 @@ class CrytekDaeExporter:
 
         ALLOWED_NODE_TYPES = ('chr', 'skin')
         for group in utils.get_mesh_export_nodes(
-                    self._config.export_selected_nodes):
+                self._config.export_selected_nodes):
             node_type = utils.get_node_type(group)
             if node_type in ALLOWED_NODE_TYPES:
                 for object_ in group.objects:
@@ -427,7 +445,10 @@ class CrytekDaeExporter:
         controller_node.setAttribute("id", id_)
 
         skin_node = self._doc.createElement("skin")
-        skin_node.setAttribute("source", "#{!s}".format(utils.get_geometry_name(group, object_)))
+        skin_node.setAttribute(
+            "source", "#{!s}".format(
+                utils.get_geometry_name(
+                    group, object_)))
         controller_node.appendChild(skin_node)
 
         bind_shape_matrix = self._doc.createElement("bind_shape_matrix")
@@ -592,8 +613,9 @@ class CrytekDaeExporter:
                 prop_name = object_.name
                 node_type = utils.get_node_type(group)
                 if node_type in ('chr', 'skin'):
-                    prop_name = join(object_.name,
-                                 self._create_properties_name(object_, group))
+                    prop_name = join(
+                        object_.name, self._create_properties_name(
+                            object_, group))
                 node = self._doc.createElement("node")
                 node.setAttribute("id", prop_name)
                 node.setAttribute("name", prop_name)
@@ -612,14 +634,14 @@ class CrytekDaeExporter:
                     node.appendChild(udp_extra)
 
                 parent_node.appendChild(node)
-                
+
                 if utils.is_has_lod(object_):
                     sub_node = node
                     for lod in utils.get_lod_geometries(object_):
                         sub_node = self._write_lods(lod, sub_node, group)
 
                 if node_type in ('chr', 'skin') and object_.parent \
-                                        and object_.parent.type == "ARMATURE":
+                        and object_.parent.type == "ARMATURE":
                     armature = object_.parent
                     self._write_bone_list([utils.get_root_bone(
                         armature)], object_, parent_node, group)
@@ -637,7 +659,7 @@ class CrytekDaeExporter:
         node_type = utils.get_node_type(group)
         if node_type in ('chr', 'ckin'):
             prop_name = join(object_.name,
-                        self._create_properties_name(object_, group))
+                             self._create_properties_name(object_, group))
         node = self._doc.createElement("node")
         node.setAttribute("id", prop_name)
         node.setAttribute("name", prop_name)
@@ -656,7 +678,7 @@ class CrytekDaeExporter:
             node.appendChild(udp_extra)
 
         parent_node.appendChild(node)
-        
+
         return node
 
     def _write_bone_list(self, bones, object_, parent_node, group):
@@ -804,7 +826,10 @@ class CrytekDaeExporter:
                 object_.name))
         elif object_.name[:6] != "_joint" and object_.type == "MESH":
             instance = self._doc.createElement("instance_geometry")
-            instance.setAttribute("url", "#{!s}".format(utils.get_geometry_name(group, object_)))
+            instance.setAttribute(
+                "url", "#{!s}".format(
+                    utils.get_geometry_name(
+                        group, object_)))
 
         if instance is not None:
             bind_material = self._create_bind_material(object_)
@@ -883,7 +908,8 @@ class CrytekDaeExporter:
         xsi_custom_p_set.appendChild(propagation)
 
         type_node = self._doc.createElement("type")
-        type_node.appendChild(self._doc.createTextNode("CryExportNodeProperties"))
+        type_node.appendChild(
+            self._doc.createTextNode("CryExportNodeProperties"))
         xsi_custom_p_set.appendChild(type_node)
 
         xsi_parameter = self._doc.createElement("XSI_Parameter")
@@ -907,14 +933,15 @@ class CrytekDaeExporter:
         xsi_parameter = self._doc.createElement("XSI_Parameter")
         xsi_parameter.setAttribute("id", "MergeObjects")
         xsi_parameter.setAttribute("type", "Boolean")
-        xsi_parameter.setAttribute("value", str(int(self._config.merge_all_nodes)))
+        xsi_parameter.setAttribute("value",
+                                   str(int(self._config.merge_all_nodes)))
         xsi_custom_p_set.appendChild(xsi_parameter)
 
         technique_xsi.appendChild(xsi_custom_p_set)
 
         return technique_xsi
 
-    def _create_user_defined_property(self, object_):        
+    def _create_user_defined_property(self, object_):
         udp_buffer = None
         for prop in object_.rna_type.id_data.items():
             if prop:
@@ -935,7 +962,7 @@ class CrytekDaeExporter:
             properties._doc.createTextNode(udp_buffer)
             technique.appendChild(properties)
             extra.appendChild(technique)
-            
+
             return extra
         else:
             return None

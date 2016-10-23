@@ -37,7 +37,7 @@ class CrytekMaterialExporter:
         self._config = config
         self._doc = Document()
         self._materials = material_utils.get_materials(
-                                            config.export_selected_nodes)
+            config.export_selected_nodes)
 
     def generate_materials(self):
         material_utils.generate_mtl_files(self._config, self._materials)
@@ -72,7 +72,8 @@ class CrytekMaterialExporter:
             image_node.setAttribute("id", image.name)
             image_node.setAttribute("name", image.name)
             init_form = self._doc.createElement('init_from')
-            path = material_utils.get_image_path_for_game(image, self._config.game_dir)
+            path = material_utils.get_image_path_for_game(
+                image, self._config.game_dir)
             path_node = self._doc.createTextNode(path)
             init_form.appendChild(path_node)
             image_node.appendChild(init_form)
@@ -116,7 +117,7 @@ class CrytekMaterialExporter:
 
     def _write_surface_and_sampler(self, images, profile_node):
         for image in images:
-            if image == None:
+            if image is None:
                 continue
 
             surface = self._doc.createElement("newparam")
