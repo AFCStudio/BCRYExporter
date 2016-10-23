@@ -152,7 +152,9 @@ for textures in .mtl file.'''
 
     def process(self, filepath):
         if not os.path.isdir(filepath):
-            raise exceptions.NoGameDirectorySelected
+            filepath = os.path.dirname(filepath)
+            if not os.path.isdir(filepath):
+                raise Exception("Directory is invalid!")
 
         Configuration.game_dir = filepath
         bcPrint("Game directory: {!r}.".format(
