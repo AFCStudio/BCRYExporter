@@ -285,7 +285,7 @@ class AddCryAnimationNode(bpy.types.Operator):
              desc.list['range_markers']),
         ),
         default="Timeline",
-    ) 
+    )
     node_start = IntProperty(name="Start Frame")
     node_end = IntProperty(name="End Frame")
     start_m_name = StringProperty(name="Marker Start Name")
@@ -474,12 +474,12 @@ class GenerateLODs(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     lod_count = IntProperty(name="LOD Count", default=2, min=1, max=5, step=1,
-                        description="LOD count to generate.")
+                            description="LOD count to generate.")
     decimate_ratio = FloatProperty(name="Decimate Ratio", default=0.5,
-                        min=0.001, max=1.000, precision=3, step=0.1,
-                        description="Decimate ratio for LODs.")
+                                   min=0.001, max=1.000, precision=3, step=0.1,
+                                   description="Decimate ratio for LODs.")
     view_offset = FloatProperty(name="View Offset", default=1.5, precision=3,
-                        description="View offset in scene.")
+                                description="View offset in scene.")
 
     def draw(self, context):
         layout = self.layout
@@ -498,7 +498,7 @@ class GenerateLODs(bpy.types.Operator):
 
     def execute(self, context):
         object_ = bpy.context.active_object
-    
+
         for obj in bpy.context.scene.objects:
             if object_.name != obj.name:
                 obj.select = False
@@ -533,7 +533,7 @@ class GenerateLODs(bpy.types.Operator):
             decimate = lod.modifiers[len(lod.modifiers) - 1]
 
             decimate.ratio = self.decimate_ratio / math.pow(2, index)
-            
+
             lod_name = "{}_LOD{}".format(object_.name, index)
             lod.name = lod_name
             lod.data.name = lod_name
@@ -610,7 +610,7 @@ class AddBreakableJoint(bpy.types.Operator):
 
     def execute(self, context):
         # Reviewed in the future.
-        #return add.add_joint(self, context)
+        # return add.add_joint(self, context)
         return None
 
     def invoke(self, context, event):
@@ -793,7 +793,8 @@ class SetMaterialNames(bpy.types.Operator):
             return {'FINISHED'}
 
         if self.just_rephysic:
-            return material_utils.set_material_physic(self, context, self.material_phys)
+            return material_utils.set_material_physic(
+                self, context, self.material_phys)
 
         # Revert all materials to fetch also those that are no longer in a group
         # and store their possible physics properties in a dictionary.
@@ -809,7 +810,8 @@ class SetMaterialNames(bpy.types.Operator):
                     for slot in object.material_slots:
 
                         # Skip materials that have been renamed already.
-                        if not material_utils.is_bcry_material(slot.material.name):
+                        if not material_utils.is_bcry_material(
+                                slot.material.name):
                             materialCounter[group.name] += 1
                             materialOldName = slot.material.name
 
@@ -883,7 +885,8 @@ class AddMaterial(bpy.types.Operator):
                     node_name = _object.users_group[0].name
                     # get material for this group
                     if node_name not in materials:
-                        index = len(material_utils.get_materials_per_group(node_name)) + 1
+                        index = len(
+                            material_utils.get_materials_per_group(node_name)) + 1
                         # generate new material
                         material = bpy.data.materials.new(
                             "{}__{:03d}__{}__{}".format(
@@ -931,7 +934,7 @@ class GenerateMaterials(bpy.types.Operator, ExportHelper):
         description="Converts source textures to DDS while generating materials.",
         default=False,
     )
-    
+
     merge_all_nodes = True
     make_layer = False
 
@@ -956,7 +959,7 @@ class GenerateMaterials(bpy.types.Operator, ExportHelper):
         bcPrint(Configuration.rc_path, 'debug')
         try:
             config = GenerateMaterials.Config(config=self)
-        
+
             material_utils.generate_mtl_files(config)
 
             self.filepath = '//'
@@ -1591,7 +1594,8 @@ class SetMaterialPhysDefault(bpy.types.Operator):
 
     def execute(self, context):
         material_name = bpy.context.active_object.active_material.name
-        message = "{} material physic has been set to physDefault".format(material_name)
+        message = "{} material physic has been set to physDefault".format(
+            material_name)
         self.report({'INFO'}, message)
         bcPrint(message)
         return material_utils.set_material_physic(self, context, bl_label)
@@ -1604,7 +1608,8 @@ class SetMaterialPhysProxyNoDraw(bpy.types.Operator):
 
     def execute(self, context):
         material_name = bpy.context.active_object.active_material.name
-        message = "{} material physic has been set to physProxyNoDraw".format(material_name)
+        message = "{} material physic has been set to physProxyNoDraw".format(
+            material_name)
         bcPrint(message)
         return material_utils.set_material_physic(self, context, self.bl_label)
 
@@ -1616,7 +1621,8 @@ class SetMaterialPhysNone(bpy.types.Operator):
 
     def execute(self, context):
         material_name = bpy.context.active_object.active_material.name
-        message = "{} material physic has been set to physNone".format(material_name)
+        message = "{} material physic has been set to physNone".format(
+            material_name)
         bcPrint(message)
         return material_utils.set_material_physic(self, context, self.bl_label)
 
@@ -1628,7 +1634,8 @@ class SetMaterialPhysObstruct(bpy.types.Operator):
 
     def execute(self, context):
         material_name = bpy.context.active_object.active_material.name
-        message = "{} material physic has been set to physObstruct".format(material_name)
+        message = "{} material physic has been set to physObstruct".format(
+            material_name)
         bcPrint(message)
         return material_utils.set_material_physic(self, context, self.bl_label)
 
@@ -1641,7 +1648,8 @@ class SetMaterialPhysNoCollide(bpy.types.Operator):
 
     def execute(self, context):
         material_name = bpy.context.active_object.active_material.name
-        message = "{} material physic has been set to physNoCollide".format(material_name)
+        message = "{} material physic has been set to physNoCollide".format(
+            material_name)
         bcPrint(message)
         return material_utils.set_material_physic(self, context, self.bl_label)
 
@@ -1755,7 +1763,7 @@ class FindWeightless(bpy.types.Operator):
         col = layout.column()
         col.label(self.message)
         col.separator()
-        
+
         if self.vert_count:
             col.separator()
             col.operator("view3d.view_selected", text="Focus")
@@ -1769,7 +1777,7 @@ class FindWeightless(bpy.types.Operator):
             return None
 
         object_ = bpy.context.active_object
-        if object_.parent == None or object_.parent.type != 'ARMATURE':
+        if object_.parent is None or object_.parent.type != 'ARMATURE':
             self.report({'ERROR'}, "Please select a mesh in OBJECT mode.")
             return None
 
@@ -1797,7 +1805,8 @@ class FindWeightless(bpy.types.Operator):
         if self.vert_count == 0:
             self.message = "Selected mesh has no any weightless vertex."
         else:
-            self.message = "Selected mesh has {} weightless vertices.".format(self.vert_count)
+            self.message = "Selected mesh has {} weightless vertices.".format(
+                self.vert_count)
             bpy.ops.object.mode_set(mode="EDIT")
 
     def invoke(self, context, event):
@@ -1805,7 +1814,7 @@ class FindWeightless(bpy.types.Operator):
             self.report({'ERROR'}, "Please select a mesh in OBJECT mode.")
             return {'FINISHED'}
         object_ = context.object
-        if object_.parent == None or object_.parent.type != 'ARMATURE':
+        if object_.parent is None or object_.parent.type != 'ARMATURE':
             self.report({'ERROR'}, "Please select a mesh in OBJECT mode.")
             return {'FINISHED'}
 
@@ -1903,9 +1912,9 @@ class AddRootBone(bpy.types.Operator):
         ),
         default="y",
     )
-    
+
     bone_length = FloatProperty(name="Bone Length", default=0.18,
-                        description=desc.list['locator_length'])
+                                description=desc.list['locator_length'])
     root_name = StringProperty(name="Name", default="Root")
     hips_bone = StringProperty(name="Hips Bone", default="hips")
 
@@ -1931,7 +1940,8 @@ class AddRootBone(bpy.types.Operator):
             self.report({'ERROR'}, "Please select a armature object!")
             return {'FINISHED'}
         elif armature.pose.bones.find('Root') != -1:
-            message = "{} armature already has a Root bone!".format(armature.name)
+            message = "{} armature already has a Root bone!".format(
+                armature.name)
             self.report({'INFO'}, message)
             return {'FINISHED'}
 
@@ -1979,7 +1989,7 @@ class AddRootBone(bpy.types.Operator):
         root_pose_bone = armature.pose.bones[self.root_name]
         root_pose_bone.bone.select = True
         armature.data.bones.active = root_pose_bone.bone
-        
+
         bpy.ops.object.mode_set(mode="OBJECT")
 
         return {'FINISHED'}
@@ -2009,20 +2019,26 @@ class AddLocatorLocomotion(bpy.types.Operator):
         ),
         default="y",
     )
-    
-    bone_length = FloatProperty(name="Bone Length", default=0.15,
-                        description=desc.list['locator_length'])
-    root_bone = StringProperty(name="Root Bone", default="Root",
-                        description=desc.list['locator_root'])
-    movement_bone = StringProperty(name="Movement Bone", default="hips",
-                        description=desc.list['locator_move'])
 
-    x_axis = BoolProperty(name="X Axis", default=False,
-                        description="Use X axis from movement reference bone.")
-    y_axis = BoolProperty(name="Y Axis", default=True,
-                        description="Use Y axis from movement reference bone.")
-    z_axis = BoolProperty(name="Z Axis", default=False,
-                        description="Use Z axis from movement reference bone.")
+    bone_length = FloatProperty(name="Bone Length", default=0.15,
+                                description=desc.list['locator_length'])
+    root_bone = StringProperty(name="Root Bone", default="Root",
+                               description=desc.list['locator_root'])
+    movement_bone = StringProperty(name="Movement Bone", default="hips",
+                                   description=desc.list['locator_move'])
+
+    x_axis = BoolProperty(
+        name="X Axis",
+        default=False,
+        description="Use X axis from movement reference bone.")
+    y_axis = BoolProperty(
+        name="Y Axis",
+        default=True,
+        description="Use Y axis from movement reference bone.")
+    z_axis = BoolProperty(
+        name="Z Axis",
+        default=False,
+        description="Use Z axis from movement reference bone.")
 
     def draw(self, context):
         layout = self.layout
@@ -2032,11 +2048,11 @@ class AddLocatorLocomotion(bpy.types.Operator):
 
         col.prop(self, "bone_length")
         col.separator()
-        
+
         col.prop(self, "root_bone")
         col.prop(self, "movement_bone")
         col.separator()
-        
+
         col.label("Movement Axis:")
         col.prop(self, "x_axis")
         col.prop(self, "y_axis")
@@ -2051,7 +2067,8 @@ class AddLocatorLocomotion(bpy.types.Operator):
             self.report({'ERROR'}, "Please select a armature object!")
             return {'FINISHED'}
         elif armature.pose.bones.find('Locator_Locomotion') != -1:
-            message = "{} armature already has a Locator Locomotion bone!".format(armature.name)
+            message = "{} armature already has a Locator Locomotion bone!".format(
+                armature.name)
             self.report({'ERROR'}, message)
             return {'FINISHED'}
 
@@ -2114,7 +2131,7 @@ class AddPrimitiveMesh(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     root_bone = StringProperty(name="Root Bone", default="Root",
-                        description=desc.list['locator_root'])
+                               description=desc.list['locator_root'])
 
     def draw(self, context):
         layout = self.layout
@@ -2140,12 +2157,12 @@ class AddPrimitiveMesh(bpy.types.Operator):
 
         bpy.ops.mesh.primitive_plane_add()
         triangle = bpy.context.active_object
-        
+
         bm = bmesh.new()
         bm.verts.new((1.0, 1.0, 0.0))
         bm.verts.new((-1.0, -1.0, 0.0))
         bm.verts.new((1.0, -1.0, 0.0))
-        
+
         bm.faces.new(bm.verts)
         bm.to_mesh(triangle.data)
         triangle.name = 'No_Draw'
@@ -2159,7 +2176,7 @@ class AddPrimitiveMesh(bpy.types.Operator):
 
         bpy.ops.object.modifier_add(type='ARMATURE')
         triangle.modifiers['Armature'].object = armature
-        
+
         triangle.parent = armature
 
         material_ = None
@@ -2185,43 +2202,51 @@ class PhysicalizeSkeleton(bpy.types.Operator):
     bl_label = "Physicalize Skeleton"
     bl_idname = "armature.physicalize_skeleton"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     physic_skeleton = BoolProperty(name='Physic Skeleton', default=True,
-                            description='Creates physic skeleton.')
+                                   description='Creates physic skeleton.')
     physic_proxies = BoolProperty(name='Physic Proxies', default=True,
-                            description='Creates physic proxies.')
-    physic_proxy_settings = BoolProperty(name='Physic Proxy Settings', default=True,
-                            description='Fill physic proxy settings to default.')
-    physic_ik_settings = BoolProperty(name='IK Settings', default=True,
-                            description='Fill IK settings to default.')
+                                  description='Creates physic proxies.')
+    physic_proxy_settings = BoolProperty(
+        name='Physic Proxy Settings',
+        default=True,
+        description='Fill physic proxy settings to default.')
+    physic_ik_settings = BoolProperty(
+        name='IK Settings',
+        default=True,
+        description='Fill IK settings to default.')
 
     radius_torso = FloatProperty(name='Torso Radius', default=0.12,
-                            min=0.01, precision=3, step=0.1,
-                            description='Torso bones radius')
+                                 min=0.01, precision=3, step=0.1,
+                                 description='Torso bones radius')
     radius_head = FloatProperty(name='Head Radius', default=0.1,
-                            min=0.01, precision=3, step=0.1,
-                            description='Head bones radius')
+                                min=0.01, precision=3, step=0.1,
+                                description='Head bones radius')
     radius_arm = FloatProperty(name='Arm Radius', default=0.04,
-                            min=0.01, precision=3, step=0.1,
-                            description='Arm bones radius')
+                               min=0.01, precision=3, step=0.1,
+                               description='Arm bones radius')
     radius_leg = FloatProperty(name='Leg Radius', default=0.05,
-                            min=0.01, precision=3, step=0.1,
-                            description='Leg bones radius')
+                               min=0.01, precision=3, step=0.1,
+                               description='Leg bones radius')
     radius_foot = FloatProperty(name='Foot Radius', default=0.05,
-                            min=0.01, precision=3, step=0.1,
-                            description='Foot bones radius')
+                                min=0.01, precision=3, step=0.1,
+                                description='Foot bones radius')
     radius_other = FloatProperty(name='Other Radius', default=0.05,
-                            min=0.01, precision=3, step=0.1,
-                            description='Other bones radius')
+                                 min=0.01, precision=3, step=0.1,
+                                 description='Other bones radius')
 
-    physic_materials = BoolProperty(name='Create Physic Materials', default=True,
-                            description='Creates materials for bone proxies.')
+    physic_materials = BoolProperty(
+        name='Create Physic Materials',
+        default=True,
+        description='Creates materials for bone proxies.')
     physic_alpha = FloatProperty(name='Physic Alpha', default=0.2,
-                            min=0.0, max=1.0, step=1.0,
-                            description='Set physic proxy alpha value.')
-    use_single_material = BoolProperty(name='Use Single Material', default=False,
-                            description='Use single material for all bone proxies.')
-    
+                                 min=0.0, max=1.0, step=1.0,
+                                 description='Set physic proxy alpha value.')
+    use_single_material = BoolProperty(
+        name='Use Single Material',
+        default=False,
+        description='Use single material for all bone proxies.')
+
     def __init__(self):
         armature = bpy.context.active_object
         if armature.type != 'ARMATURE':
@@ -2230,7 +2255,9 @@ class PhysicalizeSkeleton(bpy.types.Operator):
 
         group = utils.get_chr_node_from_skeleton(armature)
         if not group:
-            self.report({'ERROR'}, 'Your armature has to has a primitive mesh which added to a CHR node!')
+            self.report(
+                {'ERROR'},
+                'Your armature has to has a primitive mesh which added to a CHR node!')
             return {'FINISHED'}
 
     def draw(self, context):
@@ -2242,7 +2269,7 @@ class PhysicalizeSkeleton(bpy.types.Operator):
         col.prop(self, "physic_proxy_settings")
         col.prop(self, "physic_ik_settings")
         col.separator()
-        
+
         col.label("Physic Proxy Sizes:")
         col.prop(self, "radius_torso")
         col.prop(self, "radius_head")
@@ -2259,7 +2286,7 @@ class PhysicalizeSkeleton(bpy.types.Operator):
         col.prop(self, "use_single_material")
         col.separator()
         col.separator()
-    
+
     def execute(self, context):
         armature = bpy.context.active_object
         materials = {}
@@ -2273,7 +2300,7 @@ class PhysicalizeSkeleton(bpy.types.Operator):
             if not bone.bone.select:
                 continue
 
-            if self.physic_proxies:            
+            if self.physic_proxies:
                 name = "{}_boneGeometry".format(bone.name)
                 bone_radius = {}
                 bone_radius['torso'] = self.radius_torso
@@ -2284,17 +2311,17 @@ class PhysicalizeSkeleton(bpy.types.Operator):
                 bone_radius['other'] = self.radius_other
                 bone_type = utils.get_bone_type(bone)
                 rd = bone_radius[bone_type]
-                
+
                 bpy.ops.mesh.primitive_cube_add(radius=rd, location=(0, 0, 0))
                 object_ = bpy.context.active_object
                 object_.name = name
                 object_.data.name = name
-                
+
                 bpy.ops.object.mode_set(mode='EDIT')
-                
+
                 bm = bmesh.from_edit_mesh(object_.data)
                 scale_vertor = (1.07, 1.07, 1.07)
-                
+
                 for face in bm.faces:
                     if face.normal.x == -1.0:
                         for vert in face.verts:
@@ -2303,10 +2330,11 @@ class PhysicalizeSkeleton(bpy.types.Operator):
                         for vert in face.verts:
                             vert.co.x = bone.length
                         bmesh.ops.scale(bm, vec=scale_vertor, verts=face.verts)
-                
+
                 bpy.ops.object.mode_set(mode='OBJECT')
 
-                object_.matrix_world = utils.transform_animation_matrix(bone.matrix)
+                object_.matrix_world = utils.transform_animation_matrix(
+                    bone.matrix)
                 bpy.ops.object.transform_apply(scale=True)
 
                 if group:
@@ -2320,7 +2348,9 @@ class PhysicalizeSkeleton(bpy.types.Operator):
                     if self.use_single_material:
                         mat = materials['single']
                     else:
-                        mat = materials[utils.get_bone_material_type(bone, bone_type)]
+                        mat = materials[
+                            utils.get_bone_material_type(
+                                bone, bone_type)]
 
                     mat.use_transparency = True
                     mat.alpha = self.physic_alpha
@@ -2342,18 +2372,17 @@ class PhysicalizeSkeleton(bpy.types.Operator):
                         bone['phys_proxy'] = 'capsule'
                     else:
                         bone['phys_proxy'] = 'capsule'
-                        
+
                     bone['Spring'] = (0.0, 0.0, 0.0)
                     bone['Spring Tension'] = (1.0, 1.0, 1.0)
                     bone['Damping'] = (1.0, 1.0, 1.0)
-                    
+
                     hips_list = ['hips', 'pelvis']
                     if utils.is_in_list(bone.name, hips_list):
                         bone['Damping'] = (0.0, 0.0, 0.0)
 
                 if self.physic_ik_settings:
                     self.__set_ik(bone)
-
 
         if self.physic_skeleton:
             bpy.ops.object.mode_set(mode='OBJECT')
@@ -2377,15 +2406,14 @@ class PhysicalizeSkeleton(bpy.types.Operator):
 
             physic_armature.select = True
             bpy.context.scene.objects.active = physic_armature
-        
+
             physic_armature.location = location
             physic_armature.draw_type = 'WIRE'
-        
+
             for bone in physic_armature.data.bones:
                 utils.make_physic_bone(bone)
 
             physic_armature.select = False
-
 
         self.__set_primitive_mesh_material(armature, materials)
 
@@ -2393,7 +2421,6 @@ class PhysicalizeSkeleton(bpy.types.Operator):
         bpy.context.scene.objects.active = armature
 
         armature.data.pose_position = 'POSE'
-
 
         return {'FINISHED'}
 
@@ -2403,14 +2430,16 @@ class PhysicalizeSkeleton(bpy.types.Operator):
                 bone_name = phys_bone.name[:-5]
                 bone = armature.pose.bones[bone_name]
                 while True:
-                    if bone.parent == None:
+                    if bone.parent is None:
                         break
 
                     bone = bone.parent
                     phys_bone_name = "{}_Phys".format(bone.name)
                     if phys_bone_name in physic_armature.pose.bones:
-                        phys_edit_bone = physic_armature.data.edit_bones[phys_bone.name]
-                        phys_parent_edit_bone = physic_armature.data.edit_bones[phys_bone_name]
+                        phys_edit_bone = physic_armature.data.edit_bones[
+                            phys_bone.name]
+                        phys_parent_edit_bone = physic_armature.data.edit_bones[
+                            phys_bone_name]
                         phys_edit_bone.parent = phys_parent_edit_bone
                         break
 
@@ -2435,24 +2464,35 @@ class PhysicalizeSkeleton(bpy.types.Operator):
 
     def __create_materials(self, armature, materials):
         if self.use_single_material:
-            single_material_name = "{}__01__proxy_bones__physProxyNoDraw".format(armature.name)
+            single_material_name = "{}__01__proxy_bones__physProxyNoDraw".format(
+                armature.name)
             if single_material_name in bpy.data.materials:
                 materials['single'] = bpy.data.materials[single_material_name]
             else:
-                materials['single'] = bpy.data.materials.new(single_material_name)
-                
+                materials['single'] = bpy.data.materials.new(
+                    single_material_name)
+
             materials['single'].diffuse_color = (0.016, 0.016, 0.016)
             return
-        
-        mat_primitive_name = "{}__01__No_Draw__physProxyNoDraw".format(armature.name)
-        mat_larm_name = "{}__02__Skel_Arm_Left__physProxyNoDraw".format(armature.name)
-        mat_rarm_name = "{}__03__Skel_Arm_Right__physProxyNoDraw".format(armature.name)
-        mat_lleg_name = "{}__04__Skel_Leg_Left__physProxyNoDraw".format(armature.name)
-        mat_rleg_name = "{}__05__Skel_Leg_Right__physProxyNoDraw".format(armature.name)
-        mat_torso_name = "{}__06__Skel_Torso__physProxyNoDraw".format(armature.name)
-        mat_head_name = "{}__07__Skel_Head__physProxyNoDraw".format(armature.name)
-        mat_lfoot_name = "{}__08__Skel_Foot_Left__physProxyNoDraw".format(armature.name)
-        mat_rfoot_name = "{}__09__Skel_Foot_Right__physProxyNoDraw".format(armature.name)
+
+        mat_primitive_name = "{}__01__No_Draw__physProxyNoDraw".format(
+            armature.name)
+        mat_larm_name = "{}__02__Skel_Arm_Left__physProxyNoDraw".format(
+            armature.name)
+        mat_rarm_name = "{}__03__Skel_Arm_Right__physProxyNoDraw".format(
+            armature.name)
+        mat_lleg_name = "{}__04__Skel_Leg_Left__physProxyNoDraw".format(
+            armature.name)
+        mat_rleg_name = "{}__05__Skel_Leg_Right__physProxyNoDraw".format(
+            armature.name)
+        mat_torso_name = "{}__06__Skel_Torso__physProxyNoDraw".format(
+            armature.name)
+        mat_head_name = "{}__07__Skel_Head__physProxyNoDraw".format(
+            armature.name)
+        mat_lfoot_name = "{}__08__Skel_Foot_Left__physProxyNoDraw".format(
+            armature.name)
+        mat_rfoot_name = "{}__09__Skel_Foot_Right__physProxyNoDraw".format(
+            armature.name)
 
         if mat_primitive_name in bpy.data.materials:
             materials['primitive'] = bpy.data.materials[mat_primitive_name]
@@ -2498,7 +2538,7 @@ class PhysicalizeSkeleton(bpy.types.Operator):
             materials['rfoot'] = bpy.data.materials[mat_rfoot_name]
         else:
             materials['rfoot'] = bpy.data.materials.new(mat_rfoot_name)
-        
+
         materials['larm'].diffuse_color = (0.800, 0.008, 0.019)
         materials['rarm'].diffuse_color = (1.000, 0.774, 0.013)
         materials['lleg'].diffuse_color = (0.023, 0.114, 1.000)
@@ -2521,7 +2561,7 @@ class PhysicalizeSkeleton(bpy.types.Operator):
             bone.ik_max_x = math.radians(18)
             bone.ik_max_y = math.radians(18)
             bone.ik_max_z = math.radians(18)
-            
+
         elif utils.is_in_list(bone.name, ['head']):
             bone.lock_ik_x = False
             bone.lock_ik_y = False
@@ -2553,7 +2593,7 @@ class PhysicalizeSkeleton(bpy.types.Operator):
                 bone.ik_max_z = math.radians(140)
             else:
                 bone.ik_max_z = math.radians(90)
-                
+
         elif utils.is_in_list(bone.name, ['forearm']):
             bone.lock_ik_x = False
             bone.lock_ik_y = True
@@ -2611,7 +2651,7 @@ class PhysicalizeSkeleton(bpy.types.Operator):
             bone.ik_max_x = math.radians(15)
             bone.ik_max_y = math.radians(4)
             bone.ik_max_z = math.radians(30)
-            
+
         else:
             bone.lock_ik_x = False
             bone.lock_ik_y = False
@@ -2625,17 +2665,18 @@ class PhysicalizeSkeleton(bpy.types.Operator):
             bone.ik_max_y = math.radians(180)
             bone.ik_max_z = math.radians(180)
 
+
 class ClearSkeletonPhysics(bpy.types.Operator):
     '''Clear physics from selected skeleton.'''
     bl_label = "Clear Skeleton Physics"
     bl_idname = "armature.clear_skeleton_physics"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     physic_skeleton = BoolProperty(name='Remove Physic Skeleton', default=True,
-                            description='Removes physic skeleton.')
+                                   description='Removes physic skeleton.')
     physic_proxies = BoolProperty(name='Clear Physic Proxies', default=True,
-                            description='Clears physic proxies.')
-    
+                                  description='Clears physic proxies.')
+
     def __init__(self):
         armature = bpy.context.active_object
         if armature.type != 'ARMATURE':
@@ -2644,7 +2685,9 @@ class ClearSkeletonPhysics(bpy.types.Operator):
 
         group = utils.get_chr_node_from_skeleton(armature)
         if not group:
-            self.report({'ERROR'}, 'Your armature has to has a primitive mesh which added to a CHR node!')
+            self.report(
+                {'ERROR'},
+                'Your armature has to has a primitive mesh which added to a CHR node!')
             return {'FINISHED'}
 
     def draw(self, context):
@@ -2655,7 +2698,7 @@ class ClearSkeletonPhysics(bpy.types.Operator):
         col.prop(self, "physic_proxies")
         col.separator()
         col.separator()
-    
+
     def execute(self, context):
         armature = bpy.context.active_object
         physic_armature = None
@@ -2672,7 +2715,7 @@ class ClearSkeletonPhysics(bpy.types.Operator):
 
         if self.physic_skeleton and (physic_name in bpy.data.objects):
             physic_armature = bpy.data.objects[physic_name]
-            
+
             armature.select = False
             physic_armature.select = True
             bpy.context.scene.objects.active = physic_armature
@@ -3101,7 +3144,9 @@ class BoneUtilitiesPanel(View3DPanel, Panel):
         col.separator()
         col.operator("armature.add_root_bone", text="Add Root Bone")
         col.operator("armature.add_primitive_mesh", text="Add Primitive Mesh")
-        col.operator("armature.add_locator_locomotion", text="Add Locator Locomotion")
+        col.operator(
+            "armature.add_locator_locomotion",
+            text="Add Locator Locomotion")
         col.separator()
 
         col.label(text="Bone", icon="BONE_DATA")
@@ -3116,8 +3161,12 @@ class BoneUtilitiesPanel(View3DPanel, Panel):
 
         col.label("Physics", icon="PHYSICS")
         col.separator()
-        col.operator("armature.physicalize_skeleton", text="Physicalize Skeleton")
-        col.operator("armature.clear_skeleton_physics", text="Clear Skeleton Physics")
+        col.operator(
+            "armature.physicalize_skeleton",
+            text="Physicalize Skeleton")
+        col.operator(
+            "armature.clear_skeleton_physics",
+            text="Clear Skeleton Physics")
 
 
 class MeshUtilitiesPanel(View3DPanel, Panel):
@@ -3168,7 +3217,7 @@ class MaterialUtilitiesPanel(View3DPanel, Panel):
             text="Undo Material Convention")
         col.separator()
         col.operator("material.generate_materials",
-            text="Generate Materials")
+                     text="Generate Materials")
 
 
 class CustomPropertiesPanel(View3DPanel, Panel):
@@ -3267,7 +3316,9 @@ class BCryMainMenu(bpy.types.Menu):
 
         layout.separator()
         layout.separator()
-        layout.operator("scene.export_to_game", icon_value=bcry_icons["crye"].icon_id)
+        layout.operator(
+            "scene.export_to_game",
+            icon_value=bcry_icons["crye"].icon_id)
         layout.separator()
         layout.operator("scene.export_animations", icon="RENDER_ANIMATION")
 
@@ -3366,7 +3417,7 @@ class MeshUtilitiesMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        
+
         layout.label(text="LODs")
         layout.operator(
             "mesh.generate_lod_meshes",
@@ -3597,7 +3648,7 @@ def get_classes_to_register():
         AddBreakableJoint,
         AddBranch,
         AddBranchJoint,
-        
+
         GenerateLODs,
 
         EditInverseKinematics,

@@ -4,7 +4,7 @@
 #
 # Author:      Özkan Afacan,
 #              Angelo J. Miner, Mikołaj Milej, Daniel White,
-#              Oscar Martin Garcia, Duo Oratar, David Marcelis 
+#              Oscar Martin Garcia, Duo Oratar, David Marcelis
 #
 # Created:     23/02/2012
 # Copyright:   (c) Angelo J. Miner 2012
@@ -165,9 +165,9 @@ def get_bmesh(object_):
     # bmesh may be gotten only in edit mode for active object.
     # Unfortunately Blender goes in edit mode just objects
     # in which first layer with bpy.ops.object.mode_set(mode='EDIT')
-    # So we must temporarily activate first layer for objects which it is not 
+    # So we must temporarily activate first layer for objects which it is not
     # already in first layer. Also scene first layer must be active.
-    # That lacking related with Blender, if it will fix in future that 
+    # That lacking related with Blender, if it will fix in future that
     # code will be clean.
 
     scene_first_layer = bpy.context.scene.layers[0]
@@ -194,17 +194,17 @@ def clear_bmesh(object_, layer_state, scene_first_layer):
 def get_tessfaces(bmesh_):
     tessfaces = []
     tfs = bmesh_.calc_tessface()
-    
+
     for face in bmesh_.faces:
-        #initialize tessfaces array
+        # initialize tessfaces array
         tessfaces.append([])
-    
+
     for tf in tfs:
         vert_list = []
         for loop in tf:
-            #tessfaces[loop.face.index].append(loop.vert.index)
+            # tessfaces[loop.face.index].append(loop.vert.index)
             vert_list.append(loop.vert.index)
-            
+
         tessfaces[tf[0].face.index].append(vert_list)
 
     return tessfaces
@@ -213,7 +213,7 @@ def get_tessfaces(bmesh_):
 def get_custom_normals(bmesh_, use_edge_angle, split_angle):
     split_angle = math.degrees(split_angle)
     float_normals = []
-    
+
     for face in bmesh_.faces:
         if not face.smooth:
             for vertex in face.verts:
@@ -242,7 +242,7 @@ def get_custom_normals(bmesh_, use_edge_angle, split_angle):
 
 def get_normal_array(bmesh_, use_edge_angle, use_edge_sharp, split_angle):
     float_normals = []
-    
+
     for face in bmesh_.faces:
         if not face.smooth:
             for vertex in face.verts:
@@ -255,26 +255,32 @@ def get_normal_array(bmesh_, use_edge_angle, use_edge_sharp, split_angle):
                         continue
                     if link_face.smooth:
                         if not use_edge_angle and not use_edge_sharp:
-                            v_normals.append([link_face.normal.normalized(), link_face.calc_area()])
+                            v_normals.append(
+                                [link_face.normal.normalized(), link_face.calc_area()])
 
                         elif use_edge_angle and not use_edge_sharp:
                             face_angle = face.normal.normalized().dot(link_face.normal.normalized())
                             face_angle = min(1.0, max(face_angle, -1.0))
                             face_angle = math.acos(face_angle)
                             if face_angle < split_angle:
-                                v_normals.append([link_face.normal.normalized(), link_face.calc_area()])
+                                v_normals.append(
+                                    [link_face.normal.normalized(), link_face.calc_area()])
 
                         elif use_edge_sharp and not use_edge_angle:
                             is_neighbor_face = False
                             for edge in vertex.link_edges:
-                                if (edge in face.edges) and (edge in link_face.edges):
+                                if (edge in face.edges) and (
+                                        edge in link_face.edges):
                                     is_neighbor_face = True
                                     if edge.smooth:
-                                        v_normals.append([link_face.normal.normalized(), link_face.calc_area()])
+                                        v_normals.append(
+                                            [link_face.normal.normalized(), link_face.calc_area()])
 
                             if not is_neighbor_face:
-                                if check_sharp_edges(vertex, face, None, link_face):
-                                    v_normals.append([link_face.normal.normalized(), link_face.calc_area()])
+                                if check_sharp_edges(
+                                        vertex, face, None, link_face):
+                                    v_normals.append(
+                                        [link_face.normal.normalized(), link_face.calc_area()])
 
                         elif use_edge_angle and use_edge_sharp:
                             face_angle = face.normal.normalized().dot(link_face.normal.normalized())
@@ -283,14 +289,18 @@ def get_normal_array(bmesh_, use_edge_angle, use_edge_sharp, split_angle):
                             if face_angle < split_angle:
                                 is_neighbor_face = False
                                 for edge in vertex.link_edges:
-                                    if (edge in face.edges) and (edge in link_face.edges):
+                                    if (edge in face.edges) and (
+                                            edge in link_face.edges):
                                         is_neighbor_face = True
                                         if edge.smooth:
-                                            v_normals.append([link_face.normal.normalized(), link_face.calc_area()])
+                                            v_normals.append(
+                                                [link_face.normal.normalized(), link_face.calc_area()])
 
                                 if not is_neighbor_face:
-                                    if check_sharp_edges(vertex, face, None, link_face):
-                                        v_normals.append([link_face.normal.normalized(), link_face.calc_area()])
+                                    if check_sharp_edges(
+                                            vertex, face, None, link_face):
+                                        v_normals.append(
+                                            [link_face.normal.normalized(), link_face.calc_area()])
 
                 smooth_normal = Vector()
                 area_sum = 0
@@ -298,7 +308,8 @@ def get_normal_array(bmesh_, use_edge_angle, use_edge_sharp, split_angle):
                     area_sum += vertex_normal[1]
                 for vertex_normal in v_normals:
                     if area_sum:
-                        smooth_normal += vertex_normal[0] * (vertex_normal[1] / area_sum)
+                        smooth_normal += vertex_normal[0] * \
+                            (vertex_normal[1] / area_sum)
                 float_normals.extend(smooth_normal.normalized())
 
     return float_normals
@@ -315,8 +326,8 @@ def check_sharp_edges(vertex, current_face, previous_face, target_face):
                         return True
                     else:
                         new_previous_face = current_face
-                        return check_sharp_edges(vertex, neighbor_face,
-                                            new_previous_face, target_face)
+                        return check_sharp_edges(
+                            vertex, neighbor_face, new_previous_face, target_face)
 
     return False
 
@@ -457,20 +468,21 @@ def clean_file(just_selected=False):
         nodetype = get_node_type(node)
         node_name = replace_invalid_rc_characters(node_name)
         node.name = "{}.{}".format(node_name, nodetype)
-        
+
         for object_ in node.objects:
             object_.name = replace_invalid_rc_characters(object_.name)
             try:
-                object_.data.name = replace_invalid_rc_characters(object_.data.name)
+                object_.data.name = replace_invalid_rc_characters(
+                    object_.data.name)
             except AttributeError:
                 pass
             if object_.type == "ARMATURE":
                 for bone in object_.data.bones:
                     bone.name = replace_invalid_rc_characters(bone.name)
-        
+
         for material in material_utils.get_materials(just_selected):
             material.name = replace_invalid_rc_characters(material.name)
-            
+
             for image in material_utils.get_textures(material):
                 try:
                     image.name = replace_invalid_rc_characters(image.name)
@@ -535,7 +547,8 @@ def apply_modifiers(just_selected=False):
                 if modifier.type == 'ARMATURE':
                     continue
                 mod_name = modifier.name
-                bpy.ops.object.modifier_apply(apply_as='DATA', modifier=mod_name)
+                bpy.ops.object.modifier_apply(
+                    apply_as='DATA', modifier=mod_name)
 
         bcPrint("Modifiers are applied for {} node.".format(node.name))
 

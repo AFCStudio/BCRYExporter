@@ -1,0 +1,11 @@
+<Material MtlFlags="524544" vertModifType="0">
+ <SubMaterials>
+  <Material Diffuse="0.800000,0.800000,0.800000" GenMask="60400000" LayerAct="1" MatTemplate="" MtlFlags="524416" Name="Triangle" Opacity="1.0" Shader="Nodraw" Shininess="50" Specular="1.000000,1.000000,1.000000" StringGenMask="%NORMAL_MAP%SPECULAR_MAP%SUBSURFACE_SCATTERING" SurfaceType="" vertModifType="0">
+   <Textures>
+    <Texture File="" Map="Diffuse"/>
+   </Textures>
+   <PublicParams EmittanceMapGamma="1" IndirectColor="0.25, 0.25, 0.25" SSSIndex="0"/>
+  </Material>
+ </SubMaterials>
+ <PublicParams EmittanceMapGamma="1" IndirectColor="0.25, 0.25, 0.25" SSSIndex="0"/>
+</Material>

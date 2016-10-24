@@ -41,7 +41,7 @@ class OutPipe():
 
         else:
             raise exceptions.BCryException("No such message type {!r}".
-                                               format(message_type))
+                                           format(message_type))
 
 
 op = OutPipe()
