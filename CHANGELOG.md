@@ -1,5 +1,75 @@
 # Changelog:
 
+-------------------------------------------------------------------------------
+
+BCRY Exporter
+
+-------------------------------------------------------------------------------
+
+## 5.0
+#### Compatibility
+* Only compatible with CryEngine 3.5 and up.
+* Only compatible with Blender 2.7 and up.
+* Supports primary assets: CGF, CGA, CHR, SKIN, ANM, I_CAF.
+* Compatible with LumberYard.
+
+#### UI Changes:
+* Timeline Editor choose for Add Animation Node window.
+* New Generate LODs menuitem.
+* Removed Add Bone Geometry, Remove Bone Geometry, Rename Phys Bones menuitems.
+* New Physicalize Skeleton menuitem.
+* New Clear Skeleton Physics menuitem.
+* New Add Locator Locomotion menuitem.
+* New Add Primitive Mesh menuitem.
+* Edit Inverse Kinematics menuitem name changed to Set Bone Physic and IKs.
+* Removed Remove Old Fakebones menuitem.
+* New Generate Materials menuitem.
+* Export to Game changed to Export to CryEngine.
+* Export to Game icon is changed.
+
+#### New Features:
+* New Smoothing System.
+* VCloth 2 exporting.
+* Custom Normals.
+* Bone Axis Orientations.
+* X-Axis Skeleton exporting.
+* X-Axis Animated Skeleton exporting.
+* Player SDK.
+* New Physicalize Skeleton tool.
+* New Clear Skeleton Physics tool.
+* New Generate LODs tool.
+* New Generate Materials tool.
+* Color exporting for materials.
+* New Add Locator Locomotion tool.
+* New Add Primitive Mesh tool.
+
+#### Improvements/Fixes:
+* Geometry writing is completely adapted to BMeshes.
+* Input prediction for Add Export Node tool.
+* Vertex Colors exporting is fixed.
+* Calculate normals using with BMesh tessfaces.
+* Now smooth normals are calculated according to face areas.
+* Bone axis, length and Tool Shelf panel supporting for Add Root Bone tool.
+* Tool Shelf panel supporting for Apply Transformaitons tool.
+* SelectGameDirectory wrong folder name fixed.
+* Default Physic is changed to None.
+* Armature writing enhancements.
+* Now animation nodes can be stored with skin and chr nodes.
+* Geometry name is rearrenged for Library Controllers.
+* Apply Modifiers are fixed.
+* Apply Modifiers, Export Selected Nodes supporting.
+* Custom Icons interface.
+* Multiple Cycles Texture support.
+* Descriptions for Set Material Physics tool.
+* Logs have been improved.
+
+
+-------------------------------------------------------------------------------
+
+CryBlend
+
+-------------------------------------------------------------------------------
+
 ## 5.2
 #### Compatibility:
 * Only compatible with CryEngine 3.5 and up.
