@@ -1,0 +1,340 @@
+<?xml version="1.0" ?>
+<Params>
+	<IK_Definition>
+		<LimbIK_Definition>
+			<IK EndEffector="Bip01 R Hand" Handle="RgtArm01" Root="Bip01 R UpperArm" Solver="2BIK"/>
+			<IK EndEffector="Bip01 L Hand" Handle="LftArm01" Root="Bip01 L UpperArm" Solver="2BIK"/>
+			<IK EndEffector="Bip01 R Foot" Handle="RgtLeg01" Root="Bip01 R Thigh" Solver="2BIK"/>
+			<IK EndEffector="Bip01 L Foot" Handle="LftLeg01" Root="Bip01 L Thigh" Solver="2BIK"/>
+		</LimbIK_Definition>
+
+		<Animation_Driven_IK_Targets>
+			<ADIKTarget Handle="RgtArm01" Target="Bip01 RHand2RiflePos_IKTarget" Weight="Bip01 RHand2RiflePos_IKBlend"/>
+			<ADIKTarget Handle="RgtArm01" Target="Bip01 RHand2Aim_IKTarget" Weight="Bip01 RHand2Aim_IKBlend"/>
+			<ADIKTarget Handle="LftArm01" Target="Bip01 LHand2Aim_IKTarget" Weight="Bip01 LHand2Aim_IKBlend"/>
+			<ADIKTarget Handle="LftArm01" Target="Bip01 LHand2Weapon_IKTarget" Weight="Bip01 LHand2Weapon_IKBlend"/>
+			<ADIKTarget Handle="LftArm01" Target="Bip01 LHand2Pocket_IKTarget" Weight="Bip01 LHand2Pocket_IKBlend"/>
+			<ADIKTarget Handle="RgtArm01" Target="Bip01 RHand2Pocket_IKTarget" Weight="Bip01 RHand2Pocket_IKBlend"/>
+			<ADIKTarget Handle="LftArm01" Target="Bip01 LHand2RiflePos_IKTarget" Weight="Bip01 LHand2RiflePos_IKBlend"/>
+			<ADIKTarget Handle="LftArm01" Target="Bip01 LHand2PistolPos_IKTarget" Weight="Bip01 LHand2PistolPos_IKBlend"/>
+			<ADIKTarget Handle="RgtArm01" Target="Bip01 RHand2PistolPos_IKTarget" Weight="Bip01 RHand2PistolPos_IKBlend"/>
+			<ADIKTarget Handle="RgtArm01" Target="Bip01 RHand2Weapon_IKTarget" Weight="Bip01 RHand2Weapon_IKBlend"/>
+		</Animation_Driven_IK_Targets>
+
+		<FeetLock_Definition>
+			<RIKHandle Handle="RgtLeg01"/>
+			<LIKHandle Handle="LftLeg01"/>
+		</FeetLock_Definition>
+
+		<Recoil_Definition>
+			<RIKHandle Handle="RgtArm01"/>
+			<LIKHandle Handle="LftArm01"/>
+			<RWeaponJoint JointName="weapon_bone"/>
+			<LWeaponJoint JointName="Lweapon_bone"/>
+			<ImpactJoints>
+				<ImpactJoint Arm="3" Delay="0.3" Weight="0.2" JointName="Bip01 Pelvis" />
+				<ImpactJoint Arm="3" Delay="0.3" Weight="0.2" JointName="Bip01 Spine"  />
+				<ImpactJoint Arm="3" Delay="0.3" Weight="0.3" JointName="Bip01 Spine1" />
+				<ImpactJoint Arm="3" Delay="0.0" Weight="1.0" JointName="Bip01 RHand2Aim_IKTarget" />
+				<ImpactJoint Arm="3" Delay="0.2" Weight="0.4" JointName="Bip01 Spine2" />
+				<ImpactJoint Arm="3" Delay="0.2" Weight="0.4" JointName="Bip01 Spine3" />
+				<ImpactJoint Arm="3" Delay="0.15" Weight="0.4" JointName="Bip01 Neck" />
+
+				<ImpactJoint Arm="3" Delay="0.10" Weight="0.10" JointName="Bip01 R Thigh" />
+				<ImpactJoint Arm="3" Delay="0.05" Weight="0.05" JointName="Bip01 R Calf" />
+				<ImpactJoint Arm="3" Delay="0.10" Weight="0.10" JointName="Bip01 L Thigh" />
+				<ImpactJoint Arm="3" Delay="0.05" Weight="0.05" JointName="Bip01 L Calf" />
+			</ImpactJoints>
+		</Recoil_Definition>
+
+		<LookIK_Definition>
+			<LEyeAttachment Name="eye_left" />
+			<REyeAttachment Name="eye_right" />
+			<DirectionalBlends>
+				<Joint AnimToken="LookPoses" ParameterJoint="Bip01 Look" StartJoint="Bip01 Look" ReferenceJoint="Bip01 Neck"/>
+			</DirectionalBlends>
+			<RotationList>
+				<Rotation Additive="1" Primary="1" JointName="Bip01 Pelvis"/>
+				<Rotation Additive="1" Primary="1" JointName="Bip01 Spine"/>
+				<Rotation Additive="1" Primary="1" JointName="Bip01 Spine1"/>
+				<Rotation Additive="1" Primary="1" JointName="Bip01 Spine2" />
+				<Rotation Additive="1" Primary="1" JointName="Bip01 Spine3" />
+				<Rotation Additive="1" Primary="1" JointName="Bip01 Neck" />
+				<Rotation Additive="0" Primary="1" JointName="Bip01 Head" />
+				<Rotation Additive="0" Primary="1" JointName="Bip01 Look" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 R Clavicle" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 R UpperArm" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 L Clavicle" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 L UpperArm" />
+			</RotationList>
+			<PositionList>
+				<Position Additive="1" JointName="Bip01 Pelvis"/>
+			</PositionList>
+		</LookIK_Definition>
+
+		<AimIK_Definition>
+			<DirectionalBlends>
+				<Joint AnimToken="AimPoses"  ParameterJoint="Bip01 CustomAim" StartJoint="Bip01 CustomAimStart" ReferenceJoint="Bip01 Pelvis"/>
+			</DirectionalBlends>
+			<RotationList>
+				<Rotation Additive="1" Primary="1" JointName="Bip01 Pelvis"/>
+				<Rotation Additive="1" Primary="1" JointName="Bip01 Spine"/>
+				<Rotation Additive="1" Primary="1" JointName="Bip01 Spine1"/>
+				<Rotation Additive="1" Primary="1" JointName="Bip01 Spine2" />
+				<Rotation Additive="0" Primary="1" JointName="Bip01 CustomAim" />
+				<Rotation Additive="0" Primary="1" JointName="Bip01 CustomAimStart" />
+				<Rotation Additive="0" Primary="0" JointName="Bip01 LHand2Aim_IKTarget" />
+				<Rotation Additive="0" Primary="0" JointName="Bip01 LHand2Aim_IKBlend" />
+				<Rotation Additive="0" Primary="0" JointName="Bip01 RHand2Aim_IKTarget" />
+				<Rotation Additive="0" Primary="0" JointName="Bip01 RHand2Aim_IKBlend" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 Spine3" />
+				<Rotation Additive="0" Primary="0" JointName="Bip01 Neck" />
+				<Rotation Additive="0" Primary="0" JointName="Bip01 Head" />
+				<Rotation Additive="0" Primary="0" JointName="weapon_bone" />
+				<Rotation Additive="0" Primary="0" JointName="Lweapon_bone" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 R Clavicle" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 R UpperArm" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 R ForeArm" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 R Hand" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 L Clavicle" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 L UpperArm" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 L ForeArm" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 L Hand" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 L Thigh" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 L Calf" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 R Thigh" />
+				<Rotation Additive="1" Primary="0" JointName="Bip01 R Calf" />
+				<Rotation Additive="0" Primary="0" JointName="Bip01 LHand2Weapon_IKTarget" />
+				<Rotation Additive="0" Primary="0" JointName="Bip01 LHand2Weapon_IKBlend" />
+				<Rotation Additive="0" Primary="0" JointName="Bip01 RHand2Weapon_IKTarget" />
+				<Rotation Additive="0" Primary="0" JointName="Bip01 RHand2Weapon_IKBlend" />
+			</RotationList>
+			<PositionList>
+				<Position Additive="1" JointName="Bip01 Pelvis"/>
+				<Position Additive="0" JointName="Bip01 CustomAim" />
+				<Position Additive="0" JointName="Bip01 CustomAimStart" />
+				<Position Additive="0" JointName="Bip01 LHand2Aim_IKTarget"/>
+				<Position Additive="0" JointName="Bip01 LHand2Aim_IKBlend"/>
+				<Position Additive="0" JointName="Bip01 RHand2Aim_IKTarget"/>
+				<Position Additive="0" JointName="Bip01 RHand2Aim_IKBlend"/>
+				<Position Additive="0" JointName="weapon_bone"/>
+				<Position Additive="0" JointName="Lweapon_bone"/>
+				<Position Additive="0" JointName="Bip01 LHand2Weapon_IKTarget"/>
+				<Position Additive="0" JointName="Bip01 LHand2Weapon_IKBlend"/>
+				<Position Additive="0" JointName="Bip01 RHand2Weapon_IKTarget"/>
+				<Position Additive="0" JointName="Bip01 RHand2Weapon_IKBlend"/>
+			</PositionList>
+		</AimIK_Definition>
+	</IK_Definition>
+
+	<Lod>
+		<JointList level="1">
+			<Joint name="Bip01"/>
+			<Joint name="Bip01 Pelvis"/>
+			<Joint name="Bip01 Spine"/>
+			<Joint name="Bip01 Spine1"/>
+			<Joint name="Bip01 Spine2"/>
+			<Joint name="Bip01 Spine3"/>
+			<Joint name="Bip01 Neck"/>
+			<Joint name="Bip01 Head"/>
+			<Joint name="Bip01 L Thigh"/>
+			<Joint name="Bip01 L Calf"/>
+			<Joint name="Bip01 L Foot"/>
+			<Joint name="Bip01 L Toe0"/>
+			<Joint name="Bip01 R Thigh"/>
+			<Joint name="Bip01 R Calf"/>
+			<Joint name="Bip01 R Foot"/>
+			<Joint name="Bip01 R Toe0"/>
+			<Joint name="Bip01 L Clavicle"/>
+			<Joint name="Bip01 L UpperArm"/>
+			<Joint name="Bip01 L Forearm"/>
+			<Joint name="Bip01 L ForeTwist1"/>
+			<Joint name="Bip01 L ForeTwist2"/>
+			<Joint name="Bip01 L ForeTwist3"/>
+			<Joint name="Bip01 L Hand"/>
+			<Joint name="Bip01 L Finger1"/>
+			<Joint name="Bip01 L Finger11"/>
+			<Joint name="Bip01 L Finger2"/>
+			<Joint name="Bip01 L Finger21"/>
+			<Joint name="Bip01 L Finger3"/>
+			<Joint name="Bip01 L Finger31"/>
+			<Joint name="Bip01 L Finger4"/>
+			<Joint name="Bip01 L Finger41"/>
+			<Joint name="Bip01 R Clavicle"/>
+			<Joint name="Bip01 R UpperArm"/>
+			<Joint name="Bip01 R Forearm"/>
+			<Joint name="Bip01 R ForeTwist1"/>
+			<Joint name="Bip01 R ForeTwist2"/>
+			<Joint name="Bip01 R ForeTwist3"/>
+			<Joint name="Bip01 R Hand"/>
+			<Joint name="Bip01 R Finger1"/>
+			<Joint name="Bip01 R Finger11"/>
+			<Joint name="Bip01 R Finger2"/>
+			<Joint name="Bip01 R Finger21"/>
+			<Joint name="Bip01 R Finger3"/>
+			<Joint name="Bip01 R Finger31"/>
+			<Joint name="Bip01 R Finger4"/>
+			<Joint name="Bip01 R Finger41"/>
+			<Joint name="weapon_bone"/>
+			<Joint name="Lweapon_bone"/>
+			<Joint name="Bip01 CustomAim"/>
+			<Joint name="Bip01 CustomAimStart"/>
+			<Joint name="Bip01 LHand2Weapon_IKTarget"/>
+			<Joint name="Bip01 LHand2Weapon_IKBlend"/>
+			<Joint name="Bip01 RHand2Weapon_IKTarget"/>
+			<Joint name="Bip01 RHand2Weapon_IKBlend"/>
+			<Joint name="Bip01 LHand2Aim_IKTarget"/>
+			<Joint name="Bip01 LHand2Aim_IKBlend"/>
+			<Joint name="Bip01 RHand2Aim_IKTarget"/>
+			<Joint name="Bip01 RHand2Aim_IKBlend"/>
+			<Joint name="Bip01 planeTargetLeft" />
+			<Joint name="Bip01 planeTargetRight" />
+		</JointList>
+		<JointList level="2">
+			<Joint name="Bip01"/>
+			<Joint name="Bip01 Pelvis"/>
+			<Joint name="Bip01 Spine"/>
+			<Joint name="Bip01 Spine1"/>
+			<Joint name="Bip01 Spine2"/>
+			<Joint name="Bip01 Spine3"/>
+			<Joint name="Bip01 Neck"/>
+			<Joint name="Bip01 Head"/>
+			<Joint name="Bip01 L Thigh"/>
+			<Joint name="Bip01 L Calf"/>
+			<Joint name="Bip01 L Foot"/>
+			<Joint name="Bip01 R Thigh"/>
+			<Joint name="Bip01 R Calf"/>
+			<Joint name="Bip01 R Foot"/>
+			<Joint name="Bip01 L Clavicle"/>
+			<Joint name="Bip01 L UpperArm"/>
+			<Joint name="Bip01 L Forearm"/>
+			<Joint name="Bip01 L Hand"/>
+			<Joint name="Bip01 L Finger1"/>
+			<Joint name="Bip01 L Finger2"/>
+			<Joint name="Bip01 L Finger3"/>
+			<Joint name="Bip01 L Finger4"/>
+			<Joint name="Bip01 R Clavicle"/>
+			<Joint name="Bip01 R UpperArm"/>
+			<Joint name="Bip01 R Forearm"/>
+			<Joint name="Bip01 R Hand"/>
+			<Joint name="Bip01 R Finger1"/>
+			<Joint name="Bip01 R Finger2"/>
+			<Joint name="Bip01 R Finger3"/>
+			<Joint name="Bip01 R Finger4"/>
+			<Joint name="weapon_bone"/>
+			<Joint name="Lweapon_bone"/>
+			<Joint name="Bip01 CustomAim"/>
+			<Joint name="Bip01 CustomAimStart"/>
+			<Joint name="Bip01 LHand2Weapon_IKTarget"/>
+			<Joint name="Bip01 LHand2Weapon_IKBlend"/>
+			<Joint name="Bip01 RHand2Weapon_IKTarget"/>
+			<Joint name="Bip01 RHand2Weapon_IKBlend"/>
+			<Joint name="Bip01 LHand2Aim_IKTarget"/>
+			<Joint name="Bip01 LHand2Aim_IKBlend"/>
+			<Joint name="Bip01 RHand2Aim_IKTarget"/>
+			<Joint name="Bip01 RHand2Aim_IKBlend"/>
+			<Joint name="Bip01 planeTargetLeft" />
+			<Joint name="Bip01 planeTargetRight" />
+		</JointList>
+		<JointList level="3">
+			<Joint name="Bip01"/>
+			<Joint name="Bip01 Pelvis"/>
+			<Joint name="Bip01 Spine"/>
+			<Joint name="Bip01 Spine1"/>
+			<Joint name="Bip01 Spine2"/>
+			<Joint name="Bip01 Spine3"/>
+			<Joint name="Bip01 Neck"/>
+			<Joint name="Bip01 Head"/>
+			<Joint name="Bip01 L Thigh"/>
+			<Joint name="Bip01 L Calf"/>
+			<Joint name="Bip01 L Foot"/>
+			<Joint name="Bip01 R Thigh"/>
+			<Joint name="Bip01 R Calf"/>
+			<Joint name="Bip01 R Foot"/>
+			<Joint name="Bip01 L Clavicle"/>
+			<Joint name="Bip01 L UpperArm"/>
+			<Joint name="Bip01 L Forearm"/>
+			<Joint name="Bip01 L Hand"/>
+			<Joint name="Bip01 R Clavicle"/>
+			<Joint name="Bip01 R UpperArm"/>
+			<Joint name="Bip01 R Forearm"/>
+			<Joint name="Bip01 R Hand"/>
+			<Joint name="weapon_bone"/>
+			<Joint name="Lweapon_bone"/>
+			<Joint name="Bip01 CustomAim"/>
+			<Joint name="Bip01 CustomAimStart"/>
+			<Joint name="Bip01 LHand2Weapon_IKTarget"/>
+			<Joint name="Bip01 LHand2Weapon_IKBlend"/>
+			<Joint name="Bip01 RHand2Weapon_IKTarget"/>
+			<Joint name="Bip01 RHand2Weapon_IKBlend"/>
+			<Joint name="Bip01 LHand2Aim_IKTarget"/>
+			<Joint name="Bip01 LHand2Aim_IKBlend"/>
+			<Joint name="Bip01 RHand2Aim_IKTarget"/>
+			<Joint name="Bip01 RHand2Aim_IKBlend"/>
+			<Joint name="Bip01 planeTargetLeft" />
+			<Joint name="Bip01 planeTargetRight" />
+		</JointList>
+	</Lod>
+
+	<!-- Deprecated, replaced by BBoxIncludeList and BBoxExtension
+	<BBoxExcludeList>
+		<Joint name="Bip01 LookTarget"/>
+		<Joint name="Bip01 AimTarget"/>
+		<Joint name="Bip01 RHand2Aim_IKBlend"/>
+		<Joint name="Bip01 LHand2Aim_IKBlend"/>
+		<Joint name="Bip01 RHand2RiflePos_IKBlend"/>
+		<Joint name="Bip01 LHand2RiflePos_IKBlend"/>
+		<Joint name="Bip01 RHand2PistolPos_IKBlend"/>
+		<Joint name="Bip01 LHand2PistolPos_IKBlend"/>
+		<Joint name="Bip01 RHand2Pocket_IKBlend"/>
+		<Joint name="Bip01 LHand2Pocket_IKBlend"/>
+		<Joint name="Bip01 RHand2Weapon_IKBlend"/>
+		<Joint name="Bip01 LHand2Weapon_IKBlend"/>
+	</BBoxExcludeList> -->
+
+	<BBoxIncludeList>
+		<Joint name="Bip01 L Hand"/>
+		<Joint name="Bip01 R Hand"/>
+		<Joint name="Bip01 L Foot"/>
+		<Joint name="Bip01 R Foot"/>
+		<Joint name="Bip01 L Forearm"/>
+		<Joint name="Bip01 R Forearm"/>
+		<Joint name="Bip01 Head"/>
+		<Joint name="Bip01 Pelvis"/>
+	</BBoxIncludeList>
+
+	<BBoxExtension>
+		<Axis  negX="0.3" negY="0.3" negZ="0.3" posX="0.3" posY="0.3" posZ="0.3" />
+	</BBoxExtension>
+
+	<AnimationList>
+		<Animation name="$AnimEventDatabase" path="animations\human\male\events.animevents"/>
+		<Animation name="$Include" path="animations\human\male\player.chrparams"/>
+		<Animation name="$facelib" path="Objects\Characters\human\generic\skeleton_player_generic.fxl"/>
+	</AnimationList>
+	
+	<ShadowCapsulesList>
+		<!-- Head & Body -->
+		<Capsule JointName0="Bip01 Head"          JointName1="Bip01 Neck"         Radius=".1"/>    
+		<Capsule JointName0="Bip01 Neck"          JointName1="Bip01 Spine"        Radius=".12"/>
+
+		<!-- R Leg -->
+		<Capsule JointName0="Bip01 Spine"         JointName1="Bip01 R Calf"       Radius=".08"/>
+		<Capsule JointName0="Bip01 R Calf"        JointName1="Bip01 R Foot"       Radius=".08"/>
+		<Capsule JointName0="Bip01 R Foot"        JointName1="Bip01 R Toe0"       Radius=".08"/>
+
+		<!-- L Leg -->
+		<Capsule JointName0="Bip01 Spine"         JointName1="Bip01 L Calf"       Radius=".08"/>
+		<Capsule JointName0="Bip01 L Calf"        JointName1="Bip01 L Foot"       Radius=".08"/>
+		<Capsule JointName0="Bip01 L Foot"        JointName1="Bip01 L Toe0"       Radius=".08"/>
+
+		<!-- R Arm -->
+		<Capsule JointName0="Bip01 Neck"          JointName1="Bip01 R ForeTwist1" Radius=".06"/>
+		<Capsule JointName0="Bip01 R ForeTwist1"  JointName1="Bip01 R Finger20"   Radius=".06"/>
+
+		<!-- L Arm -->
+		<Capsule JointName0="Bip01 Neck"          JointName1="Bip01 L ForeTwist1" Radius=".06"/>
+		<Capsule JointName0="Bip01 L ForeTwist1"  JointName1="Bip01 L Finger20"   Radius=".06"/>
+	</ShadowCapsulesList> 
+
+</Params>
