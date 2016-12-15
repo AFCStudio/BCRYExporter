@@ -956,10 +956,10 @@ class CrytekDaeExporter:
 
         if udp_buffer:
             extra = self._doc.createElement("extra")
-            technique = self._doc.createElemen("technique")
+            technique = self._doc.createElement("technique")
             technique.setAttribute("profile", "CryEngine")
             properties = self._doc.createElement("properties")
-            properties._doc.createTextNode(udp_buffer)
+            properties = self._doc.createTextNode(udp_buffer)
             technique.appendChild(properties)
             extra.appendChild(technique)
 
