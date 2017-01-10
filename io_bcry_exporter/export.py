@@ -303,11 +303,19 @@ class CrytekDaeExporter:
         float_colors = []
         alpha_found = False
 
-        color_layer = bmesh_.loops.layers.color.active
+        active_layer = bmesh_.loops.layers.color.active
         if object_.data.vertex_colors:
-            for vert in bmesh_.verts:
-                loop = vert.link_loops[0]
-                float_colors.extend(loop[color_layer])
+            if active_layer.name.lower() == 'alpha':
+                alpha_found = True
+                for vert in bmesh_.verts:
+                    loop = vert.link_loops[0]
+                    color = loop[active_layer]
+                    alpha_color = (color[0] + color[1] + color[2]) / 3.0
+                    float_colors.extend([1.0, 1.0, 1.0, alpha_color])
+            else:
+                for vert in bmesh_.verts:
+                    loop = vert.link_loops[0]
+                    float_colors.extend(loop[active_layer])
 
         if float_colors:
             id_ = "{!s}-vcol".format(geometry_name)
