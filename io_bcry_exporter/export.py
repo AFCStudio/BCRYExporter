@@ -617,7 +617,8 @@ class CrytekDaeExporter:
     def _write_visual_scene_node(self, objects, parent_node, group):
         for object_ in objects:
             if object_.type == "MESH" and not utils.is_fakebone(object_) \
-                    and not utils.is_lod_geometry(object_):
+                    and not utils.is_lod_geometry(object_) \
+                    and not utils.is_there_a_parent_releation(object_, group):
                 prop_name = object_.name
                 node_type = utils.get_node_type(group)
                 if node_type in ('chr', 'skin'):
@@ -658,6 +659,40 @@ class CrytekDaeExporter:
                     if armature_physic:
                         self._write_bone_list([utils.get_root_bone(
                             armature_physic)], armature_physic, parent_node, group)
+                else:
+                    self._write_child_objects(object_, node, group)
+
+        return parent_node
+
+    def _write_child_objects(self, parent_object, parent_node, group):
+        for child_object in parent_object.children:
+            if utils.is_lod_geometry(child_object):
+                continue
+            if not utils.is_object_in_group(child_object, group):
+                continue
+
+            prop_name = child_object.name
+            node_type = utils.get_node_type(group)
+            node = self._doc.createElement("node")
+            node.setAttribute("id", prop_name)
+            node.setAttribute("name", prop_name)
+            node.setIdAttribute("id")
+
+            self._write_transforms(child_object, node)
+
+            ALLOWED_NODE_TYPES = ('cgf', 'cga', 'chr', 'skin')
+            if utils.get_node_type(group) in ALLOWED_NODE_TYPES:
+                instance = self._create_instance(group, child_object)
+                if instance is not None:
+                    node.appendChild(instance)
+
+            udp_extra = self._create_user_defined_property(child_object)
+            if udp_extra is not None:
+                node.appendChild(udp_extra)
+
+            self._write_child_objects(child_object, node, group)
+            
+            parent_node.appendChild(node)
 
         return parent_node
 

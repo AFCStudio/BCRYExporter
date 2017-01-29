@@ -748,6 +748,24 @@ def is_visual_scene_node_writed(object_, group):
     return True
 
 
+def is_there_a_parent_releation(object_, group):
+    while object_.parent:
+        print(object_.parent.name)
+        if is_object_in_group(object_.parent, group) and object_.parent.type == 'MESH':
+            return True
+        else:
+            return is_there_a_parent_releation(object_.parent, group)
+
+    return False
+
+
+def is_object_in_group(object_, group):
+    for obj in group.objects:
+        if object_.name == obj.name:
+            return True
+
+    return False
+
 #------------------------------------------------------------------------------
 # Fakebones:
 #------------------------------------------------------------------------------
