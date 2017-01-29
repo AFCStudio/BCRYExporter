@@ -950,13 +950,11 @@ class CrytekDaeExporter:
         return technique_xsi
 
     def _create_user_defined_property(self, object_):
-        udp_buffer = None
+        udp_buffer = ""
         for prop in object_.rna_type.id_data.items():
             if prop:
                 prop_name = prop[0]
                 if udp.is_user_defined_property(prop_name):
-                    udp_buffer = "\n"
-
                     if isinstance(prop[1], str):
                         udp_buffer += "{!s}\n".format(prop[1])
                     else:
@@ -967,7 +965,8 @@ class CrytekDaeExporter:
             technique = self._doc.createElement("technique")
             technique.setAttribute("profile", "CryEngine")
             properties = self._doc.createElement("properties")
-            properties = self._doc.createTextNode(udp_buffer)
+            buffer = self._doc.createTextNode(udp_buffer)
+            properties.appendChild(buffer)
             technique.appendChild(properties)
             extra.appendChild(technique)
 
