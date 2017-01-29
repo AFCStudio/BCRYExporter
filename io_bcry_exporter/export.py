@@ -665,7 +665,7 @@ class CrytekDaeExporter:
         #prop_name = object_.name
         prop_name = utils.changed_lod_name(object_.name)
         node_type = utils.get_node_type(group)
-        if node_type in ('chr', 'ckin'):
+        if node_type in ('chr', 'skin'):
             prop_name = join(object_.name,
                              self._create_properties_name(object_, group))
         node = self._doc.createElement("node")
