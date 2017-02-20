@@ -214,7 +214,7 @@ class AddCryExportNode(bpy.types.Operator):
         self.node_name = object_.name
         self.node_type = 'cgf'
 
-        if object_.type != 'MESH':
+        if object_.type not in ('MESH', 'EMPTY'):
             self.report(
                 {'ERROR'},
                 "Selected object is not a mesh! Please select a mesh object.")
