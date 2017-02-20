@@ -36,7 +36,6 @@ import xml.dom.minidom
 #------------------------------------------------------------------------------
 
 def generate_mtl_files(_config, materials=None):
-    print()
     if materials is None:
         materials = get_materials(_config.export_selected_nodes)
 
@@ -48,10 +47,16 @@ def generate_mtl_files(_config, materials=None):
         sub_material = _doc.createElement('SubMaterials')
         parent_material.appendChild(sub_material)
         set_public_params(_doc, None, parent_material)
+        
+        print()
+        bcPrint("'{}' material is being processed...".format(node))
 
-        for material, material_name in materials.items():
+        for material_name, material in materials.items():
             if material_name.split('__')[0] != node:
                 continue
+
+            print()
+            write_material_information(material_name)
 
             material_node = _doc.createElement('Material')
 
@@ -68,19 +73,34 @@ def generate_mtl_files(_config, materials=None):
         utils.generate_xml(filepath, _doc, True, 1)
         utils.clear_xml_header(filepath)
 
+        print()
         bcPrint("'{}' material file has been generated.".format(filename))
+
+
+def write_material_information(material_name):
+    parts = material_name.split('__')
+    bcPrint("Subname: '{}'  -  Index: '{}'  -  Physic Type: '{}'".format(
+                                    parts[2], parts[1], parts[3]))
 
 
 def get_material_groups(materials):
     material_groups = []
 
-    for material, material_name in materials.items():
+    for material_name, material in materials.items():
         group_name = material_name.split('__')[0]
 
         if not (group_name in material_groups):
             material_groups.append(group_name)
 
     return material_groups
+
+
+def sort_materials_by_names(unordered_materials):
+    materials = OrderedDict()
+    for material_name in sorted(unordered_materials):
+        materials[material_name] = unordered_materials[material_name]
+
+    return materials
 
 
 def get_materials(just_selected=False):
@@ -90,12 +110,21 @@ def get_materials(just_selected=False):
     for group in utils.get_mesh_export_nodes(just_selected):
         material_counter[group.name] = 0
         for object in group.objects:
-            for slot in object.material_slots:
-                if slot.material is None:
+            for i in range(0, len(object.material_slots)):
+                slot = object.material_slots[i]
+                material = slot.material
+                if material is None:
                     continue
 
-                if slot.material not in materials:
+                if material not in materials:
                     node_name = utils.get_node_name(group)
+
+                    material.name = utils.replace_invalid_rc_characters(material.name)
+                    for image in get_textures(material):
+                        try:
+                            image.name = utils.replace_invalid_rc_characters(image.name)
+                        except AttributeError:
+                            pass
 
                     node, index, name, physics = get_material_parts(
                         node_name, slot.material.name)
@@ -105,10 +134,11 @@ def get_materials(just_selected=False):
                         material_counter[group.name] += 1
                         index = material_counter[group.name]
 
-                    materials[slot.material] = "{}__{:02d}__{}__{}".format(
+                    material_name = "{}__{:02d}__{}__{}".format(
                         node, index, name, physics)
+                    materials[material_name] = material
 
-    return materials
+    return sort_materials_by_names(materials)
 
 
 def set_material_attributes(material, material_name, material_node):
@@ -165,6 +195,7 @@ def add_textures(_doc, material, material_node, _config):
         path = get_image_path_for_game(diffuse, _config.game_dir)
         texture_node.setAttribute("File", path)
         textures_node.appendChild(texture_node)
+        bcPrint("Diffuse Path: {}.".format(path))
     else:
         if "physProxyNoDraw" != get_material_physic(material.name):
             texture_node = _doc.createElement('Texture')
@@ -172,18 +203,21 @@ def add_textures(_doc, material, material_node, _config):
             path = "textures/defaults/white.dds"
             texture_node.setAttribute("File", path)
             textures_node.appendChild(texture_node)
+            bcPrint("Diffuse Path: {}.".format(path))
     if specular:
         texture_node = _doc.createElement('Texture')
         texture_node.setAttribute("Map", "Specular")
         path = get_image_path_for_game(specular, _config.game_dir)
         texture_node.setAttribute("File", path)
         textures_node.appendChild(texture_node)
+        bcPrint("Specular Path: {}.".format(path))
     if normal:
         texture_node = _doc.createElement('Texture')
         texture_node.setAttribute("Map", "Normal")
         path = get_image_path_for_game(normal, _config.game_dir)
         texture_node.setAttribute("File", path)
         textures_node.appendChild(texture_node)
+        bcPrint("Normal Path: {}.".format(path))
 
     if _config.convert_textures:
         convert_image_to_dds([diffuse, specular, normal], _config)
