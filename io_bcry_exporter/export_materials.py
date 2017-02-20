@@ -44,10 +44,10 @@ class CrytekMaterialExporter:
 
     def get_materials_for_object(self, object_):
         materials = OrderedDict()
-        for material, materialname in self._materials.items():
+        for material_name, material in self._materials.items():
             for object_material in object_.data.materials:
                 if material.name == object_material.name:
-                    materials[material] = materialname
+                    materials[material] = material_name
 
         return materials
 
@@ -87,17 +87,17 @@ class CrytekMaterialExporter:
 #------------------------------------------------------------------------------
 
     def export_library_effects(self, library_effects):
-        for material, materialname in self._materials.items():
+        for material_name, material in self._materials.items():
             self._export_library_effects_material(
-                material, materialname, library_effects)
+                material, material_name, library_effects)
 
     def _export_library_effects_material(
-            self, material, materialname, library_effects):
+            self, material, material_name, library_effects):
 
         images = material_utils.get_textures(material)
 
         effect_node = self._doc.createElement("effect")
-        effect_node.setAttribute("id", "{}_fx".format(materialname))
+        effect_node.setAttribute("id", "{}_fx".format(material_name))
         profile_node = self._doc.createElement("profile_COMMON")
         self._write_surface_and_sampler(images, profile_node)
 
@@ -222,10 +222,10 @@ class CrytekMaterialExporter:
 #------------------------------------------------------------------------------
 
     def export_library_materials(self, library_materials):
-        for material, materialname in self._materials.items():
+        for material_name, material in self._materials.items():
             material_element = self._doc.createElement('material')
-            material_element.setAttribute('id', materialname)
+            material_element.setAttribute('id', material_name)
             instance_effect = self._doc.createElement('instance_effect')
-            instance_effect.setAttribute('url', '#{}_fx'.format(materialname))
+            instance_effect.setAttribute('url', '#{}_fx'.format(material_name))
             material_element.appendChild(instance_effect)
             library_materials.appendChild(material_element)

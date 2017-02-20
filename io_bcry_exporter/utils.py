@@ -480,15 +480,6 @@ def clean_file(just_selected=False):
                 for bone in object_.data.bones:
                     bone.name = replace_invalid_rc_characters(bone.name)
 
-        for material in material_utils.get_materials(just_selected):
-            material.name = replace_invalid_rc_characters(material.name)
-
-            for image in material_utils.get_textures(material):
-                try:
-                    image.name = replace_invalid_rc_characters(image.name)
-                except AttributeError:
-                    pass
-
 
 def replace_invalid_rc_characters(string):
     # Remove leading and trailing spaces.
