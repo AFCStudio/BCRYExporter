@@ -616,7 +616,8 @@ class CrytekDaeExporter:
 
     def _write_visual_scene_node(self, objects, parent_node, group):
         for object_ in objects:
-            if object_.type == "MESH" and not utils.is_fakebone(object_) \
+            if object_.type == "MESH" or object_.type == 'EMPTY' \
+                    and not utils.is_fakebone(object_) \
                     and not utils.is_lod_geometry(object_) \
                     and not utils.is_there_a_parent_releation(object_, group):
                 prop_name = object_.name
@@ -632,11 +633,12 @@ class CrytekDaeExporter:
 
                 self._write_transforms(object_, node)
 
-                ALLOWED_NODE_TYPES = ('cgf', 'cga', 'chr', 'skin')
-                if node_type in ALLOWED_NODE_TYPES:
-                    instance = self._create_instance(group, object_)
-                    if instance is not None:
-                        node.appendChild(instance)
+                if not utils.is_dummy(object_):
+                    ALLOWED_NODE_TYPES = ('cgf', 'cga', 'chr', 'skin')
+                    if node_type in ALLOWED_NODE_TYPES:
+                        instance = self._create_instance(group, object_)
+                        if instance is not None:
+                            node.appendChild(instance)
 
                 udp_extra = self._create_user_defined_property(object_)
                 if udp_extra is not None:
@@ -930,10 +932,6 @@ class CrytekDaeExporter:
 
         technique.appendChild(properties)
 
-        if (node.name[:6] == "_joint"):
-            helper = self._create_helper_joint(node)
-            technique.appendChild(helper)
-
         extra.appendChild(technique)
         extra.appendChild(self._create_xsi_profile(node))
 
@@ -995,7 +993,7 @@ class CrytekDaeExporter:
                     else:
                         udp_buffer += "{!s}={!s}\n".format(prop[0], prop[1])
 
-        if udp_buffer:
+        if udp_buffer or utils.is_dummy(object_):
             extra = self._doc.createElement("extra")
             technique = self._doc.createElement("technique")
             technique.setAttribute("profile", "CryEngine")
@@ -1003,13 +1001,16 @@ class CrytekDaeExporter:
             buffer = self._doc.createTextNode(udp_buffer)
             properties.appendChild(buffer)
             technique.appendChild(properties)
+            if utils.is_dummy(object_):
+                helper = self._create_helper_for_dummy(object_)
+                technique.appendChild(helper)
             extra.appendChild(technique)
 
             return extra
         else:
             return None
 
-    def _create_helper_joint(self, object_):
+    def _create_helper_for_dummy(self, object_):
         x1, y1, z1, x2, y2, z2 = utils.get_bounding_box(object_)
 
         min = self._doc.createElement("bound_box_min")
@@ -1022,12 +1023,12 @@ class CrytekDaeExporter:
             "{:f} {:f} {:f}".format(x2, y2, z2))
         max.appendChild(max_text)
 
-        joint = self._doc.createElement("helper")
-        joint.setAttribute("type", "dummy")
-        joint.appendChild(min)
-        joint.appendChild(max)
+        helper = self._doc.createElement("helper")
+        helper.setAttribute("type", "dummy")
+        helper.appendChild(min)
+        helper.appendChild(max)
 
-        return joint
+        return helper
 
     def _create_properties_name(self, bone, group):
         bone_name = bone.name.replace("__", "*")
