@@ -742,7 +742,7 @@ def get_node_type(node):
 def is_visual_scene_node_writed(object_, group):
     if is_bone_geometry(object_):
         return False
-    if object_.parent is not None and object_.type != 'MESH':
+    if object_.parent is not None and object_.type not in ('MESH', 'EMPTY'):
         return False
 
     return True
@@ -750,8 +750,8 @@ def is_visual_scene_node_writed(object_, group):
 
 def is_there_a_parent_releation(object_, group):
     while object_.parent:
-        print(object_.parent.name)
-        if is_object_in_group(object_.parent, group) and object_.parent.type == 'MESH':
+        if is_object_in_group(object_.parent,
+                        group) and object_.parent.type in ('MESH', 'EMPTY'):
             return True
         else:
             return is_there_a_parent_releation(object_.parent, group)

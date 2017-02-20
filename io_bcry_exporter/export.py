@@ -616,7 +616,7 @@ class CrytekDaeExporter:
 
     def _write_visual_scene_node(self, objects, parent_node, group):
         for object_ in objects:
-            if object_.type == "MESH" or object_.type == 'EMPTY' \
+            if (object_.type == "MESH" or object_.type == 'EMPTY') \
                     and not utils.is_fakebone(object_) \
                     and not utils.is_lod_geometry(object_) \
                     and not utils.is_there_a_parent_releation(object_, group):
