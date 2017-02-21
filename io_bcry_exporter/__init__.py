@@ -1275,6 +1275,8 @@ class EditRenderMesh(bpy.types.Operator):
     other_rendermesh = BoolProperty(name="Other Rendermesh",
                                     description=desc.list['other_rendermesh'])
 
+    hull = BoolProperty(name="Hull", description="Hull for vehicles.")
+
     object_ = None
 
     def __init__(self):
@@ -1296,6 +1298,8 @@ class EditRenderMesh(bpy.types.Operator):
 
         self.is_entity = udp.get_udp(self.object_, "entity", self.is_entity)
         self.is_dynamic = udp.get_udp(self.object_, "dynamic", self.is_dynamic)
+
+        self.hull = udp.get_udp(self.object_, "hull", self.hull)
 
         return None
 
@@ -1319,6 +1323,7 @@ class EditRenderMesh(bpy.types.Operator):
             "other_rendermesh",
             "other_rendermesh",
             self.other_rendermesh)
+        udp.edit_udp(self.object_, "hull", "hull", self.hull)
 
         return {'FINISHED'}
 
