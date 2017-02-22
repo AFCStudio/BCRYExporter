@@ -1226,8 +1226,8 @@ class EditPhysicProxy(bpy.types.Operator):
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        if context.object is None or context.object.type != "MESH":
-            self.report({'ERROR'}, "Select a mesh in OBJECT mode.")
+        if self.object_ is None or self.object_.type not in ('MESH', 'EMPTY'):
+            self.report({'ERROR'}, "Please select a mesh or empty object.")
             return {'FINISHED'}
 
         return context.window_manager.invoke_props_dialog(self)
@@ -1328,8 +1328,8 @@ class EditRenderMesh(bpy.types.Operator):
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        if context.object is None or context.object.type != "MESH":
-            self.report({'ERROR'}, "Select a mesh in OBJECT mode.")
+        if self.object_ is None or self.object_.type not in ('MESH', 'EMPTY'):
+            self.report({'ERROR'}, "Please select a mesh or empty object.")
             return {'FINISHED'}
 
         return context.window_manager.invoke_props_dialog(self)
@@ -1432,8 +1432,8 @@ class EditJointNode(bpy.types.Operator):
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        if context.object is None or context.object.type != "MESH":
-            self.report({'ERROR'}, "Select a mesh in OBJECT mode.")
+        if self.object_ is None or self.object_.type not in ('MESH', 'EMPTY'):
+            self.report({'ERROR'}, "Please select a mesh or empty object.")
             return {'FINISHED'}
 
         return context.window_manager.invoke_props_dialog(self)
@@ -1562,8 +1562,8 @@ class EditDeformable(bpy.types.Operator):
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        if context.object is None or context.object.type != "MESH":
-            self.report({'ERROR'}, "Select a mesh in OBJECT mode.")
+        if self.object_ is None or self.object_.type not in ('MESH', 'EMPTY'):
+            self.report({'ERROR'}, "Please select a mesh or empty object.")
             return {'FINISHED'}
 
         return context.window_manager.invoke_props_dialog(self)
