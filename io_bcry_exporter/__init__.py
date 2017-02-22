@@ -1603,7 +1603,7 @@ class SetMaterialPhysDefault(bpy.types.Operator):
             material_name)
         self.report({'INFO'}, message)
         bcPrint(message)
-        return material_utils.set_material_physic(self, context, bl_label)
+        return material_utils.set_material_physic(self, context, self.bl_label)
 
 
 class SetMaterialPhysProxyNoDraw(bpy.types.Operator):
