@@ -1365,7 +1365,7 @@ class EditJointNode(bpy.types.Operator):
                            description=info.format('pull'))
     pull = FloatProperty(name="Pull", description=desc.list['pull'])
 
-    is_push = BoolProperty(name="Use Psuh Property",
+    is_push = BoolProperty(name="Use Push Property",
                            description=info.format('push'))
     push = FloatProperty(name="Push", description=desc.list['push'])
 
