@@ -91,6 +91,7 @@ def is_user_defined_property(property_name):
         "thickness",
         "explosion_scale",
         "notaprim",
+        "hull",
         "wheel"]
 
     return property_name in prop_list

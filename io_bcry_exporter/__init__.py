@@ -1182,7 +1182,6 @@ class EditPhysicProxy(bpy.types.Operator):
                                     description=desc.list['no_exp_occlusion'])
     colltype_player = BoolProperty(name="Colltype Player",
                                    description=desc.list['colltpye_player'])
-    wheel = BoolProperty(name="Wheel", description="Wheel for vehicles.")
 
     object_ = None
 
@@ -1200,7 +1199,6 @@ class EditPhysicProxy(bpy.types.Operator):
             self.no_exp_occlusion)
         self.colltype_player = udp.get_udp(
             self.object_, "colltype_player", self.colltype_player)
-        self.wheel = udp.get_udp(self.object_, "wheel", self.wheel)
 
         return None
 
@@ -1224,7 +1222,6 @@ class EditPhysicProxy(bpy.types.Operator):
             "colltype_player",
             "colltype_player",
             self.colltype_player)
-        udp.edit_udp(self.object_, "wheel", "wheel", self.wheel)
 
         return {'FINISHED'}
 
@@ -1275,6 +1272,9 @@ class EditRenderMesh(bpy.types.Operator):
     other_rendermesh = BoolProperty(name="Other Rendermesh",
                                     description=desc.list['other_rendermesh'])
 
+    hull = BoolProperty(name="Hull", description="Hull for vehicles.")
+    wheel = BoolProperty(name="Wheel", description="Wheel for vehicles.")
+
     object_ = None
 
     def __init__(self):
@@ -1296,6 +1296,9 @@ class EditRenderMesh(bpy.types.Operator):
 
         self.is_entity = udp.get_udp(self.object_, "entity", self.is_entity)
         self.is_dynamic = udp.get_udp(self.object_, "dynamic", self.is_dynamic)
+
+        self.hull = udp.get_udp(self.object_, "hull", self.hull)
+        self.wheel = udp.get_udp(self.object_, "wheel", self.wheel)
 
         return None
 
@@ -1319,6 +1322,8 @@ class EditRenderMesh(bpy.types.Operator):
             "other_rendermesh",
             "other_rendermesh",
             self.other_rendermesh)
+        udp.edit_udp(self.object_, "hull", "hull", self.hull)
+        udp.edit_udp(self.object_, "wheel", "wheel", self.wheel)
 
         return {'FINISHED'}
 
