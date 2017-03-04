@@ -1,0 +1,12 @@
+<cryasset>
+ <AssetMetadata version="0" type="AnimatedMesh" guid="{88220186-6716-0DA8-9083-7B92F8608B11}" source="Door.dae">
+  <Files>
+   <File path="door.cga"/>
+  </Files>
+  <Details>
+   <Detail name="materialCount">3</Detail>
+   <Detail name="triangleCount">84</Detail>
+   <Detail name="vertexCount">190</Detail>
+  </Details>
+ </AssetMetadata>
+</cryasset>
