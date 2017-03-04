@@ -211,7 +211,6 @@ def get_tessfaces(bmesh_):
 
 
 def get_custom_normals(bmesh_, use_edge_angle, split_angle):
-    split_angle = math.degrees(split_angle)
     float_normals = []
 
     for face in bmesh_.faces:
@@ -220,21 +219,31 @@ def get_custom_normals(bmesh_, use_edge_angle, split_angle):
                 float_normals.extend(face.normal.normalized())
         else:
             for vertex in face.verts:
-                smooth_normal = face.normal.normalized()
+                v_normals = [[face.normal.normalized(), face.calc_area()]]
                 for link_face in vertex.link_faces:
                     if face.index == link_face.index:
                         continue
                     if link_face.smooth:
                         if not use_edge_angle:
-                            smooth_normal += link_face.normal.normalized()
+                            v_normals.append(
+                                [link_face.normal.normalized(), link_face.calc_area()])
 
                         elif use_edge_angle:
                             face_angle = face.normal.normalized().dot(link_face.normal.normalized())
                             face_angle = min(1.0, max(face_angle, -1.0))
-                            face_angle = math.degrees(math.acos(face_angle))
+                            face_angle = math.acos(face_angle)
                             if face_angle < split_angle:
-                                smooth_normal += link_face.normal.normalized()
+                                v_normals.append(
+                                    [link_face.normal.normalized(), link_face.calc_area()])
 
+                smooth_normal = Vector()
+                area_sum = 0
+                for vertex_normal in v_normals:
+                    area_sum += vertex_normal[1]
+                for vertex_normal in v_normals:
+                    if area_sum:
+                        smooth_normal += vertex_normal[0] * \
+                            (vertex_normal[1] / area_sum)
                 float_normals.extend(smooth_normal.normalized())
 
     return float_normals
