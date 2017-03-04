@@ -36,9 +36,9 @@ bl_info = {
     "author": "Özkan Afacan, Angelo J. Miner, Mikołaj Milej, Daniel White, "
               "Oscar Martin Garcia, Duo Oratar, David Marcelis",
     "blender": (2, 70, 0),
-    "version": (5, 0, 0),
+    "version": (5, 1, 0),
     "location": "BCRY Exporter Menu",
-    "description": "Export assets from Blender to CryEngine 3",
+    "description": "Export assets from Blender to CryEngine V",
     "warning": "",
     "wiki_url": "https://github.com/AFCStudio/BCryExporter/wiki",
     "tracker_url": "https://github.com/AFCStudio/BCryExporter/issues",

@@ -6,6 +6,34 @@ BCRY Exporter
 
 -------------------------------------------------------------------------------
 
+## 5.1
+#### Compatibility
+* Only compatible with CryEngine 3.5 and up.
+* Only compatible with Blender 2.7 and up.
+* Supports primary assets: CGF, CGA, CHR, SKIN, ANM, I_CAF.
+* Compatible with LumberYard.
+
+#### UI Changes:
+* User Defined Properties in Tool Shelf Panel.
+
+#### New Features:
+* Vehicle exporting support.
+* Parent-Child relation exporting.
+* CGA parent child support.
+* Dummy/Empty object exporting.
+* Dummy/Empty object UDP support.
+* Vehicle hull UDP support.
+* Alpha vertex color exporting for Blend Layer.
+
+#### Improvements/Fixes:
+* Custom normals area calculation.
+* Material exporting log.
+* Material order fix.
+* Set Material Name defualt tool fixing.
+* UDP properties fixing.
+
+
+
 ## 5.0
 #### Compatibility
 * Only compatible with CryEngine 3.5 and up.

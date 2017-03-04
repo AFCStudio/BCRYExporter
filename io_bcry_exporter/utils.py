@@ -750,8 +750,11 @@ def is_visual_scene_node_writed(object_, group):
 
 def is_there_a_parent_releation(object_, group):
     while object_.parent:
-        if is_object_in_group(object_.parent,
-                        group) and object_.parent.type in ('MESH', 'EMPTY'):
+        if is_object_in_group(
+                object_.parent,
+                group) and object_.parent.type in (
+                'MESH',
+                'EMPTY'):
             return True
         else:
             return is_there_a_parent_releation(object_.parent, group)
@@ -774,6 +777,7 @@ def is_dummy(object_):
 #------------------------------------------------------------------------------
 # Fakebones:
 #------------------------------------------------------------------------------
+
 
 def get_fakebone(bone_name):
     return next((fakebone for fakebone in get_type("fakebones")
