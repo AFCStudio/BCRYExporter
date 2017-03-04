@@ -47,7 +47,7 @@ def generate_mtl_files(_config, materials=None):
         sub_material = _doc.createElement('SubMaterials')
         parent_material.appendChild(sub_material)
         set_public_params(_doc, None, parent_material)
-        
+
         print()
         bcPrint("'{}' material is being processed...".format(node))
 
@@ -80,7 +80,7 @@ def generate_mtl_files(_config, materials=None):
 def write_material_information(material_name):
     parts = material_name.split('__')
     bcPrint("Subname: '{}'  -  Index: '{}'  -  Physic Type: '{}'".format(
-                                    parts[2], parts[1], parts[3]))
+        parts[2], parts[1], parts[3]))
 
 
 def get_material_groups(materials):
@@ -119,10 +119,12 @@ def get_materials(just_selected=False):
                 if material not in materials:
                     node_name = utils.get_node_name(group)
 
-                    material.name = utils.replace_invalid_rc_characters(material.name)
+                    material.name = utils.replace_invalid_rc_characters(
+                        material.name)
                     for image in get_textures(material):
                         try:
-                            image.name = utils.replace_invalid_rc_characters(image.name)
+                            image.name = utils.replace_invalid_rc_characters(
+                                image.name)
                         except AttributeError:
                             pass
 

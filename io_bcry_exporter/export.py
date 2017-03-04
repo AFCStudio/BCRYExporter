@@ -693,7 +693,7 @@ class CrytekDaeExporter:
                 node.appendChild(udp_extra)
 
             self._write_child_objects(child_object, node, group)
-            
+
             parent_node.appendChild(node)
 
         return parent_node
