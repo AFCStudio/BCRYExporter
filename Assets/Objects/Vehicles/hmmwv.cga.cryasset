@@ -1,0 +1,12 @@
+<cryasset>
+ <AssetMetadata version="0" type="AnimatedMesh" guid="{00A71495-44C7-1801-E9BE-73A79BD3CBBD}" source="HMMWV_Simple.dae">
+  <Files>
+   <File path="hmmwv.cga"/>
+  </Files>
+  <Details>
+   <Detail name="materialCount">6</Detail>
+   <Detail name="triangleCount">48555</Detail>
+   <Detail name="vertexCount">74187</Detail>
+  </Details>
+ </AssetMetadata>
+</cryasset>

@@ -1,9 +1,27 @@
 <Material MtlFlags="524544" vertModifType="0">
  <SubMaterials>
-  <Material Diffuse="0.800000,0.800000,0.800000" GenMask="60400000" LayerAct="1" MatTemplate="" MtlFlags="524416" Name="Triangle" Opacity="1.0" Shader="Nodraw" Shininess="50" Specular="1.000000,1.000000,1.000000" StringGenMask="%NORMAL_MAP%SPECULAR_MAP%SUBSURFACE_SCATTERING" SurfaceType="" vertModifType="0">
-   <Textures>
-    <Texture File="" Map="Diffuse"/>
-   </Textures>
+  <Material Diffuse="0.640000,0.640000,0.640000" GenMask="60400000" LayerAct="1" MatTemplate="" MtlFlags="524416" Name="No_Draw" Opacity="1.0" Shader="Nodraw" Shininess="49" Specular="0.500000,0.500000,0.500000" StringGenMask="%NORMAL_MAP%SPECULAR_MAP%SUBSURFACE_SCATTERING" SurfaceType="" vertModifType="0">
+   <Textures/>
+   <PublicParams EmittanceMapGamma="1" IndirectColor="0.25, 0.25, 0.25" SSSIndex="0"/>
+  </Material>
+  <Material Diffuse="1.000000,0.774000,0.013000" GenMask="60400000" LayerAct="1" MatTemplate="" MtlFlags="524416" Name="Skel_Arm_Right" Opacity="0.20000000298023224" Shader="Nodraw" Shininess="50" Specular="1.000000,1.000000,1.000000" StringGenMask="%NORMAL_MAP%SPECULAR_MAP%SUBSURFACE_SCATTERING" SurfaceType="" vertModifType="0">
+   <Textures/>
+   <PublicParams EmittanceMapGamma="1" IndirectColor="0.25, 0.25, 0.25" SSSIndex="0"/>
+  </Material>
+  <Material Diffuse="0.013000,1.000000,0.048000" GenMask="60400000" LayerAct="1" MatTemplate="" MtlFlags="524416" Name="Skel_Leg_Right" Opacity="0.20000000298023224" Shader="Nodraw" Shininess="50" Specular="1.000000,1.000000,1.000000" StringGenMask="%NORMAL_MAP%SPECULAR_MAP%SUBSURFACE_SCATTERING" SurfaceType="" vertModifType="0">
+   <Textures/>
+   <PublicParams EmittanceMapGamma="1" IndirectColor="0.25, 0.25, 0.25" SSSIndex="0"/>
+  </Material>
+  <Material Diffuse="0.016000,0.016000,0.016000" GenMask="60400000" LayerAct="1" MatTemplate="" MtlFlags="524416" Name="Skel_Torso" Opacity="0.20000000298023224" Shader="Nodraw" Shininess="50" Specular="1.000000,1.000000,1.000000" StringGenMask="%NORMAL_MAP%SPECULAR_MAP%SUBSURFACE_SCATTERING" SurfaceType="" vertModifType="0">
+   <Textures/>
+   <PublicParams EmittanceMapGamma="1" IndirectColor="0.25, 0.25, 0.25" SSSIndex="0"/>
+  </Material>
+  <Material Diffuse="0.000000,0.450000,0.464000" GenMask="60400000" LayerAct="1" MatTemplate="" MtlFlags="524416" Name="Skel_Head" Opacity="0.20000000298023224" Shader="Nodraw" Shininess="50" Specular="1.000000,1.000000,1.000000" StringGenMask="%NORMAL_MAP%SPECULAR_MAP%SUBSURFACE_SCATTERING" SurfaceType="" vertModifType="0">
+   <Textures/>
+   <PublicParams EmittanceMapGamma="1" IndirectColor="0.25, 0.25, 0.25" SSSIndex="0"/>
+  </Material>
+  <Material Diffuse="1.000000,0.320000,0.093000" GenMask="60400000" LayerAct="1" MatTemplate="" MtlFlags="524416" Name="Skel_Foot_Right" Opacity="0.20000000298023224" Shader="Nodraw" Shininess="50" Specular="1.000000,1.000000,1.000000" StringGenMask="%NORMAL_MAP%SPECULAR_MAP%SUBSURFACE_SCATTERING" SurfaceType="" vertModifType="0">
+   <Textures/>
    <PublicParams EmittanceMapGamma="1" IndirectColor="0.25, 0.25, 0.25" SSSIndex="0"/>
   </Material>
  </SubMaterials>
