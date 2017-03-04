@@ -3225,14 +3225,19 @@ class MaterialUtilitiesPanel(View3DPanel, Panel):
                      text="Generate Materials")
 
 
-class CustomPropertiesPanel(View3DPanel, Panel):
-    bl_label = "Custom Properties"
+class UserDefinedPropertiesPanel(View3DPanel, Panel):
+    bl_label = "User Defined Properties"
 
     def draw(self, context):
         layout = self.layout
+        col = layout.column(align=True)
 
-        layout.label("Properties:", icon="SCRIPT")
-        layout.menu("menu.UDP", text="User Defined Properties")
+        col.label("User Defined Properties", icon="SCRIPT")
+        col.separator()
+        col.operator("object.edit_render_mesh", text="Edit Render Mesh")
+        col.operator("object.edit_physics_proxy", text="Edit Physic Proxy")
+        col.operator("object.edit_joint_node", text="Edit Joint")
+        col.operator("object.edit_deformable", text="Edit Deformable")
 
 
 class ConfigurationsPanel(View3DPanel, Panel):
@@ -3691,7 +3696,7 @@ def get_classes_to_register():
         BoneUtilitiesPanel,
         MeshUtilitiesPanel,
         MaterialUtilitiesPanel,
-        CustomPropertiesPanel,
+        UserDefinedPropertiesPanel,
         ConfigurationsPanel,
         ExportPanel,
 
