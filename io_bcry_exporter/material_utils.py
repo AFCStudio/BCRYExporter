@@ -116,7 +116,7 @@ def get_materials(just_selected=False):
                 if material is None:
                     continue
 
-                if material not in materials:
+                if material not in materials.values():
                     node_name = utils.get_node_name(group)
 
                     material.name = utils.replace_invalid_rc_characters(
