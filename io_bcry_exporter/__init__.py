@@ -3082,6 +3082,7 @@ class View3DPanel():
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_category = "BCry Exporter"
+    bl_options = {'DEFAULT_CLOSED'}
 
 
 class ExportUtilitiesPanel(View3DPanel, Panel):
