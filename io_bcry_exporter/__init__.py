@@ -739,19 +739,20 @@ def name_branch(is_new_branch):
 # Material Tools:
 #------------------------------------------------------------------------------
 
-class SetMaterialNames(bpy.types.Operator):
-    '''Materials will be named after the first CryExportNode the Object is in.'''
-    """Set Material Names by heeding the RC naming scheme:
-        - CryExportNode group name
-        - Strict number sequence beginning with 1 for each CryExportNode (max 999)
-        - Physics
-    """
-    bl_label = "Update material names in CryExportNodes"
-    bl_idname = "material.set_material_names"
+class AddMaterialProperties(bpy.types.Operator):
+    '''Add BCRY Exporter material properties to materials of which selected node:
+        - Material Name
+        - Sub Material Index
+        - Sub Material Name
+        - Physical Proxy Type
+    '''
+    bl_label = "Add BCRY Exporter material properties to materials"
+    bl_idname = "material.add_material_properties"
 
-    material_name = StringProperty(name="Cry Material Name")
+    material_name = StringProperty(name="Material Name",
+            description="Main material name which shown at CryEngine")
     material_phys = EnumProperty(
-        name="Physic Proxy",
+        name="Physical Proxy",
         items=(
             ("physDefault", "Default", desc.list['physDefault']),
             ("physProxyNoDraw", "Physical Proxy", desc.list['physProxyNoDraw']),
@@ -760,10 +761,6 @@ class SetMaterialNames(bpy.types.Operator):
             ("physNone", "None", desc.list['physNone'])
         ),
         default="physNone")
-
-    just_rephysic = BoolProperty(
-        name="Only Physic",
-        description="Only change physic of selected material.")
 
     object_ = None
     errorReport = None
@@ -791,10 +788,6 @@ class SetMaterialNames(bpy.types.Operator):
     def execute(self, context):
         if self.errorReport is not None:
             return {'FINISHED'}
-
-        if self.just_rephysic:
-            return material_utils.set_material_physic(
-                self, context, self.material_phys)
 
         # Revert all materials to fetch also those that are no longer in a group
         # and store their possible physics properties in a dictionary.
@@ -842,11 +835,11 @@ class SetMaterialNames(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self)
 
 
-class RemoveMaterialNames(bpy.types.Operator):
-    '''Removes all BCry Exporter properties from material names. This includes \
-physics, so they get lost.'''
-    bl_label = "Remove BCry Exporter properties from material names"
-    bl_idname = "material.remove_material_names"
+class DiscardMaterialProperties(bpy.types.Operator):
+    '''Removes all BCRY Exporter properties from material names. This includes \
+physics.'''
+    bl_label = "Remove BCRY Exporter properties from material names"
+    bl_idname = "material.discard_material_properties"
 
     def execute(self, context):
         material_utils.remove_bcry_properties()
@@ -3266,11 +3259,11 @@ class MaterialUtilitiesPanel(View3DPanel, Panel):
             icon="ZOOMIN")
         col.separator()
         col.operator(
-            "material.set_material_names",
+            "material.add_material_properties",
             text="Add Material Properties",
             icon="GREASEPENCIL")
         col.operator(
-            "material.remove_material_names",
+            "material.discard_material_properties",
             text="Discard Material Properties",
             icon="BRUSH_DATA")
         col.separator()
@@ -3551,21 +3544,21 @@ class MaterialUtilitiesMenu(bpy.types.Menu):
         layout.operator(
             "material.add_cry_material",
             text="Add Material",
-            icon="MATERIAL_DATA")
+            icon="ZOOMIN")
         layout.separator()
         layout.operator(
-            "material.set_material_names",
-            text="Do Material Convention",
-            icon="MATERIAL")
+            "material.add_material_properties",
+            text="Add Material Properties",
+            icon="GREASEPENCIL")
         layout.operator(
-            "material.remove_material_names",
-            text="Undo Material Convention",
-            icon="MATERIAL")
+            "material.discard_material_properties",
+            text="Discard Material Properties",
+            icon="BRUSH_DATA")
         layout.separator()
         layout.operator(
             "material.generate_materials",
             text="Generate Materials",
-            icon="MATERIAL")
+            icon="GROUP_VCOL")
 
 
 class CustomPropertiesMenu(bpy.types.Menu):
@@ -3720,8 +3713,8 @@ def get_classes_to_register():
         AddCryAnimationNode,
         SelectedToCryExportNodes,
         AddMaterial,
-        SetMaterialNames,
-        RemoveMaterialNames,
+        AddMaterialProperties,
+        DiscardMaterialProperties,
         GenerateMaterials,
         AddRootBone,
         AddLocatorLocomotion,
