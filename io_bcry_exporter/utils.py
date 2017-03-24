@@ -341,6 +341,16 @@ def check_sharp_edges(vertex, current_face, previous_face, target_face):
     return False
 
 
+def get_joint_name(object_, index=1):
+    joint_name = "$joint{:02d}".format(index)
+
+    for child in object_.children:
+        if child.name == joint_name:
+            return get_joint_name(object_, index + 1)
+
+    return joint_name
+
+
 #------------------------------------------------------------------------------
 # Path Manipulations:
 #------------------------------------------------------------------------------
