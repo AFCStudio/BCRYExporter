@@ -604,21 +604,97 @@ be converted to the selected shape in CryEngine.'''
 
 
 class AddBreakableJoint(bpy.types.Operator):
-    '''Click to add a pre-broken breakable joint to current selection.'''
-    bl_label = "Add Joint"
+    '''Add a dummy helper breakable joint to 3D cursor position.'''
+    bl_label = "Add Breakable Joint"
     bl_idname = "object.add_joint"
 
+    ''' "limit", "bend", "twist", "pull", "push",
+        "shift", "player_can_break", "gameplay_critical" '''
+
+    info = "If you want to use {} joint property. Please enable this."
+    
+    draw_size = FloatProperty(name="Joint Size", default=0.1,
+                            description="Breakable Joint Size")
+
+    is_limit = BoolProperty(name="Use Limit Property", default=True,
+                            description=info.format('limit'))
+    limit = FloatProperty(name="Limit", default=10.0,
+                            description=desc.list['limit'])
+
+    is_bend = BoolProperty(name="Use Bend Property",
+                           description=info.format('bend'))
+    bend = FloatProperty(name="Bend", description=desc.list['bend'])
+
+    is_twist = BoolProperty(name="Use Twist Property",
+                            description=info.format('twist'))
+    twist = FloatProperty(name="Twist", description=desc.list['twist'])
+
+    is_pull = BoolProperty(name="Use Pull Property",
+                           description=info.format('pull'))
+    pull = FloatProperty(name="Pull", description=desc.list['pull'])
+
+    is_push = BoolProperty(name="Use Push Property",
+                           description=info.format('push'))
+    push = FloatProperty(name="Push", description=desc.list['push'])
+
+    is_shift = BoolProperty(name="Use Shift Property",
+                            description=info.format('shift'))
+    shift = FloatProperty(name="Shift", description=desc.list['shift'])
+
+    player_can_break = BoolProperty(name="Player can break",
+                                    description=desc.list['player_can_break'])
+
+    gameplay_critical = BoolProperty(
+        name="Gameplay critical",
+        description=desc.list['gameplay_critical'])
+
+    object_ = None
+    group_ = None
+
     def execute(self, context):
-        # Reviewed in the future.
-        # return add.add_joint(self, context)
-        return None
+        bpy.ops.object.empty_add(type='CUBE')
+        joint_ = bpy.context.active_object
+
+        joint_.name = utils.get_joint_name(self.object_)
+        joint_.parent = self.object_
+        self.group_.objects.link(joint_)
+
+        udp.edit_udp(joint_, "limit", self.limit, self.is_limit)
+        udp.edit_udp(joint_, "bend", self.bend, self.is_bend)
+        udp.edit_udp(joint_, "twist", self.twist, self.is_twist)
+        udp.edit_udp(joint_, "pull", self.pull, self.is_pull)
+        udp.edit_udp(joint_, "push", self.push, self.is_push)
+        udp.edit_udp(joint_, "shift", self.shift, self.is_shift)
+        udp.edit_udp(
+            joint_,
+            "player_can_break",
+            "player_can_break",
+            self.player_can_break)
+        udp.edit_udp(
+            joint_,
+            "gameplay_critical",
+            "gameplay_critical",
+            self.gameplay_critical)
+
+        joint_.empty_draw_size = self.draw_size
+
+        return {'FINISHED'}
 
     def invoke(self, context, event):
-        if context.object is None or context.object.type != "MESH" or context.object.mode != "OBJECT":
-            self.report({'ERROR'}, "Select a mesh in OBJECT mode.")
+        self.object_ = bpy.context.active_object
+        message = "Please select a empty object which added BCRY export node."
+        if self.object_ is None or self.object_.type != 'EMPTY':
+            self.report({'ERROR'}, message)
             return {'FINISHED'}
 
-        return self.execute(context)
+        for group in self.object_.users_group:
+            if utils.is_export_node(group) and \
+                utils.get_node_type(group) == 'cgf':
+                self.group_ = group
+                return context.window_manager.invoke_props_dialog(self)
+
+        self.report({'ERROR'}, message)
+        return {'FINISHED'}
 
 
 class AddBranch(bpy.types.Operator):
