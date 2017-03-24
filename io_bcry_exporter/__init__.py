@@ -3551,21 +3551,21 @@ class MaterialUtilitiesMenu(bpy.types.Menu):
         layout.operator(
             "material.add_cry_material",
             text="Add Material",
-            icon="MATERIAL_DATA")
+            icon="ZOOMIN")
         layout.separator()
         layout.operator(
             "material.set_material_names",
-            text="Do Material Convention",
-            icon="MATERIAL")
+            text="Add Material Properties",
+            icon="GREASEPENCIL")
         layout.operator(
             "material.remove_material_names",
-            text="Undo Material Convention",
-            icon="MATERIAL")
+            text="Discard Material Properties",
+            icon="BRUSH_DATA")
         layout.separator()
         layout.operator(
             "material.generate_materials",
             text="Generate Materials",
-            icon="MATERIAL")
+            icon="GROUP_VCOL")
 
 
 class CustomPropertiesMenu(bpy.types.Menu):
