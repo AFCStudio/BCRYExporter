@@ -3092,18 +3092,24 @@ class ExportUtilitiesPanel(View3DPanel, Panel):
         layout = self.layout
 
         col = layout.column(align=True)
-        col.label("Export Nodes", icon="GROUP")
-        col.separator()
         row = col.row(align=True)
-        row.operator("object.add_cry_export_node", text="Add Export Node")
+        row.operator(
+            "object.add_cry_export_node",
+            text="Add Export Node",
+            icon="GROUP")
         row.operator(
             "object.add_cry_animation_node",
-            text="Add Animation Node")
+            text="Add Animation Node",
+            icon="PREVIEW_RANGE")
         col.operator(
             "object.selected_to_cry_export_nodes",
-            text="Export Nodes from Objects")
+            text="Export Nodes from Objects",
+            icon="SCENE_DATA")
         col.separator()
-        col.operator("object.apply_transforms", text="Apply All Transforms")
+        col.operator(
+            "object.apply_transforms",
+            text="Apply All Transforms",
+            icon="MESH_DATA")
 
 
 class CryUtilitiesPanel(View3DPanel, Panel):
@@ -3116,27 +3122,48 @@ class CryUtilitiesPanel(View3DPanel, Panel):
         col.label("Add Physics Proxy", icon="ROTATE")
         col.separator()
         row = col.row(align=True)
-        add_box_proxy = row.operator("object.add_proxy", text="Box")
+        add_box_proxy = row.operator(
+            "object.add_proxy",
+            text="Box",
+            icon="META_CUBE")
         add_box_proxy.type_ = "box"
-        add_capsule_proxy = row.operator("object.add_proxy", text="Capsule")
+        add_capsule_proxy = row.operator(
+            "object.add_proxy",
+            text="Capsule",
+            icon="META_CAPSULE")
         add_capsule_proxy.type_ = "capsule"
 
         row = col.row(align=True)
-        add_cylinder_proxy = row.operator("object.add_proxy", text="Cylinder")
+        add_cylinder_proxy = row.operator(
+            "object.add_proxy",
+            text="Cylinder",
+            icon="META_ELLIPSOID")
         add_cylinder_proxy.type_ = "cylinder"
-        add_sphere_proxy = row.operator("object.add_proxy", text="Sphere")
+        add_sphere_proxy = row.operator(
+            "object.add_proxy",
+            text="Sphere",
+            icon="META_BALL")
         add_sphere_proxy.type_ = "sphere"
         col.separator()
-
-        col.label("Breakables:", icon="PARTICLES")
-        col.separator()
-        col.operator("object.add_joint", text="Add Joint")
         col.separator()
 
-        col.label("Touch Bending:", icon="MOD_SIMPLEDEFORM")
         col.separator()
-        col.operator("mesh.add_branch", text="Add Branch")
-        col.operator("mesh.add_branch_joint", text="Add Branch Joint")
+        col.operator(
+            "object.add_joint",
+            text="Add Joint",
+            icon="PARTICLES")
+        col.separator()
+        col.separator()
+
+        col.separator()
+        col.operator(
+            "mesh.add_branch",
+            text="Add Branch",
+            icon="MOD_SIMPLEDEFORM")
+        col.operator(
+            "mesh.add_branch_joint",
+            text="Add Branch Joint",
+            icon="MOD_SIMPLEDEFORM")
 
 
 class BoneUtilitiesPanel(View3DPanel, Panel):
@@ -3146,33 +3173,38 @@ class BoneUtilitiesPanel(View3DPanel, Panel):
         layout = self.layout
         col = layout.column(align=True)
 
-        col.label("Skeleton", icon="ARMATURE_DATA")
-        col.separator()
-        col.operator("armature.add_root_bone", text="Add Root Bone")
-        col.operator("armature.add_primitive_mesh", text="Add Primitive Mesh")
+        col.operator(
+            "armature.add_root_bone",
+            text="Add Root Bone",
+            icon="BONE_DATA")
+        col.operator(
+            "armature.add_primitive_mesh",
+            text="Add Primitive Mesh",
+            icon="BONE_DATA")
         col.operator(
             "armature.add_locator_locomotion",
-            text="Add Locator Locomotion")
+            text="Add Locator Locomotion",
+            icon="BONE_DATA")
         col.separator()
 
-        col.label(text="Bone", icon="BONE_DATA")
-        col.separator()
         col.operator(
             "object.edit_inverse_kinematics",
-            text="Edit Bone Physic and IKs")
+            text="Edit Bone Physic and IKs",
+            icon="OUTLINER_DATA_ARMATURE")
         col.operator(
             "ops.apply_animation_scaling",
-            text="Apply Animation Scaling")
+            text="Apply Animation Scaling",
+            icon="OUTLINER_DATA_ARMATURE")
         col.separator()
 
-        col.label("Physics", icon="PHYSICS")
-        col.separator()
         col.operator(
             "armature.physicalize_skeleton",
-            text="Physicalize Skeleton")
+            text="Physicalize Skeleton",
+            icon="PHYSICS")
         col.operator(
             "armature.clear_skeleton_physics",
-            text="Clear Skeleton Physics")
+            text="Clear Skeleton Physics",
+            icon="PHYSICS")
 
 
 class MeshUtilitiesPanel(View3DPanel, Panel):
@@ -3182,26 +3214,43 @@ class MeshUtilitiesPanel(View3DPanel, Panel):
         layout = self.layout
         col = layout.column(align=True)
 
-        col.label(text="LODs", icon="EDIT_VEC")
-        col.separator()
-        col.operator("mesh.generate_lod_meshes", text="Create LODs")
-
-        col.label(text="Weight Repair", icon="WPAINT_HLT")
-        col.separator()
-        col.operator("mesh.find_weightless", text="Find Weightless")
-        col.operator("mesh.remove_weight", text="Remove Weight")
+        col.operator(
+            "mesh.generate_lod_meshes",
+            text="Create LODs",
+            icon="EDIT_VEC")
         col.separator()
 
-        col.label(text="Mesh Repair", icon='ZOOM_ALL')
         col.separator()
-        col.operator("object.find_degenerate_faces", text="Find Degenerate")
-        col.operator("mesh.find_multiface_lines", text="Find Multi-face")
+        col.operator(
+            "mesh.find_weightless",
+            text="Find Weightless",
+            icon="WPAINT_HLT")
+        col.operator(
+            "mesh.remove_weight",
+            text="Remove Weight",
+            icon="WPAINT_HLT")
         col.separator()
 
-        col.label(text="UV Repair", icon="UV_FACESEL")
         col.separator()
-        col.operator("scene.find_no_uvs", text="Find All Objects with No UV's")
-        col.operator("mesh.add_uv_texture", text="Add UV's to Objects")
+        col.operator(
+            "object.find_degenerate_faces",
+            text="Find Degenerate",
+            icon='ZOOM_ALL')
+        col.operator(
+            "mesh.find_multiface_lines",
+            text="Find Multi-face",
+            icon='ZOOM_ALL')
+        col.separator()
+
+        col.separator()
+        col.operator(
+            "scene.find_no_uvs",
+            text="Find All Objects with No UV's",
+            icon="UV_FACESEL")
+        col.operator(
+            "mesh.add_uv_texture",
+            text="Add UV's to Objects",
+            icon="UV_FACESEL")
 
 
 class MaterialUtilitiesPanel(View3DPanel, Panel):
@@ -3211,19 +3260,24 @@ class MaterialUtilitiesPanel(View3DPanel, Panel):
         layout = self.layout
         col = layout.column(align=True)
 
-        col.label(text="Material:", icon="MATERIAL_DATA")
-        col.separator()
-        col.operator("material.add_cry_material", text="Add Material")
+        col.operator(
+            "material.add_cry_material",
+            text="Add Material",
+            icon="ZOOMIN")
         col.separator()
         col.operator(
             "material.set_material_names",
-            text="Do Material Convention")
+            text="Add Material Properties",
+            icon="GREASEPENCIL")
         col.operator(
             "material.remove_material_names",
-            text="Undo Material Convention")
+            text="Discard Material Properties",
+            icon="BRUSH_DATA")
         col.separator()
-        col.operator("material.generate_materials",
-                     text="Generate Materials")
+        col.operator(
+            "material.generate_materials",
+            text="Generate Materials",
+            icon="GROUP_VCOL")
 
 
 class UserDefinedPropertiesPanel(View3DPanel, Panel):
@@ -3233,12 +3287,22 @@ class UserDefinedPropertiesPanel(View3DPanel, Panel):
         layout = self.layout
         col = layout.column(align=True)
 
-        col.label("User Defined Properties", icon="SCRIPT")
-        col.separator()
-        col.operator("object.edit_render_mesh", text="Edit Render Mesh")
-        col.operator("object.edit_physics_proxy", text="Edit Physic Proxy")
-        col.operator("object.edit_joint_node", text="Edit Joint")
-        col.operator("object.edit_deformable", text="Edit Deformable")
+        col.operator(
+            "object.edit_render_mesh",
+            text="Edit Render Mesh",
+            icon="FORCE_LENNARDJONES")
+        col.operator(
+            "object.edit_physics_proxy",
+            text="Edit Physic Proxy",
+            icon="META_CUBE")
+        col.operator(
+            "object.edit_joint_node",
+            text="Edit Joint",
+            icon="MOD_SCREW")
+        col.operator(
+            "object.edit_deformable",
+            text="Edit Deformable",
+            icon="MOD_SIMPLEDEFORM")
 
 
 class ConfigurationsPanel(View3DPanel, Panel):
@@ -3248,14 +3312,19 @@ class ConfigurationsPanel(View3DPanel, Panel):
         layout = self.layout
         col = layout.column(align=True)
 
-        col.label("Configure", icon="NEWFOLDER")
-        col.separator()
-        col.operator("file.find_rc", text="Find RC")
+        col.operator(
+            "file.find_rc",
+            text="Find RC",
+            icon="SCRIPTPLUGINS")
         col.operator(
             "file.find_rc_for_texture_conversion",
-            text="Find Texture RC")
+            text="Find Texture RC",
+            icon="SCRIPTPLUGINS")
         col.separator()
-        col.operator("file.select_game_dir", text="Select Game Directory")
+        col.operator(
+            "file.select_game_dir",
+            text="Select Game Directory",
+            icon="FILESEL")
 
 
 class ExportPanel(View3DPanel, Panel):
@@ -3265,12 +3334,15 @@ class ExportPanel(View3DPanel, Panel):
         layout = self.layout
         col = layout.column(align=True)
 
-        col.label("Export Animations", icon="RENDER_ANIMATION")
+        col.operator(
+            "scene.export_animations",
+            text="Export Animations",
+            icon="RENDER_ANIMATION")
         col.separator()
-        col.operator("scene.export_animations", text="Export Animations")
-        col.label("Export to CryEngine", icon_value=bcry_icons["crye"].icon_id)
-        col.separator()
-        col.operator("scene.export_to_game", text="Export to CryEngine")
+        col.operator(
+            "scene.export_to_game",
+            text="Export to CryEngine",
+            icon_value=bcry_icons["crye"].icon_id)
         col.separator()
 
 #------------------------------------------------------------------------------
