@@ -761,10 +761,6 @@ class SetMaterialNames(bpy.types.Operator):
         ),
         default="physNone")
 
-    just_rephysic = BoolProperty(
-        name="Only Physic",
-        description="Only change physic of selected material.")
-
     object_ = None
     errorReport = None
 
@@ -791,10 +787,6 @@ class SetMaterialNames(bpy.types.Operator):
     def execute(self, context):
         if self.errorReport is not None:
             return {'FINISHED'}
-
-        if self.just_rephysic:
-            return material_utils.set_material_physic(
-                self, context, self.material_phys)
 
         # Revert all materials to fetch also those that are no longer in a group
         # and store their possible physics properties in a dictionary.
