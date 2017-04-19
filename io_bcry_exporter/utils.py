@@ -890,6 +890,8 @@ def get_keyframes(armature):
             if bone.parent and bone.parent.parent:
                 parent_matrix = transform_animation_matrix(bone.parent.matrix)
                 bone_matrix = parent_matrix.inverted() * bone_matrix
+            elif bone.name == 'Locator_Locomotion':
+                bone_matrix = bone.matrix
             elif not bone.parent:
                 bone_matrix = Matrix()
 
