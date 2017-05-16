@@ -185,7 +185,7 @@ class CrytekDaeExporter:
                 if object_.type != 'MESH':
                     continue
 
-                bmesh_, layer_state, scene_layer = utils.get_bmesh(object_)
+                bmesh_, backup_info = utils.get_bmesh(object_)
                 geometry_node = self._doc.createElement("geometry")
                 geometry_name = utils.get_geometry_name(group, object_)
                 geometry_node.setAttribute("id", geometry_name)
@@ -239,7 +239,7 @@ class CrytekDaeExporter:
                 geometry_node.appendChild(mesh_node)
                 libgeo.appendChild(geometry_node)
 
-                utils.clear_bmesh(object_, layer_state, scene_layer)
+                utils.clear_bmesh(object_, backup_info)
                 bcPrint(
                     '"{}" object has been processed for "{}" node.'.format(
                         object_.name, group.name))
