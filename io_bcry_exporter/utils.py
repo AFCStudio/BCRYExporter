@@ -159,7 +159,7 @@ def get_geometry_name(group, object_):
         return "{}_{}_geometry".format(node_name, object_.name)
 
 
-def get_bmesh(object_):
+def get_bmesh(object_, apply_modifiers=False):
     set_active(object_)
 
     # bmesh may be gotten only in edit mode for active object.
@@ -177,18 +177,21 @@ def get_bmesh(object_):
     if layer_state:
         object_.layers[0] = True
 
+    backup_data = object_.data
+    object_.data = object_.to_mesh(bpy.context.scene, apply_modifiers, 'PREVIEW')
+
     bpy.ops.object.mode_set(mode='EDIT')
 
     bmesh_ = bmesh.from_edit_mesh(object_.data)
-
-    backup_info = (layer_state, scene_first_layer)
+    backup_info = (backup_data, layer_state, scene_first_layer)
 
     return bmesh_, backup_info
 
 
 def clear_bmesh(object_, backup_info):
-    layer_state = backup_info[0]
-    scene_first_layer = backup_info[1]
+    backup_data = backup_info[0]
+    layer_state = backup_info[1]
+    scene_first_layer = backup_info[2]
 
     bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -196,6 +199,10 @@ def clear_bmesh(object_, backup_info):
 
     if layer_state:
         object_.layers[0] = False
+
+    export_data = object_.data
+    object_.data = backup_data
+    bpy.data.meshes.remove(export_data)
 
 
 def get_tessfaces(bmesh_):
@@ -553,21 +560,6 @@ def fix_weights():
             raise exceptions.BCryException(
                 "Please fix weightless vertices first.")
     bcPrint("Weights Corrected.")
-
-
-def apply_modifiers(just_selected=False):
-    print()
-    for node in get_export_nodes(just_selected):
-        for object_ in node.objects:
-            bpy.context.scene.objects.active = object_
-            for modifier in object_.modifiers:
-                if modifier.type == 'ARMATURE':
-                    continue
-                mod_name = modifier.name
-                bpy.ops.object.modifier_apply(
-                    apply_as='DATA', modifier=mod_name)
-
-        bcPrint("Modifiers are applied for {} node.".format(node.name))
 
 
 #------------------------------------------------------------------------------
