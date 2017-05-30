@@ -93,9 +93,6 @@ class CrytekDaeExporter:
     def _prepare_for_export(self):
         utils.clean_file(self._config.export_selected_nodes)
 
-        if self._config.apply_modifiers:
-            utils.apply_modifiers(self._config.export_selected_nodes)
-
         if self._config.fix_weights:
             utils.fix_weights()
 
@@ -185,7 +182,8 @@ class CrytekDaeExporter:
                 if object_.type != 'MESH':
                     continue
 
-                bmesh_, backup_info = utils.get_bmesh(object_)
+                bmesh_, backup_info = utils.get_bmesh(object_,
+                                                self._config.apply_modifiers)
                 geometry_node = self._doc.createElement("geometry")
                 geometry_name = utils.get_geometry_name(group, object_)
                 geometry_node.setAttribute("id", geometry_name)

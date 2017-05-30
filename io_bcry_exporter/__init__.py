@@ -2809,6 +2809,11 @@ class Export(bpy.types.Operator, ExportHelper):
     filename_ext = ".dae"
     filter_glob = StringProperty(default="*.dae", options={'HIDDEN'})
 
+    apply_modifiers = BoolProperty(
+        name="Apply Modifiers",
+        description="Apply all modifiers for objects before exporting.",
+        default=True,
+    )
     merge_all_nodes = BoolProperty(
         name="Merge All Nodes",
         description=desc.list["merge_all_nodes"],
@@ -2817,11 +2822,6 @@ class Export(bpy.types.Operator, ExportHelper):
     export_selected_nodes = BoolProperty(
         name="Export Selected Nodes",
         description="Just exports selected nodes.",
-        default=False,
-    )
-    apply_modifiers = BoolProperty(
-        name="Apply Modifiers",
-        description="Apply all modifiers for objects before exporting.",
         default=False,
     )
     custom_normals = BoolProperty(
@@ -2897,9 +2897,9 @@ class Export(bpy.types.Operator, ExportHelper):
         def __init__(self, config):
             attributes = (
                 'filepath',
+                'apply_modifiers',
                 'merge_all_nodes',
                 'export_selected_nodes',
-                'apply_modifiers',
                 'custom_normals',
                 'vcloth_pre_process',
                 'generate_materials',
@@ -2962,9 +2962,9 @@ class Export(bpy.types.Operator, ExportHelper):
 
         box = col.box()
         box.label("General", icon="WORLD")
+        box.prop(self, "apply_modifiers")
         box.prop(self, "merge_all_nodes")
         box.prop(self, "export_selected_nodes")
-        box.prop(self, "apply_modifiers")
         box.prop(self, "custom_normals")
         box.prop(self, "vcloth_pre_process")
 
