@@ -179,10 +179,17 @@ def get_bmesh(object_):
 
     bpy.ops.object.mode_set(mode='EDIT')
 
-    return bmesh.from_edit_mesh(object_.data), layer_state, scene_first_layer
+    bmesh_ = bmesh.from_edit_mesh(object_.data)
+
+    backup_info = (layer_state, scene_first_layer)
+
+    return bmesh_, backup_info
 
 
-def clear_bmesh(object_, layer_state, scene_first_layer):
+def clear_bmesh(object_, backup_info):
+    layer_state = backup_info[0]
+    scene_first_layer = backup_info[1]
+
     bpy.ops.object.mode_set(mode='OBJECT')
 
     bpy.context.scene.layers[0] = scene_first_layer
