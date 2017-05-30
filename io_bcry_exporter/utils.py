@@ -177,6 +177,8 @@ def get_bmesh(object_, apply_modifiers=False):
     if layer_state:
         object_.layers[0] = True
 
+    bcry_split_modifier(object_)
+
     backup_data = object_.data
     object_.data = object_.to_mesh(bpy.context.scene, apply_modifiers, 'PREVIEW')
 
@@ -202,7 +204,30 @@ def clear_bmesh(object_, backup_info):
 
     export_data = object_.data
     object_.data = backup_data
+    remove_bcry_split_modifier(object_)
     bpy.data.meshes.remove(export_data)
+
+
+def bcry_split_modifier(object_):
+    if object_.data.use_auto_smooth:
+        modifier_unique_name = 'BCRY_EDGE_SPLIT'
+
+        object_.modifiers.new(modifier_unique_name, 'EDGE_SPLIT')
+        edge_split_modifier = object_.modifiers.get(modifier_unique_name)
+        edge_split_modifier.use_edge_angle = True
+        edge_split_modifier.use_edge_sharp = True
+        edge_split_modifier.split_angle = object_.data.auto_smooth_angle
+
+        object_.data.use_auto_smooth = False
+
+
+def remove_bcry_split_modifier(object_):
+    modifier_unique_name = 'BCRY_EDGE_SPLIT'
+
+    edge_split_modifier = object_.modifiers.get(modifier_unique_name)
+    if edge_split_modifier:
+        object_.data.use_auto_smooth = True
+        object_.modifiers.remove(edge_split_modifier)
 
 
 def get_tessfaces(bmesh_):
