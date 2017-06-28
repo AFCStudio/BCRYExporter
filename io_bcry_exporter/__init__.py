@@ -67,6 +67,7 @@ from bpy.props import BoolProperty, EnumProperty, FloatVectorProperty, \
     FloatProperty, IntProperty, StringProperty, BoolVectorProperty
 from bpy.types import Menu, Panel
 from bpy_extras.io_utils import ExportHelper
+from mathutils import Vector
 from io_bcry_exporter.configuration import Configuration
 from io_bcry_exporter.outpipe import bcPrint
 from io_bcry_exporter.desc import list
@@ -248,7 +249,7 @@ class AddCryExportNode(bpy.types.Operator):
         return {"FINISHED"}
 
     def invoke(self, context, event):
-        if len(context.selected_objects) == 0:
+        if not context.selected_objects:
             self.report(
                 {'ERROR'},
                 "Select one or more objects in OBJECT mode.")
@@ -455,6 +456,43 @@ class ApplyTransforms(bpy.types.Operator):
 
     def invoke(self, context, event):
         if len(context.selected_objects) == 0:
+            self.report(
+                {'ERROR'},
+                "Select one or more objects in OBJECT mode.")
+            return {'FINISHED'}
+
+        return self.execute(context)
+
+
+class FeetOnFloor(bpy.types.Operator):
+    '''Places mesh on grid floor.'''
+    bl_label = "Feet on Floor"
+    bl_idname = "object.feet_on_floor"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    z_offset = FloatProperty(name="Z Offset",
+                        default=0.0, step=0.1, precision=3,
+                        description="Z offset for center of object.")
+
+    def execute(self, context):
+        old_cursor = context.scene.cursor_location.copy()
+        for obj in context.selected_objects:
+            ctx = utils.override(obj, active=True, selected=True)
+            bpy.ops.object.origin_set(ctx, type="ORIGIN_GEOMETRY", center="BOUNDS")
+            bpy.ops.view3d.snap_cursor_to_selected(ctx)
+            x, y, z = bpy.context.scene.cursor_location
+            z = obj.location.z - obj.dimensions.z / 2 - self.z_offset
+            bpy.context.scene.cursor_location = Vector((x, y, z))
+            bpy.ops.object.origin_set(ctx, type="ORIGIN_CURSOR")
+            bpy.context.scene.cursor_location = Vector((0, 0, 0))
+            bpy.ops.view3d.snap_selected_to_cursor(ctx)
+
+        bpy.context.scene.cursor_location = old_cursor
+
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        if not context.selected_objects or context.mode != "OBJECT":
             self.report(
                 {'ERROR'},
                 "Select one or more objects in OBJECT mode.")
@@ -3179,6 +3217,10 @@ class ExportUtilitiesPanel(View3DPanel, Panel):
             "object.apply_transforms",
             text="Apply All Transforms",
             icon="MESH_DATA")
+        col.operator(
+            "object.feet_on_floor",
+            text="Feet On Floor",
+            icon="ARMATURE_DATA")
 
 
 class CryUtilitiesPanel(View3DPanel, Panel):
@@ -3450,6 +3492,10 @@ class BCryMainMenu(bpy.types.Menu):
             "object.apply_transforms",
             text="Apply All Transforms",
             icon="MESH_DATA")
+        layout.operator(
+            "object.feet_on_floor",
+            text="Feet On Floor",
+            icon="ARMATURE_DATA")
         layout.separator()
 
         layout.menu("menu.add_physics_proxy", icon="ROTATE")
@@ -3788,6 +3834,9 @@ def get_classes_to_register():
         AddCryExportNode,
         AddCryAnimationNode,
         SelectedToCryExportNodes,
+        ApplyTransforms,
+        FeetOnFloor,
+
         AddMaterial,
         AddMaterialProperties,
         DiscardMaterialProperties,
@@ -3795,7 +3844,6 @@ def get_classes_to_register():
         AddRootBone,
         AddLocatorLocomotion,
         AddPrimitiveMesh,
-        ApplyTransforms,
         AddProxy,
         AddBreakableJoint,
         AddBranch,

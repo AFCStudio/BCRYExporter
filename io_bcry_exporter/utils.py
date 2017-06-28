@@ -1400,6 +1400,28 @@ def get_3d_context(object_):
     return override
 
 
+def override(obj, active=True, selected=True):
+    ctx = bpy.context.copy()
+    for area in bpy.context.screen.areas:
+        if area.type == 'VIEW_3D':
+            ctx['area'] = area
+            ctx['region'] = area.regions[-1]
+            break
+
+    if active:
+        ctx['active_object'] = obj
+        ctx['active_base'] = obj
+        ctx['object'] = obj
+
+    if selected:
+        ctx['selected_objects'] = [obj]
+        ctx['selected_bases'] = [obj]
+        ctx['selected_editable_objects'] = [obj]
+        ctx['selected_editable_bases'] = [obj]
+
+    return ctx
+
+
 #------------------------------------------------------------------------------
 # Layer File:
 #------------------------------------------------------------------------------
