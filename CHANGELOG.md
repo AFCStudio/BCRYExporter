@@ -6,6 +6,31 @@ BCRY Exporter
 
 -------------------------------------------------------------------------------
 
+## 5.2
+#### Compatibility
+* Only compatible with CryEngine 3.5 and up.
+* Only compatible with Blender 2.7 and up.
+* Supports primary assets: CGF, CGA, CHR, SKIN, ANM, I_CAF.
+* Compatible with LumberYard.
+
+#### UI Changes:
+* Collapse panel as default.
+* New Tool Shelf Panel Design.
+* New material utilities name and icons.
+
+#### New Features:
+* New beakable joint window.
+* New apply modifiers behavior.
+* New Feet On Floor feature.
+
+#### Improvements/Fixes:
+* Material dictionary control fix.
+* Locator Locomotion axis fix.
+* Using tuple for mesh and scene backup information.
+* Auto smooth improvement.
+* Generate LODs icon replacing.
+
+
 ## 5.1
 #### Compatibility
 * Only compatible with CryEngine 3.5 and up.
@@ -31,7 +56,6 @@ BCRY Exporter
 * Material order fix.
 * Set Material Name defualt tool fixing.
 * UDP properties fixing.
-
 
 
 ## 5.0
