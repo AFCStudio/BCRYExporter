@@ -18,7 +18,7 @@
 #
 #------------------------------------------------------------------------------
 # Name:        __init__.py
-# Purpose:     Primary python file for BCry Exporter add-on
+# Purpose:     Primary python file for BCRY Exporter add-on
 #
 # Author:      Özkan Afacan,
 #              Angelo J. Miner, Mikołaj Milej, Daniel White,
@@ -32,7 +32,7 @@
 
 
 bl_info = {
-    "name": "BCry Exporter",
+    "name": "BCRY Exporter",
     "author": "Özkan Afacan, Angelo J. Miner, Mikołaj Milej, Daniel White, "
               "Oscar Martin Garcia, Duo Oratar, David Marcelis",
     "blender": (2, 70, 0),
