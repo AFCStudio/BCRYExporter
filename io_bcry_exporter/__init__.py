@@ -40,7 +40,7 @@ bl_info = {
     "location": "BCRY Exporter Menu",
     "description": "Export assets from Blender to CryEngine V",
     "warning": "",
-    "wiki_url": "https://github.com/AFCStudio/BCryExporter/wiki",
+    "wiki_url": "http://bcry.afcstudio.org/documents/",
     "tracker_url": "https://github.com/AFCStudio/BCryExporter/issues",
     "support": 'OFFICIAL',
     "category": "Import-Export"}
