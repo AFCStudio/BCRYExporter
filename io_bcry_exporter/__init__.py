@@ -3327,8 +3327,8 @@ class MeshUtilitiesPanel(View3DPanel, Panel):
 
         col.operator(
             "mesh.generate_lod_meshes",
-            text="Create LODs",
-            icon="EDIT_VEC")
+            text="Generate LODs",
+            icon="OOPS")
         col.separator()
 
         col.separator()
@@ -3620,7 +3620,7 @@ class MeshUtilitiesMenu(bpy.types.Menu):
         layout.operator(
             "mesh.generate_lod_meshes",
             text="Generate LODs",
-            icon="EDIT_VEC")
+            icon="OOPS")
         layout.separator()
 
         layout.label(text="Weight Repair")
