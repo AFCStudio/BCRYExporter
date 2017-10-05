@@ -182,8 +182,11 @@ class CrytekDaeExporter:
                 if object_.type != 'MESH':
                     continue
 
-                bmesh_, backup_info = utils.get_bmesh(object_,
-                                                self._config.apply_modifiers)
+                apply_modifiers = self._config.apply_modifiers
+                if utils.get_node_type(group) in ('chr', 'skin'):
+                    apply_modifiers = False
+
+                bmesh_, backup_info = utils.get_bmesh(object_, apply_modifiers)
                 geometry_node = self._doc.createElement("geometry")
                 geometry_name = utils.get_geometry_name(group, object_)
                 geometry_node.setAttribute("id", geometry_name)
