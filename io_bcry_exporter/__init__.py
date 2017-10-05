@@ -469,16 +469,17 @@ class FeetOnFloor(bpy.types.Operator):
     bl_label = "Feet on Floor"
     bl_idname = "object.feet_on_floor"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     z_offset = FloatProperty(name="Z Offset",
-                        default=0.0, step=0.1, precision=3,
-                        description="Z offset for center of object.")
+                             default=0.0, step=0.1, precision=3,
+                             description="Z offset for center of object.")
 
     def execute(self, context):
         old_cursor = context.scene.cursor_location.copy()
         for obj in context.selected_objects:
             ctx = utils.override(obj, active=True, selected=True)
-            bpy.ops.object.origin_set(ctx, type="ORIGIN_GEOMETRY", center="BOUNDS")
+            bpy.ops.object.origin_set(
+                ctx, type="ORIGIN_GEOMETRY", center="BOUNDS")
             bpy.ops.view3d.snap_cursor_to_selected(ctx)
             x, y, z = bpy.context.scene.cursor_location
             z = obj.location.z - obj.dimensions.z / 2 - self.z_offset
@@ -650,14 +651,14 @@ class AddBreakableJoint(bpy.types.Operator):
         "shift", "player_can_break", "gameplay_critical" '''
 
     info = "If you want to use {} joint property. Please enable this."
-    
+
     draw_size = FloatProperty(name="Joint Size", default=0.1,
-                            description="Breakable Joint Size")
+                              description="Breakable Joint Size")
 
     is_limit = BoolProperty(name="Use Limit Property", default=True,
                             description=info.format('limit'))
     limit = FloatProperty(name="Limit", default=10.0,
-                            description=desc.list['limit'])
+                          description=desc.list['limit'])
 
     is_bend = BoolProperty(name="Use Bend Property",
                            description=info.format('bend'))
@@ -727,7 +728,7 @@ class AddBreakableJoint(bpy.types.Operator):
 
         for group in self.object_.users_group:
             if utils.is_export_node(group) and \
-                utils.get_node_type(group) == 'cgf':
+                    utils.get_node_type(group) == 'cgf':
                 self.group_ = group
                 return context.window_manager.invoke_props_dialog(self)
 
@@ -863,8 +864,9 @@ class AddMaterialProperties(bpy.types.Operator):
     bl_label = "Add BCRY Exporter material properties to materials"
     bl_idname = "material.add_material_properties"
 
-    material_name = StringProperty(name="Material Name",
-            description="Main material name which shown at CryEngine")
+    material_name = StringProperty(
+        name="Material Name",
+        description="Main material name which shown at CryEngine")
     material_phys = EnumProperty(
         name="Physical Proxy",
         items=(
