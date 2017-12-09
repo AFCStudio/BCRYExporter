@@ -180,7 +180,8 @@ def get_bmesh(object_, apply_modifiers=False):
     bcry_split_modifier(object_)
 
     backup_data = object_.data
-    object_.data = object_.to_mesh(bpy.context.scene, apply_modifiers, 'PREVIEW')
+    object_.data = object_.to_mesh(
+        bpy.context.scene, apply_modifiers, 'PREVIEW')
 
     bpy.ops.object.mode_set(mode='EDIT')
 
