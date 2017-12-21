@@ -3143,6 +3143,202 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
         box.prop(self, "run_in_profiler")
 
 
+class QuickExport(bpy.types.Operator, ExportHelper):
+    '''Export scene objects to the current Blender project path.'''
+    bl_label = "Quick Export to CryEngine"
+    bl_idname = "scene.export_to_game_quick"
+    bl_options = {'REGISTER', 'UNDO'}
+    filename_ext = ".dae"
+    filter_glob = StringProperty(default="*.dae", options={'HIDDEN'})
+
+    apply_modifiers = BoolProperty(
+        name="Apply Modifiers",
+        description="Apply all modifiers for objects before exporting.",
+        default=True,
+    )
+    merge_all_nodes = BoolProperty(
+        name="Merge All Nodes",
+        description=desc.list["merge_all_nodes"],
+        default=False,
+    )
+    export_selected_nodes = BoolProperty(
+        name="Export Selected Nodes",
+        description="Just exports selected nodes.",
+        default=False,
+    )
+    custom_normals = BoolProperty(
+        name="Use Custom Normals",
+        description="Use custom normals.",
+        default=False,
+    )
+    vcloth_pre_process = BoolProperty(
+        name="VCloth Pre-Process",
+        description="Export skin as simulating mesh for VCloth V2.",
+        default=False,
+    )
+    generate_materials = BoolProperty(
+        name="Generate Materials",
+        description="Generate material files for CryEngine.",
+        default=False,
+    )
+    convert_textures = BoolProperty(
+        name="Convert Textures",
+        description="Converts source textures to DDS while exporting materials.",
+        default=False,
+    )
+    make_chrparams = BoolProperty(
+        name="Make CHRPARAMS File",
+        description="Create a base CHRPARAMS file for character animations.",
+        default=False,
+    )
+    make_cdf = BoolProperty(
+        name="Make CDF File",
+        description="Create a base CDF file for character attachments.",
+        default=False,
+    )
+    fix_weights = BoolProperty(
+        name="Fix Weights",
+        description="For use with .chr files. Generally a good idea.",
+        default=False,
+    )
+    export_for_lumberyard = BoolProperty(
+        name="Export for LumberYard",
+        description="Export for LumberYard engine instead of CryEngine.",
+        default=False,
+    )
+    make_layer = BoolProperty(
+        name="Make LYR File",
+        description="Makes a LYR to reassemble your scene in CryEngine.",
+        default=False,
+    )
+    disable_rc = BoolProperty(
+        name="Disable RC",
+        description="Do not run the resource compiler.",
+        default=False,
+    )
+    save_dae = BoolProperty(
+        name="Save DAE File",
+        description="Save the DAE file for developing purposes.",
+        default=False,
+    )
+    save_tiffs = BoolProperty(
+        name="Save TIFFs",
+        description="Saves TIFF images that are generated during conversion to DDS.",
+        default=False,
+    )
+    run_in_profiler = BoolProperty(
+        name="Profile BCry Exporter",
+        description="Select only if you want to profile BCry Exporter.",
+        default=False,
+    )
+
+    is_animation_process = False
+
+    class Config:
+
+        def __init__(self, config):
+            attributes = (
+                'filepath',
+                'apply_modifiers',
+                'merge_all_nodes',
+                'export_selected_nodes',
+                'custom_normals',
+                'vcloth_pre_process',
+                'generate_materials',
+                'convert_textures',
+                'make_chrparams',
+                'make_cdf',
+                'fix_weights',
+                'export_for_lumberyard',
+                'make_layer',
+                'disable_rc',
+                'save_dae',
+                'save_tiffs',
+                'run_in_profiler',
+                'is_animation_process'
+            )
+
+            for attribute in attributes:
+                setattr(self, attribute, getattr(config, attribute))
+
+            setattr(self, 'bcry_version', VERSION)
+            setattr(self, 'rc_path', Configuration.rc_path)
+            setattr(self, 'texture_rc_path', Configuration.texture_rc_path)
+            setattr(self, 'game_dir', Configuration.game_dir)
+
+    def execute(self, context):
+        bcPrint(Configuration.rc_path, 'debug', True)
+        self.filepath = bpy.path.abspath('//')
+        try:
+            config = Export.Config(config=self)
+
+            if self.run_in_profiler:
+                import cProfile
+                cProfile.runctx('export.save(config)', {},
+                                {'export': export, 'config': config})
+            else:
+                export.save(config)
+
+        except exceptions.BCryException as exception:
+            bcPrint(exception.what(), 'error')
+            bpy.ops.screen.display_error(
+                'INVOKE_DEFAULT', message=exception.what())
+
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        if not Configuration.configured():
+            self.report({'ERROR'}, "No RC found.")
+            return {'FINISHED'}
+
+        if not utils.get_export_nodes():
+            self.report({'ERROR'}, "No export nodes found.")
+            return {'FINISHED'}
+
+        return self.execute(context)
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+
+        box = col.box()
+        box.label("General", icon="WORLD")
+        box.prop(self, "apply_modifiers")
+        box.prop(self, "merge_all_nodes")
+        box.prop(self, "export_selected_nodes")
+        box.prop(self, "custom_normals")
+        box.prop(self, "vcloth_pre_process")
+
+        box = col.box()
+        box.label("Material & Texture", icon="TEXTURE")
+        box.prop(self, "generate_materials")
+        box.prop(self, "convert_textures")
+
+        box = col.box()
+        box.label("Character", icon="ARMATURE_DATA")
+        box.prop(self, "make_chrparams")
+        box.prop(self, "make_cdf")
+
+        box = col.box()
+        box.label("Corrective", icon="BRUSH_DATA")
+        box.prop(self, "fix_weights")
+
+        box = col.box()
+        box.label("LumberYard", icon="GAME")
+        box.prop(self, "export_for_lumberyard")
+
+        box = col.box()
+        box.label("CryEngine Editor", icon="OOPS")
+        box.prop(self, "make_layer")
+
+        box = col.box()
+        box.label("Developer Tools", icon="MODIFIER")
+        box.prop(self, "disable_rc")
+        box.prop(self, "save_dae")
+        box.prop(self, "save_tiffs")
+        box.prop(self, "run_in_profiler")
+
+
 class ErrorHandler(bpy.types.Operator):
     bl_label = "Error:"
     bl_idname = "screen.display_error"
@@ -3452,6 +3648,10 @@ class ExportPanel(View3DPanel, Panel):
             text="Export Animations",
             icon="RENDER_ANIMATION")
         col.separator()
+        col.operator(
+            "scene.export_to_game_quick",
+            text="Quick Export",
+            icon_value=bcry_icons["crye"].icon_id)
         col.operator(
             "scene.export_to_game",
             text="Export to CryEngine",
@@ -3881,6 +4081,7 @@ def get_classes_to_register():
 
         Export,
         ExportAnimations,
+        QuickExport,
         ErrorHandler,
 
         ExportUtilitiesPanel,
