@@ -1071,8 +1071,6 @@ class GenerateMaterials(bpy.types.Operator, ExportHelper):
 
             material_utils.generate_mtl_files(config)
 
-            self.filepath = '//'
-
         except exceptions.BCryException as exception:
             bcPrint(exception.what(), 'error')
             bpy.ops.screen.display_error(
@@ -2976,8 +2974,6 @@ class Export(bpy.types.Operator, ExportHelper):
             else:
                 export.save(config)
 
-            self.filepath = '//'
-
         except exceptions.BCryException as exception:
             bcPrint(exception.what(), 'error')
             bpy.ops.screen.display_error(
@@ -3107,8 +3103,6 @@ class ExportAnimations(bpy.types.Operator, ExportHelper):
                         'export_animations': export_animations, 'config': config})
             else:
                 export_animations.save(config)
-
-            self.filepath = '//'
 
         except exceptions.BCryException as exception:
             bcPrint(exception.what(), 'error')
